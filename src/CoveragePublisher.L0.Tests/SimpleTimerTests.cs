@@ -37,7 +37,7 @@ namespace CoveragePublisher.L0.Tests
         [TestMethod]
         public void SimpleTimeWhenOutSideThreshold()
         {
-            var verboseLogCalled = false;
+            var warningLogCalled = false;
             var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
             var clientFactory = new Mock<ClientFactory>(null);
             var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger.Object);
@@ -45,12 +45,14 @@ namespace CoveragePublisher.L0.Tests
             clientFactory
                 .Setup(x => x.GetClient<CustomerIntelligenceHttpClient>())
                 .Returns((CustomerIntelligenceHttpClient)null);
-            logger.Setup(x => x.Verbose(It.IsAny<string>())).Callback((() => verboseLogCalled = true));
+            logger.Setup(x => x.Warning(It.IsAny<string>())).Callback((() => warningLogCalled = true));
             telemetryDataCollector.Setup(x =>
                 x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
             using (new SimpleTimer("testTimer", "Test", "test",
                 logger.Object, telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true)) ;
+
+            Assert.IsTrue(warningLogCalled);
         }
 
         [TestMethod]
