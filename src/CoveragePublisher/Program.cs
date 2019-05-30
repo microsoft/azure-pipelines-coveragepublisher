@@ -5,9 +5,9 @@ using System;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var argsProcessor = new ArgumentsProcessor();
 
@@ -22,8 +22,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     Console.WriteLine(input);
                 }
             }
-
-            Console.ReadLine();
         }
 
     }
