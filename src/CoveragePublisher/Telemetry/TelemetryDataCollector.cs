@@ -142,5 +142,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             return Task.CompletedTask;
         }
+
+        public ConcurrentDictionary<string, object> Properties => _properties;
     }
 }
