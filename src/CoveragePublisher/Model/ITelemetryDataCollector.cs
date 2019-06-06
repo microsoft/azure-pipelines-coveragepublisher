@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
 {
     public interface ITelemetryDataCollector
     {

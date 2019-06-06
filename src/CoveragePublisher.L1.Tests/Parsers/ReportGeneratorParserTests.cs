@@ -60,5 +60,30 @@ namespace CoveragePublisher.L1.Tests
             Assert.AreEqual(fileCoverage.Count, 0);
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 0);
         }
+
+        [TestMethod]
+        [DataRow(new string[] { "SampleCoverage/Clover.xml" })]
+        [DataRow(new string[] { "SampleCoverage/Cobertura.xml" })]
+        [DataRow(new string[] { "SampleCoverage/Jacoco.xml" })]
+        [DataRow(new string[] { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/Jacoco.xml" })]
+        public void WillGenerateHTMLReport(string[] xmlFiles)
+        {
+            var tempDir1 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var tempDir2 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            Directory.CreateDirectory(tempDir1);
+            Directory.CreateDirectory(tempDir2);
+
+            var parser = new ReportGeneratorParser();
+
+            var fileList = new List<string>(xmlFiles);
+
+            var fileCoverage = parser.GetFileCoverageInfos(fileList, tempDir1);
+            var summary = parser.GetCoverageSummary(fileList, tempDir2);
+            
+            //cleanup
+            Directory.Delete(tempDir1, true);
+            Directory.Delete(tempDir2, true);
+        }
     }
 }
