@@ -18,9 +18,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
     // Will use ReportGenerator to parse xml files and generate IList<FileCoverageInfo>
     internal class ReportGeneratorParser: ICoverageParser
     {
-        public List<FileCoverageInfo> GetFileCoverageInfos(List<string> coverageFiles, string reportDirectory = "")
+        public List<FileCoverageInfo> GetFileCoverageInfos(IPublisherConfiguration config)
         {
-            var parserResult = ParseCoverageFiles(coverageFiles);
+            var parserResult = ParseCoverageFiles(new List<string>(config.CoverageFiles));
 
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
@@ -47,14 +47,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
-            this.CreateHTMLReport(parserResult, reportDirectory);
+            this.CreateHTMLReport(parserResult, config.ReportDirectory);
 
             return fileCoverages;
         }
 
-        public CoverageSummary GetCoverageSummary(List<string> coverageFiles, string reportDirectory = "")
+        public CoverageSummary GetCoverageSummary(IPublisherConfiguration config)
         {
-            var parserResult = ParseCoverageFiles(coverageFiles);
+            var parserResult = ParseCoverageFiles(new List<string>(config.CoverageFiles));
             var summary = new CoverageSummary();
 
             int totalLines = 0;
@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             summary.AddCoverageStatistics("line", totalLines, coveredLines, CoverageSummary.Priority.Line);
 
-            this.CreateHTMLReport(parserResult, reportDirectory);
+            this.CreateHTMLReport(parserResult, config.ReportDirectory);
 
             return summary;
         }

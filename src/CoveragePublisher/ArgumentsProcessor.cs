@@ -9,19 +9,22 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
     internal class ArgumentsProcessor
     {
-        public class Options : ICLIArgs
+        public class Options : IPublisherConfiguration
         {
             [Value(0, Required = true, HelpText = "Set of coverage files to be published.")]
             public IEnumerable<string> CoverageFiles { get; set; }
 
             [Option("reportDirectory", Default = "", HelpText = "Path to report directory.")]
             public string ReportDirectory { get; set; }
+
+            [Option("sourceDirectory", Default = "", HelpText = "Path to source directory.")]
+            public string SourceDirectory { get; set; }
         }
 
 
-        public ICLIArgs ProcessCommandLineArgs(string[] args)
+        public IPublisherConfiguration ProcessCommandLineArgs(string[] args)
         {
-            ICLIArgs cliArgs = null;
+            IPublisherConfiguration cliArgs = null;
 
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts => {
