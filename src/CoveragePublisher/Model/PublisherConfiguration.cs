@@ -6,23 +6,23 @@ using System.Collections.Generic;
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
 {
     /// <summary>
-    /// Interface for parsed command line arguments.
+    /// Publisher configuration
     /// </summary>
-    interface IPublisherConfiguration
+    public class PublisherConfiguration
     {
         /// <summary>
         /// List of coverage files.
         /// </summary>
-        IEnumerable<string> CoverageFiles { get; set; }
+        virtual public IEnumerable<string> CoverageFiles { get; set; }
 
         /// <summary>
         /// Path to coverage report directory. If set to null or empty, publisher will not create/publish an html report
         /// </summary>
-        string ReportDirectory { get; set; }
+        virtual public string ReportDirectory { get; set; }
 
         /// <summary>
-        /// Path to directory containing the source. Required for creating html reports for jacoco
+        /// Semi-colon separated list of source directories. Required for creating html reports for jacoco.
         /// </summary>
-        string SourceDirectory { get; set; }
+        virtual public string SourceDirectories { get; set; }
     }
 }

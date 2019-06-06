@@ -11,13 +11,17 @@ namespace CoveragePublishe.L0.Tests
     public class ArgumentsProcessorTests
     {
         private static StringWriter ConsoleWriter = new StringWriter();
-        private static string UsageText = @"  --reportDirectory    (Default: ) Path to report directory.
+        private static string UsageText = @"
+            --reportDirectory    (Default: ) Path to report directory.
 
-  --help               Display this help screen.
+            --sourceDirectory    (Default: ) List of source directories separated by ';'.
 
-  --version            Display version information.
+            --help               Display this help screen.
 
-  value pos. 0         Required. Set of coverage files to be published.";
+            --version            Display version information.
+
+            value pos. 0         Required. Set of coverage files to be published.
+";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)

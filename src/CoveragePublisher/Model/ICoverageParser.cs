@@ -13,15 +13,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <summary>
         /// Get coverage information for individual files.
         /// </summary>
-        /// <param name="configuration"><see cref="IPublisherConfiguration"/></param>
+        /// <param name="configuration"><see cref="PublisherConfiguration"/></param>
         /// <returns>List of <see cref="FileCoverageInfo"/></returns>
-        List<FileCoverageInfo> GetFileCoverageInfos(IPublisherConfiguration configuration);
+        List<FileCoverageInfo> GetFileCoverageInfos(PublisherConfiguration configuration);
         
         /// <summary>
         /// Get coverage summary, contains combined coverage summary data.
         /// </summary>
-        /// <param name="configuration"><see cref="IPublisherConfiguration"/></param>
+        /// <param name="configuration"><see cref="PublisherConfiguration"/></param>
         /// <returns><see cref="CoverageSummary"/></returns>
-        CoverageSummary GetCoverageSummary(IPublisherConfiguration configuration);
+        CoverageSummary GetCoverageSummary(PublisherConfiguration configuration);
     }
 }

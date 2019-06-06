@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -19,7 +20,7 @@ namespace CoveragePublisher.L1.Tests
         public void WillGenerateCorrectFileCoverage(string[] coverageFiles, string result)
         {
             var parser = new ReportGeneratorParser();
-            var fileCoverages = parser.GetFileCoverageInfos(coverageFiles.ToList());
+            var fileCoverages = parser.GetFileCoverageInfos(new PublisherConfiguration() { CoverageFiles = coverageFiles });
             var json = JsonConvert.SerializeObject(fileCoverages);
 
             Assert.AreEqual(json, result);
@@ -33,7 +34,7 @@ namespace CoveragePublisher.L1.Tests
         public void WillGenerateCorrectCoverageSummary(string[] coverageFiles, string result)
         {
             var parser = new ReportGeneratorParser();
-            var summary = parser.GetCoverageSummary(coverageFiles.ToList());
+            var summary = parser.GetCoverageSummary(new PublisherConfiguration() { CoverageFiles = coverageFiles });
             var json = JsonConvert.SerializeObject(summary.CodeCoverageData);
 
             Assert.AreEqual(json, result);
@@ -43,24 +44,26 @@ namespace CoveragePublisher.L1.Tests
         public void WillReturnEmptyCoverageForNoInputFiles()
         {
             var parser = new ReportGeneratorParser();
-            var fileCoverage = parser.GetFileCoverageInfos(new List<string>());
-            var summary = parser.GetCoverageSummary(new List<string>());
+            var fileCoverage = parser.GetFileCoverageInfos(new PublisherConfiguration());
+            var summary = parser.GetCoverageSummary(new PublisherConfiguration());
 
             Assert.AreEqual(fileCoverage.Count, 0);
-            Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 0);
+            Assert.AreEqual(summary.CodeCoverageData.CoverageStats.Count, 0);
         }
 
         [TestMethod]
         public void WillReturnEmptyCoverageForNonExistingFile()
         {
             var parser = new ReportGeneratorParser();
-            var fileCoverage = parser.GetFileCoverageInfos(new List<string>() { "SampleCoverage/blabla.xml" });
-            var summary = parser.GetCoverageSummary(new List<string>() { "SampleCoverage/blabla.xml" });
+            var fileCoverage = parser.GetFileCoverageInfos(new PublisherConfiguration() { CoverageFiles = new string[] { "SampleCoverage/blabla.xml" } });
+            var summary = parser.GetCoverageSummary(new PublisherConfiguration() { CoverageFiles = new string[] { "SampleCoverage/blabla.xml" } });
 
             Assert.AreEqual(fileCoverage.Count, 0);
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 0);
         }
 
+        // Ignore till https://github.com/danielpalme/ReportGenerator/issues/253 is fixed
+        [Ignore]
         [TestMethod]
         [DataRow(new string[] { "SampleCoverage/Clover.xml" })]
         [DataRow(new string[] { "SampleCoverage/Cobertura.xml" })]
@@ -76,10 +79,20 @@ namespace CoveragePublisher.L1.Tests
 
             var parser = new ReportGeneratorParser();
 
-            var fileList = new List<string>(xmlFiles);
+            parser.GetFileCoverageInfos(new PublisherConfiguration()
+            {
+                CoverageFiles = xmlFiles,
+                ReportDirectory = tempDir1
+            });
 
-            var fileCoverage = parser.GetFileCoverageInfos(fileList, tempDir1);
-            var summary = parser.GetCoverageSummary(fileList, tempDir2);
+            parser.GetCoverageSummary(new PublisherConfiguration()
+            {
+                CoverageFiles = xmlFiles,
+                ReportDirectory = tempDir2
+            });
+
+            Assert.IsTrue(Directory.EnumerateFiles(tempDir1).Count() > 0);
+            Assert.IsTrue(Directory.EnumerateFiles(tempDir2).Count() > 0);
             
             //cleanup
             Directory.Delete(tempDir1, true);

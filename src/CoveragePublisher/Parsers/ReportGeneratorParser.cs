@@ -5,9 +5,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using Palmmedia.ReportGenerator.Core.Parser;
-using Palmmedia.ReportGenerator.Core.Parser.Analysis;
 using Palmmedia.ReportGenerator.Core.Parser.Filtering;
-using Palmmedia.ReportGenerator.Core.Reporting.Builders;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,11 +16,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
     // Will use ReportGenerator to parse xml files and generate IList<FileCoverageInfo>
     internal class ReportGeneratorParser: ICoverageParser
     {
-        public List<FileCoverageInfo> GetFileCoverageInfos(IPublisherConfiguration config)
+        public List<FileCoverageInfo> GetFileCoverageInfos(PublisherConfiguration config)
         {
+            List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
+
+            if (config.CoverageFiles == null)
+            {
+                return fileCoverages;
+            }
+
             var parserResult = ParseCoverageFiles(new List<string>(config.CoverageFiles));
 
-            List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
             foreach (var assembly in parserResult.Assemblies)
             {
@@ -47,15 +51,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
-            this.CreateHTMLReport(parserResult, config.ReportDirectory);
+            this.CreateHTMLReport(parserResult, config.ReportDirectory, config.SourceDirectories);
 
             return fileCoverages;
         }
 
-        public CoverageSummary GetCoverageSummary(IPublisherConfiguration config)
+        public CoverageSummary GetCoverageSummary(PublisherConfiguration config)
         {
-            var parserResult = ParseCoverageFiles(new List<string>(config.CoverageFiles));
             var summary = new CoverageSummary();
+
+            if(config.CoverageFiles == null)
+            {
+                return summary;
+            }
+
+            var parserResult = ParseCoverageFiles(new List<string>(config.CoverageFiles));
 
             int totalLines = 0;
             int coveredLines = 0;
@@ -74,7 +84,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             summary.AddCoverageStatistics("line", totalLines, coveredLines, CoverageSummary.Priority.Line);
 
-            this.CreateHTMLReport(parserResult, config.ReportDirectory);
+            this.CreateHTMLReport(parserResult, config.ReportDirectory, config.SourceDirectories);
 
             return summary;
         }
@@ -89,7 +99,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return parser.ParseFiles(collection);
         }
 
-        private bool CreateHTMLReport(ParserResult parserResult, string reportDirectory)
+        private bool CreateHTMLReport(ParserResult parserResult, string reportDirectory, string sourceDirectories)
         {
             if (!string.IsNullOrEmpty(reportDirectory) && Directory.Exists(reportDirectory))
             {
@@ -97,6 +107,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     var config = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
                         { "targetdir", reportDirectory },
+                        { "sourcedirs", sourceDirectories },
                         { "reporttypes", "HtmlInline_AzurePipelines" }
                     });
 
