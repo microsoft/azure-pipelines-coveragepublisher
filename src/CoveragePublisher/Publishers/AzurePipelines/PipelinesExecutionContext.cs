@@ -9,23 +9,27 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
     {
         public ILogger Logger { get; private set; }
 
-        public class EnvironmentVariables
+        public PipelinesExecutionContext()
         {
-            public long ContainerId
+            Logger = new PipelinesLogger();
+        }
+
+
+        public long ContainerId
+        {
+            get
             {
-                get
-                {
-                    long.TryParse(Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.BuildContainerId), out long result);
-                    return result;
-                }
+                long.TryParse(Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.BuildContainerId), out long result);
+                return result;
             }
-            public string AccessToken
+        }
+
+        public string AccessToken
+        {
+            get
             {
-                get
-                {
-                    var accessToken = Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken);
-                    return string.IsNullOrEmpty(accessToken) ? "" : accessToken;
-                }
+                var accessToken = Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken);
+                return string.IsNullOrEmpty(accessToken) ? "" : accessToken;
             }
         }
     }
