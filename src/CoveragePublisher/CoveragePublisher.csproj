@@ -12,7 +12,7 @@
     <PackageReference Include="CommandLineParser" Version="2.5.0" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.151.0-preview" />
     <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="16.151.0-preview" />
-    <PackageReference Include="ReportGenerator.Core" Version="4.1.10" />
+    <PackageReference Include="ReportGenerator.Core" Version="4.1.10.2" />
   </ItemGroup>
 
 </Project>

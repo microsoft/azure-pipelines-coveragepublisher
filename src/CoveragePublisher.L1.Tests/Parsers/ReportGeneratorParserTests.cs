@@ -62,8 +62,6 @@ namespace CoveragePublisher.L1.Tests
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 0);
         }
 
-        // Ignore till https://github.com/danielpalme/ReportGenerator/issues/253 is fixed
-        [Ignore]
         [TestMethod]
         [DataRow(new string[] { "SampleCoverage/Clover.xml" })]
         [DataRow(new string[] { "SampleCoverage/Cobertura.xml" })]

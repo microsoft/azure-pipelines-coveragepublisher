@@ -107,7 +107,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     var config = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
                         { "targetdir", reportDirectory },
-                        { "sourcedirs", sourceDirectories },
+                        { "sourcedirs", string.IsNullOrEmpty(sourceDirectories) ? "" : sourceDirectories },
                         { "reporttypes", "HtmlInline_AzurePipelines" }
                     });
 
