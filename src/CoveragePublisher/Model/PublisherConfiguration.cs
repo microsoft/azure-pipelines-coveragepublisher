@@ -26,6 +26,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         virtual public string SourceDirectories { get; set; }
 
         /// <summary>
+        /// Enable trace logging.
+        /// </summary>
+        virtual public bool TraceLogging { get; set; }
+
+        /// <summary>
         /// Gets the configuration for whether HTML reports should be generated or not.
         /// </summary>
         public bool GenerateHTMLReport {

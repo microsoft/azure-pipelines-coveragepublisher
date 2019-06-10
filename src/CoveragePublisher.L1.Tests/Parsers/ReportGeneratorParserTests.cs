@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,6 +12,15 @@ namespace CoveragePublisher.L1.Tests
     [TestClass]
     public class ReportGeneratorParserTests
     {
+        TestTraceListener trace;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            trace = new TestTraceListener();
+            TraceLogger.Instance.AddListener(trace);
+        }
+
         [TestMethod]
         [DataRow(new string[] { "SampleCoverage/Clover.xml" }, "[{\"LineCoverageStatus\":{\"1\":0,\"4\":0},\"FilePath\":\"$PROJECT_PATH/src/errors.ts\"},{\"LineCoverageStatus\":{\"1\":0,\"3\":0,\"4\":0,\"6\":0,\"7\":0,\"9\":0,\"10\":0,\"12\":0,\"13\":0},\"FilePath\":\"$PROJECT_PATH/src/test.ts\"}]")]
         [DataRow(new string[] { "SampleCoverage/Cobertura.xml" }, "[{\"LineCoverageStatus\":{\"3\":0,\"4\":0,\"5\":0},\"FilePath\":\"C:\\\\temp\\\\test\\\\AbstractClass.java\"},{\"LineCoverageStatus\":{\"3\":0,\"4\":0,\"5\":0,\"8\":1,\"12\":1},\"FilePath\":\"C:\\\\temp\\\\test\\\\AbstractClass_SampleImpl1.java\"},{\"LineCoverageStatus\":{\"3\":0,\"4\":0,\"5\":0,\"8\":1,\"12\":1},\"FilePath\":\"C:\\\\temp\\\\test\\\\AbstractClass_SampleImpl2.java\"},{\"LineCoverageStatus\":{\"2\":0,\"4\":0,\"5\":0},\"FilePath\":\"C:\\\\temp\\\\test\\\\GenericClass.java\"},{\"LineCoverageStatus\":{\"2\":1,\"5\":0,\"7\":0,\"9\":0,\"10\":0,\"11\":0},\"FilePath\":\"C:\\\\temp\\\\test\\\\Program.java\"},{\"LineCoverageStatus\":{\"4\":0,\"7\":0,\"12\":0,\"13\":0,\"15\":0,\"17\":0,\"20\":1,\"26\":0,\"28\":1,\"30\":1,\"34\":1},\"FilePath\":\"C:\\\\temp\\\\test\\\\TestClass.java\"},{\"LineCoverageStatus\":{\"3\":1,\"5\":1,\"9\":1},\"FilePath\":\"C:\\\\temp\\\\test\\\\sub\\\\Sub.java\"}]")]
@@ -24,6 +33,12 @@ namespace CoveragePublisher.L1.Tests
             var json = JsonConvert.SerializeObject(fileCoverages);
 
             Assert.AreEqual(json, result);
+
+            Assert.AreEqual(trace.Log.Trim(), @"
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetFileCoverageInfo: Generating coverage info from coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Skipping creation of HTML report.
+".Trim());
         }
 
         [TestMethod]
@@ -38,6 +53,13 @@ namespace CoveragePublisher.L1.Tests
             var json = JsonConvert.SerializeObject(summary.CodeCoverageData);
 
             Assert.AreEqual(json, result);
+
+            Assert.AreEqual(trace.Log.Trim(), @"
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Skipping creation of HTML report.
+
+".Trim());
         }
 
         [TestMethod]
@@ -49,6 +71,14 @@ namespace CoveragePublisher.L1.Tests
 
             Assert.AreEqual(fileCoverage.Count, 0);
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats.Count, 0);
+
+            Assert.AreEqual(trace.Log.Trim(), @"
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetFileCoverageInfo: Generating coverage info from coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetFileCoverageInfos: No input received, generating empty coverage.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: No input received, generating empty coverage.
+
+".Trim());
         }
 
         [TestMethod]
@@ -60,6 +90,16 @@ namespace CoveragePublisher.L1.Tests
 
             Assert.AreEqual(fileCoverage.Count, 0);
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 0);
+
+            Assert.AreEqual(trace.Log.Trim(), @"
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetFileCoverageInfo: Generating coverage info from coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Skipping creation of HTML report.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Skipping creation of HTML report.
+
+".Trim());
         }
 
         [TestMethod]
@@ -95,6 +135,16 @@ namespace CoveragePublisher.L1.Tests
             //cleanup
             Directory.Delete(tempDir1, true);
             Directory.Delete(tempDir2, true);
+
+            Assert.AreEqual(trace.Log.Trim(), @"
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetFileCoverageInfo: Generating coverage info from coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.
+
+".Trim());
         }
     }
 }

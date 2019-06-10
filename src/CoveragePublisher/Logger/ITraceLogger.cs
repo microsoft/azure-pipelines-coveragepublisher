@@ -9,24 +9,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         /// Verbose diagnostics.
         /// </summary>
         /// <param name="text">Diagnostics text.</param>
-        void Verbose(string text);
+        void Verbose(string message, params object[] args);
 
         /// <summary>
         /// Info diagnostics.
         /// </summary>
         /// <param name="text">Diagnostics text.</param>
-        void Info(string text);
+        void Info(string message, params object[] args);
 
         /// <summary>
         /// Warning diagnostics.
         /// </summary>
         /// <param name="text">Diagnostics text.</param>
-        void Warning(string text);
+        void Warning(string message, params object[] args);
 
         /// <summary>
         /// Error diagnostics.
         /// </summary>
         /// <param name="text">Diagnostics text.</param>
-        void Error(string text);
+        void Error(string message, params object[] args);
     }
 }
