@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
-            this.CreateHTMLReportFromParserResult(parserResult, config.ReportDirectory, config.SourceDirectories);
+            this.CreateHTMLReportFromParserResult(parserResult, config, config.SourceDirectories);
 
             return fileCoverages;
         }
@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             summary.AddCoverageStatistics("line", totalLines, coveredLines, CoverageSummary.Priority.Line);
 
-            this.CreateHTMLReportFromParserResult(parserResult, config.ReportDirectory, config.SourceDirectories);
+            this.CreateHTMLReportFromParserResult(parserResult, config, config.SourceDirectories);
 
             return summary;
         }
@@ -99,14 +99,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return parser.ParseFiles(collection);
         }
 
-        private bool CreateHTMLReportFromParserResult(ParserResult parserResult, string reportDirectory, string sourceDirectories)
+        private bool CreateHTMLReportFromParserResult(ParserResult parserResult, PublisherConfiguration config, string sourceDirectories)
         {
-            if (!string.IsNullOrEmpty(reportDirectory) && Directory.Exists(reportDirectory))
+            if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
             {
                 try
                 {
-                    var config = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
-                        { "targetdir", reportDirectory },
+                    var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
+                        { "targetdir", config.ReportDirectory },
                         { "sourcedirs", string.IsNullOrEmpty(sourceDirectories) ? "" : sourceDirectories },
                         { "reporttypes", "HtmlInline_AzurePipelines" }
                     });
@@ -114,7 +114,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                     var generator = new Generator();
 
-                    generator.GenerateReport(config, new Settings(), new RiskHotspotsAnalysisThresholds(), parserResult);
+                    generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), parserResult);
                 }
                 catch(Exception e)
                 {

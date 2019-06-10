@@ -24,5 +24,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// Semi-colon separated list of source directories. Required for creating html reports for jacoco.
         /// </summary>
         virtual public string SourceDirectories { get; set; }
+
+        /// <summary>
+        /// Gets the configuration for whether HTML reports should be generated or not.
+        /// </summary>
+        public bool GenerateHTMLReport {
+            get
+            {
+                return !string.IsNullOrEmpty(ReportDirectory);
+            }
+        }
     }
 }
