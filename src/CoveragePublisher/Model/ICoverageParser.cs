@@ -11,17 +11,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     internal interface ICoverageParser
     {
         /// <summary>
-        /// Get coverage report, contains coverage information for individual files along with path to report directory.
+        /// Get coverage information for individual files.
         /// </summary>
-        /// <param name="coverageFiles">List of xml coverage files.</param>
-        /// <returns></returns>
-        List<FileCoverageInfo> GetFileCoverageInfos(List<string> coverageFiles);
+        /// <param name="configuration"><see cref="PublisherConfiguration"/></param>
+        /// <returns>List of <see cref="FileCoverageInfo"/></returns>
+        List<FileCoverageInfo> GetFileCoverageInfos(PublisherConfiguration configuration);
         
         /// <summary>
-        /// Get coverage summary, contains combined coverage summary data along with path to report directory.
+        /// Get coverage summary, contains combined coverage summary data.
         /// </summary>
-        /// <param name="coverageFiles">List of xml coverage files.</param>
-        /// <returns></returns>
-        CoverageSummary GetCoverageSummary(List<string> coverageFiles);
+        /// <param name="configuration"><see cref="PublisherConfiguration"/></param>
+        /// <returns><see cref="CoverageSummary"/></returns>
+        CoverageSummary GetCoverageSummary(PublisherConfiguration configuration);
     }
 }

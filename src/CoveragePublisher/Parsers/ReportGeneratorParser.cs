@@ -2,23 +2,33 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Palmmedia.ReportGenerator.Core;
+using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using Palmmedia.ReportGenerator.Core.Parser;
 using Palmmedia.ReportGenerator.Core.Parser.Filtering;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
     // Will use ReportGenerator to parse xml files and generate IList<FileCoverageInfo>
     internal class ReportGeneratorParser: ICoverageParser
     {
-        public List<FileCoverageInfo> GetFileCoverageInfos(List<string> coverageFiles)
+        public List<FileCoverageInfo> GetFileCoverageInfos(PublisherConfiguration config)
         {
-            var parseResult = ParseCoverageFiles(coverageFiles);
-
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
-            foreach (var assembly in parseResult.Assemblies)
+            if (config.CoverageFiles == null)
+            {
+                return fileCoverages;
+            }
+
+            var parserResult = ParseCoverageFiles(new List<string>(config.CoverageFiles));
+
+
+            foreach (var assembly in parserResult.Assemblies)
             {
                 foreach (var @class in assembly.Classes)
                 {
@@ -41,18 +51,26 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
+            this.CreateHTMLReportFromParserResult(parserResult, config, config.SourceDirectories);
+
             return fileCoverages;
         }
 
-        public CoverageSummary GetCoverageSummary(List<string> coverageFiles)
+        public CoverageSummary GetCoverageSummary(PublisherConfiguration config)
         {
-            var parseResult = ParseCoverageFiles(coverageFiles);
             var summary = new CoverageSummary();
+
+            if(config.CoverageFiles == null)
+            {
+                return summary;
+            }
+
+            var parserResult = ParseCoverageFiles(new List<string>(config.CoverageFiles));
 
             int totalLines = 0;
             int coveredLines = 0;
 
-            foreach (var assembly in parseResult.Assemblies)
+            foreach (var assembly in parserResult.Assemblies)
             {
                 foreach (var @class in assembly.Classes)
                 {
@@ -65,6 +83,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
 
             summary.AddCoverageStatistics("line", totalLines, coveredLines, CoverageSummary.Priority.Line);
+
+            this.CreateHTMLReportFromParserResult(parserResult, config, config.SourceDirectories);
 
             return summary;
         }
@@ -79,17 +99,34 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return parser.ParseFiles(collection);
         }
 
-        private string CreateHTMLReport(ParserResult result)
+        private bool CreateHTMLReportFromParserResult(ParserResult parserResult, PublisherConfiguration config, string sourceDirectories)
         {
-            /* HTML renderer and SummaryResult constructor isn't exposed yet in ReportGenerator.Core
-            var builder = new HtmlReportBuilder();
+            if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
+            {
+                try
+                {
+                    var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
+                        { "targetdir", config.ReportDirectory },
+                        { "sourcedirs", string.IsNullOrEmpty(sourceDirectories) ? "" : sourceDirectories },
+                        { "reporttypes", "HtmlInline_AzurePipelines" }
+                    });
 
-            var summaryResult = new SummaryResult();
-            builder.CreateSummaryReport(summaryResult);
 
-            var rendered = new HTMLRenderer()
-            */
-            return "";
+                    var generator = new Generator();
+
+                    generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), parserResult);
+                }
+                catch(Exception e)
+                {
+                    //TODO: log exception
+                    return false;
+                }
+
+                return true;
+
+            }
+
+            return false;
         }
     }
 }

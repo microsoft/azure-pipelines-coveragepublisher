@@ -5,13 +5,14 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>Microsoft.Azure.Pipelines.CoveragePublisher</RootNamespace>
     <AssemblyName>Microsoft.Azure.Pipelines.CoveragePublisher</AssemblyName>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.5.0" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.151.0-preview" />
     <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="16.151.0-preview" />
-    <PackageReference Include="ReportGenerator.Core" Version="4.1.6" />
+    <PackageReference Include="ReportGenerator.Core" Version="4.1.10.2" />
   </ItemGroup>
 
 </Project>
