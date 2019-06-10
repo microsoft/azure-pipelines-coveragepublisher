@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
-            this.CreateHTMLReport(parserResult, config.ReportDirectory, config.SourceDirectories);
+            this.CreateHTMLReportFromParserResult(parserResult, config.ReportDirectory, config.SourceDirectories);
 
             return fileCoverages;
         }
@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             summary.AddCoverageStatistics("line", totalLines, coveredLines, CoverageSummary.Priority.Line);
 
-            this.CreateHTMLReport(parserResult, config.ReportDirectory, config.SourceDirectories);
+            this.CreateHTMLReportFromParserResult(parserResult, config.ReportDirectory, config.SourceDirectories);
 
             return summary;
         }
@@ -99,7 +99,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return parser.ParseFiles(collection);
         }
 
-        private bool CreateHTMLReport(ParserResult parserResult, string reportDirectory, string sourceDirectories)
+        private bool CreateHTMLReportFromParserResult(ParserResult parserResult, string reportDirectory, string sourceDirectories)
         {
             if (!string.IsNullOrEmpty(reportDirectory) && Directory.Exists(reportDirectory))
             {
