@@ -16,9 +16,9 @@ namespace CoveragePublisher.L0.Tests
         [TestMethod]
         public void PublishTelemetryAsyncTest()
         {
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger);
             var ciHttpClient =
                 new Mock<CustomerIntelligenceHttpClient>(new Uri("https://somename.Visualstudio.com"), new VssCredentials());
 
@@ -32,9 +32,9 @@ namespace CoveragePublisher.L0.Tests
         [TestMethod]
         public void AddOrUpdateWithDupsWorksFine()
         {
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger);
 
             telemetryDataCollector.AddOrUpdate("Property", "Value");
             telemetryDataCollector.AddOrUpdate("Property", "Someothervalue");
@@ -45,9 +45,9 @@ namespace CoveragePublisher.L0.Tests
         [TestMethod]
         public void AddAndAggregateWithDupsWorksFine()
         {
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger);
 
             telemetryDataCollector.AddAndAggregate("Property", "Value");
             telemetryDataCollector.AddAndAggregate("Property", "Someothervalue");
@@ -67,9 +67,9 @@ namespace CoveragePublisher.L0.Tests
         [TestMethod]
         public void AddAndAggregateWithDupsWorksFineWithInt()
         {
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger);
 
             telemetryDataCollector.AddAndAggregate("Property", 1);
             telemetryDataCollector.AddAndAggregate("Property", 1);
@@ -80,9 +80,9 @@ namespace CoveragePublisher.L0.Tests
         [TestMethod]
         public void AddAndAggregateWithDupsWorksFineWithDouble()
         {
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger);
 
             telemetryDataCollector.AddAndAggregate("Property", 1.1);
             telemetryDataCollector.AddAndAggregate("Property", 1.1);
@@ -93,9 +93,9 @@ namespace CoveragePublisher.L0.Tests
         [TestMethod]
         public void PublishCumulativeTelemetryAsyncTest()
         {
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object, logger);
 
             telemetryDataCollector.AddAndAggregate("Property", 1.1);
             telemetryDataCollector.AddAndAggregate("Property", 1.1);

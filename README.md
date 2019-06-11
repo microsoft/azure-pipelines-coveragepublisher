@@ -1,7 +1,7 @@
 
 # Contributing
 
-[![Build Status](https://dev.azure.com/dtatestingint/CodeCoveragePublisher/_apis/build/status/microsoft.azure-pipelines-codecoveragePublisher?branchName=master)](https://dev.azure.com/dtatestingint/CodeCoveragePublisher/_build/latest?definitionId=184&branchName=master)
+[![Build Status](https://dev.azure.com/mseng/AzureDevOps/_apis/build/status/Teams/AutomatedTesting/microsoft.azure-pipelines-coveragepublisher?branchName=master)](https://dev.azure.com/mseng/AzureDevOps/_build/latest?definitionId=8880&branchName=master)
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us

@@ -18,10 +18,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
     {
         public List<FileCoverageInfo> GetFileCoverageInfos(PublisherConfiguration config)
         {
+            TraceLogger.Instance.Info("ReportGeneratorParser.GetFileCoverageInfo: Generating coverage info from coverage files.");
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
             if (config.CoverageFiles == null)
             {
+                TraceLogger.Instance.Info("ReportGeneratorParser.GetFileCoverageInfos: No input received, generating empty coverage.");
                 return fileCoverages;
             }
 
@@ -51,17 +53,20 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
-            this.CreateHTMLReport(parserResult, config.ReportDirectory, config.SourceDirectories);
+            CreateHTMLReportFromParserResult(parserResult, config, config.SourceDirectories);
 
             return fileCoverages;
         }
 
         public CoverageSummary GetCoverageSummary(PublisherConfiguration config)
         {
+            TraceLogger.Instance.Info("ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.");
+
             var summary = new CoverageSummary();
 
             if(config.CoverageFiles == null)
             {
+                TraceLogger.Instance.Info("ReportGeneratorParser.GetCoverageSummary: No input received, generating empty coverage.");
                 return summary;
             }
 
@@ -84,13 +89,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             summary.AddCoverageStatistics("line", totalLines, coveredLines, CoverageSummary.Priority.Line);
 
-            this.CreateHTMLReport(parserResult, config.ReportDirectory, config.SourceDirectories);
+            this.CreateHTMLReportFromParserResult(parserResult, config, config.SourceDirectories);
 
             return summary;
         }
 
         private ParserResult ParseCoverageFiles(List<string> coverageFiles)
         {
+            TraceLogger.Instance.Info("ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.");
+
             CoverageReportParser parser = new CoverageReportParser(1, new string[] { }, new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }));
@@ -99,14 +106,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return parser.ParseFiles(collection);
         }
 
-        private bool CreateHTMLReport(ParserResult parserResult, string reportDirectory, string sourceDirectories)
+        private bool CreateHTMLReportFromParserResult(ParserResult parserResult, PublisherConfiguration config, string sourceDirectories)
         {
-            if (!string.IsNullOrEmpty(reportDirectory) && Directory.Exists(reportDirectory))
+            if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
             {
+                TraceLogger.Instance.Info("ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.");
+
                 try
                 {
-                    var config = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
-                        { "targetdir", reportDirectory },
+                    var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
+                        { "targetdir", config.ReportDirectory },
                         { "sourcedirs", string.IsNullOrEmpty(sourceDirectories) ? "" : sourceDirectories },
                         { "reporttypes", "HtmlInline_AzurePipelines" }
                     });
@@ -114,16 +123,20 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                     var generator = new Generator();
 
-                    generator.GenerateReport(config, new Settings(), new RiskHotspotsAnalysisThresholds(), parserResult);
+                    generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), parserResult);
                 }
                 catch(Exception e)
                 {
-                    //TODO: log exception
+                    TraceLogger.Instance.Error(string.Format("ReportGeneratorParser.CreateHTMLReportFromParserResult: Error while generating HTML report, Error: {0}", e));
                     return false;
                 }
 
                 return true;
 
+            }
+            else
+            {
+                TraceLogger.Instance.Info("ReportGeneratorParser.CreateHTMLReportFromParserResult: Skipping creation of HTML report.");
             }
 
             return false;
