@@ -15,4 +15,19 @@
     <PackageReference Include="ReportGenerator.Core" Version="4.1.10.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Publishers\AzurePipelines\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Publishers\AzurePipelines\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

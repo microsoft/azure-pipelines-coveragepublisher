@@ -8,6 +8,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
     internal class AzurePipelinesPublisher : ICoveragePublisher
     {
+        private PipelinesExecutionContext executionContext = new PipelinesExecutionContext();
+
         public void PublishCoverageSummary(CoverageSummary coverageSummary)
         {
         }
@@ -18,6 +20,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public void PublishHTMLReport(string reportDirectory)
         {
+            var publisher = new HTMLReportPublisher();
+
+            publisher.PublishHTMLReportAsync(executionContext, reportDirectory, new System.Threading.CancellationToken()).Wait();
         }
     }
 }

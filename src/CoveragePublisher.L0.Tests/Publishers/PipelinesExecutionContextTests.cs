@@ -18,11 +18,32 @@ namespace CoveragePublisher.L0.Tests
             var context = new PipelinesExecutionContext();
             Assert.IsNotNull(context.ConsoleLogger);
 
+            var guid = Guid.NewGuid().ToString();
+
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken, "token");
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildContainerId, "1234");
+            Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildId, "1234");
+            Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.ProjectId, guid);
 
             Assert.AreEqual("token", context.AccessToken);
-            Assert.AreEqual(1234, context.ContainerId);
+            Assert.AreEqual((long)1234, context.ContainerId);
+            Assert.AreEqual((int)1234, context.BuildId);
+            Assert.AreEqual(guid, context.ProjectId.ToString());
+        }
+
+        [TestMethod]
+        public void WillInitializePropertiesWithEmptyValues()
+        {
+            var context = new PipelinesExecutionContext();
+            Assert.IsNotNull(context.ConsoleLogger);
+
+            Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildContainerId, "");
+            Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildId, "");
+            Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.ProjectId, "");
+
+            Assert.AreEqual((long)0, context.ContainerId);
+            Assert.AreEqual((int)0, context.BuildId);
+            Assert.AreEqual(Guid.Empty.ToString(), context.ProjectId.ToString());
         }
 
         [TestMethod]
