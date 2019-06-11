@@ -33,24 +33,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             _traceSource.Listeners.Add(traceListener);
         }
 
-        public void Info(string message, params object[] args)
+        public void Info(string message)
         {
-            _traceSource.TraceEvent(TraceEventType.Information, 0, string.Format(message, args));
+            _traceSource.TraceEvent(TraceEventType.Information, 0, message);
         }
 
-        public void Warning(string message, params object[] args)
+        public void Warning(string message)
         {
-            _traceSource.TraceEvent(TraceEventType.Warning, 0, string.Format(message, args));
+            _traceSource.TraceEvent(TraceEventType.Warning, 0, message);
         }
 
-        public void Verbose(string message, params object[] args)
+        public void Verbose(string message)
         {
-            _traceSource.TraceEvent(TraceEventType.Verbose, 0, string.Format(message, args));
+            _traceSource.TraceEvent(TraceEventType.Verbose, 0, message);
         }
 
-        public void Error(string message, params object[] args)
+        public void Error(string message)
         {
-            _traceSource.TraceEvent(TraceEventType.Error, 0, string.Format(message, args));
+            _traceSource.TraceEvent(TraceEventType.Error, 0, message);
         }
 
         #endregion

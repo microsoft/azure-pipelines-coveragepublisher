@@ -127,7 +127,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
                 catch(Exception e)
                 {
-                    TraceLogger.Instance.Error("ReportGeneratorParser.CreateHTMLReportFromParserResult: Error while generating HTML report, Error: {0}", e);
+                    TraceLogger.Instance.Error(string.Format("ReportGeneratorParser.CreateHTMLReportFromParserResult: Error while generating HTML report, Error: {0}", e));
                     return false;
                 }
 
