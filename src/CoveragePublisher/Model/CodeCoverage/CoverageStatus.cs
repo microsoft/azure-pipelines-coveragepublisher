@@ -6,7 +6,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     /// <summary>
     /// Line coverage status.
     /// </summary>
-    internal enum CoverageStatus
+    public enum CoverageStatus
     {
         Covered,
         NotCovered,

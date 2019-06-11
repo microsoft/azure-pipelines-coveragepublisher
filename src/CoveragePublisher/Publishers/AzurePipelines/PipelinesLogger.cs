@@ -5,7 +5,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
-    internal class PipelinesLogger : ILogger
+    internal class PipelinesLogger : Model.ILogger
     {
 
         public void Verbose(string message)

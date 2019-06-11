@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
 {
-    internal interface IExecutionContext
+    public interface IExecutionContext
     {
-        ILogger Logger { get; }
+        ILogger ConsoleLogger { get; }
     }
 }

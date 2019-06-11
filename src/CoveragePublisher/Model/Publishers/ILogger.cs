@@ -7,7 +7,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     /// <summary>
     /// Different from ITraceLogger, this class is for logging to execution context.
     /// </summary>
-    internal interface ILogger
+    public interface ILogger
     {
         /// <summary>
         /// Log error message.

@@ -7,11 +7,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
     internal class PipelinesExecutionContext: IExecutionContext
     {
-        public ILogger Logger { get; private set; }
+        public ILogger ConsoleLogger { get; private set; }
 
         public PipelinesExecutionContext()
         {
-            Logger = new PipelinesLogger();
+            ConsoleLogger = new PipelinesLogger();
         }
 
 
@@ -29,7 +29,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             get
             {
                 var accessToken = Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken);
-                return string.IsNullOrEmpty(accessToken) ? "" : accessToken;
+
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    throw new ArgumentNullException("AccessToken envrionment variable was null or empty.");
+                }
+
+                return accessToken;
             }
         }
     }

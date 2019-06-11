@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     /// <summary>
     /// Model for coverage publisher
     /// </summary>
-    internal interface ICoveragePublisher
+    public interface ICoveragePublisher
     {
         /// <summary>
         /// Publish individual file coverage data.

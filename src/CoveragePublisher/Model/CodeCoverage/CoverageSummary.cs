@@ -9,7 +9,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     /// <summary>
     /// Model for coverage summary.
     /// </summary>
-    internal class CoverageSummary
+    public class CoverageSummary
     {
         public CoverageSummary(string buildFlavor, string buildPlatform)
         {
