@@ -43,7 +43,7 @@ namespace CoveragePublisher.L0.Tests
 
             Assert.AreEqual((long)0, context.ContainerId);
             Assert.AreEqual((int)0, context.BuildId);
-            Assert.AreEqual(Guid.Empty, context.ProjectId.ToString());
+            Assert.AreEqual(Guid.Empty.ToString(), context.ProjectId.ToString());
         }
 
         [TestMethod]
