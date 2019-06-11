@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
 {
@@ -12,7 +13,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
         /// Creates a timer with threshold. A perf message is logged only if
         /// the time elapsed is more than the threshold.
         /// </summary>
-        public SimpleTimer(string timerName, string telemetryArea, string telemetryEventName, ITraceLogger logger,
+        public SimpleTimer(string timerName, string telemetryArea, string telemetryEventName, ILogger logger,
             ITelemetryDataCollector telemetryDataCollector, TimeSpan threshold, bool publishTelemetry = true)
         {
             _name = timerName;
@@ -72,7 +73,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
         #region private variables.
 
         private bool _disposed;
-        private readonly ITraceLogger _logger;
+        private readonly ILogger _logger;
         private readonly ITelemetryDataCollector _telemetry;
         private readonly Stopwatch _timer;
         private readonly string _name;

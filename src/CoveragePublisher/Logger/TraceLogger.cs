@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
-    public class TraceLogger : ITraceLogger
+    public class TraceLogger : ILogger
     {
 
         public static TraceLogger Instance

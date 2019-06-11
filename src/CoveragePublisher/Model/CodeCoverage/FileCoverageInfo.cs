@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     /// <summary>
     /// Model for file coverage for a single file.
     /// </summary>
-    internal class FileCoverageInfo
+    public class FileCoverageInfo
     {
         /// <summary>
         /// File path for the covered file.

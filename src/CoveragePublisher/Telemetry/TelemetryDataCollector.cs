@@ -1,20 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
-using Microsoft.VisualStudio.Services.WebPlatform;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
+using Microsoft.VisualStudio.Services.WebPlatform;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
     public class TelemetryDataCollector : ITelemetryDataCollector
     {
-        private readonly ITraceLogger _logger;
+        private readonly ILogger _logger;
         private readonly CustomerIntelligenceHttpClient _httpClient;
         private const string CumulativeTelemetryFeatureName = "ConsolidatedTelemetry";
         private readonly object _publishLockNode = new object();
@@ -22,7 +23,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
         public string Area => "TestResultParser";
 
-        public TelemetryDataCollector(IClientFactory clientFactory, ITraceLogger logger)
+        public TelemetryDataCollector(IClientFactory clientFactory, ILogger logger)
         {
             _logger = logger;
             _httpClient = clientFactory.GetClient<CustomerIntelligenceHttpClient>();

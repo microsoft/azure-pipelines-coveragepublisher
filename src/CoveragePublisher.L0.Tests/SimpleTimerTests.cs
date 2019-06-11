@@ -36,8 +36,7 @@ namespace CoveragePublisher.L0.Tests
                 .Returns((CustomerIntelligenceHttpClient)null);
             telemetryDataCollector.Setup(x => x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
-            using (new SimpleTimer("testTimer", "Test", "test",
-                logger, telemetryDataCollector.Object, TimeSpan.FromHours(1), true)) ;
+            using (new SimpleTimer("testTimer", "Test", "test", logger, telemetryDataCollector.Object, TimeSpan.FromHours(1), true)) { }
 
             Assert.IsTrue(trace.Log.Contains("Verbose"));
         }
@@ -56,8 +55,7 @@ namespace CoveragePublisher.L0.Tests
             telemetryDataCollector.Setup(x =>
                 x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
-            using (new SimpleTimer("testTimer", "Test", "test",
-                logger, telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true)) ;
+            using (new SimpleTimer("testTimer", "Test", "test", logger, telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true)) { }
 
             Assert.IsTrue(trace.Log.Contains("Warning"));
         }

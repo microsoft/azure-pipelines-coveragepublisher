@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelinesPublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
     internal class AzurePipelinesPublisher : ICoveragePublisher
     {

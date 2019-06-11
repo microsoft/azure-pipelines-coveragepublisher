@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     /// <summary>
     /// Model for tools that understand coverage formats and parse to IList<FileCoverageInfo>.
     /// </summary>
-    internal interface ICoverageParser
+    public interface ICoverageParser
     {
         /// <summary>
         /// Get coverage information for individual files.
