@@ -16,6 +16,8 @@ namespace CoveragePublishe.L0.Tests
 
             --sourceDirectory    (Default: ) List of source directories separated by ';'.
 
+            --diag               (Default: false) Enable diagnostics logging.
+
             --help               Display this help screen.
 
             --version            Display version information.

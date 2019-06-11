@@ -23,6 +23,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
         #region Public Methods
 
+        public static void ResetLogger()
+        {
+            _instance = null;
+        }
+
         public void AddListener(TraceListener traceListener)
         {
             _traceSource.Listeners.Add(traceListener);
@@ -46,11 +51,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         public void Error(string message, params object[] args)
         {
             _traceSource.TraceEvent(TraceEventType.Error, 0, string.Format(message, args));
-        }
-
-        public void ResetLogger()
-        {
-            _instance = null;
         }
 
         #endregion
