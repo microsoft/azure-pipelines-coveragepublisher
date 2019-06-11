@@ -13,68 +13,72 @@ namespace CoveragePublisher.L0.Tests
     [TestClass]
     public class SimpleTimerTests
     {
+        private TestTraceListener trace;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            trace = new TestTraceListener();
+            TraceLogger.ResetLogger();
+            TraceLogger.Instance.AddListener(trace);
+        }
+
         [TestMethod]
         public void SimpleTimeWhenWithinThreshold()
         {
-            var verboseLogCalled = false;
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
+
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger);
 
             clientFactory
                 .Setup(x => x.GetClient<CustomerIntelligenceHttpClient>())
                 .Returns((CustomerIntelligenceHttpClient)null);
-            logger.Setup(x => x.Verbose(It.IsAny<string>())).Callback((() => verboseLogCalled = true));
-            telemetryDataCollector.Setup(x => x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .Callback((() => verboseLogCalled = true));
+            telemetryDataCollector.Setup(x => x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
             using (new SimpleTimer("testTimer", "Test", "test",
-                logger.Object, telemetryDataCollector.Object, TimeSpan.FromHours(1), true)) ;
+                logger, telemetryDataCollector.Object, TimeSpan.FromHours(1), true)) ;
 
-            Assert.IsTrue(verboseLogCalled);
+            Assert.IsTrue(trace.Log.Contains("Verbose"));
         }
 
         [TestMethod]
         public void SimpleTimeWhenOutSideThreshold()
         {
-            var warningLogCalled = false;
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
+
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger);
 
             clientFactory
                 .Setup(x => x.GetClient<CustomerIntelligenceHttpClient>())
                 .Returns((CustomerIntelligenceHttpClient)null);
-            logger.Setup(x => x.Warning(It.IsAny<string>())).Callback((() => warningLogCalled = true));
             telemetryDataCollector.Setup(x =>
                 x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
             using (new SimpleTimer("testTimer", "Test", "test",
-                logger.Object, telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true)) ;
+                logger, telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true)) ;
 
-            Assert.IsTrue(warningLogCalled);
+            Assert.IsTrue(trace.Log.Contains("Warning"));
         }
 
         [TestMethod]
         public void SimpleTimeWorksWhenDisposedCalledTwice()
         {
-            var verboseLogCalled = false;
-            var logger = new Mock<TraceLogger>(new TextWriterTraceListener());
+            var logger = TraceLogger.Instance;
+
             var clientFactory = new Mock<ClientFactory>(null);
-            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger.Object);
+            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger);
 
             clientFactory
                 .Setup(x => x.GetClient<CustomerIntelligenceHttpClient>())
                 .Returns((CustomerIntelligenceHttpClient)null);
-            logger.Setup(x => x.Verbose(It.IsAny<string>())).Callback((() => verboseLogCalled = true));
-            telemetryDataCollector.Setup(x => x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .Callback((() => verboseLogCalled = true));
+            telemetryDataCollector.Setup(x => x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
             var timer = new SimpleTimer("testTimer", "Test", "test",
-                logger.Object, telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true);
+                logger, telemetryDataCollector.Object, TimeSpan.FromMilliseconds(10), true);
 
             timer.Dispose();
-
             timer.Dispose();
         }
     }

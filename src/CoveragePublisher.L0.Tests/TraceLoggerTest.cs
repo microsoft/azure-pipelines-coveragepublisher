@@ -11,7 +11,8 @@ namespace CoveragePublisher.L0.Tests
         public void TestInfo()
         {
             var mockListener = new MockTraceListener();
-            TraceLogger logger = new TraceLogger(mockListener);
+            var logger = TraceLogger.Instance;
+            logger.AddListener(mockListener);
             logger.Info("something");
             Assert.AreEqual("something", mockListener.Message);
             Assert.AreEqual("CodeCoveragePublisherTrace Information: 0 : ", mockListener.WriteMessage);
@@ -21,7 +22,8 @@ namespace CoveragePublisher.L0.Tests
         public void TestDebug()
         {
             var mockListener = new MockTraceListener();
-            TraceLogger logger = new TraceLogger(mockListener);
+            var logger = TraceLogger.Instance;
+            logger.AddListener(mockListener);
             logger.Verbose("something");
             Assert.AreEqual("something", mockListener.Message);
             Assert.AreEqual("CodeCoveragePublisherTrace Verbose: 0 : ", mockListener.WriteMessage);
@@ -31,7 +33,8 @@ namespace CoveragePublisher.L0.Tests
         public void TestWarning()
         {
             var mockListener = new MockTraceListener();
-            TraceLogger logger = new TraceLogger(mockListener);
+            var logger = TraceLogger.Instance;
+            logger.AddListener(mockListener);
             logger.Warning("something");
             Assert.AreEqual("something", mockListener.Message);
             Assert.AreEqual("CodeCoveragePublisherTrace Warning: 0 : ", mockListener.WriteMessage);
@@ -41,7 +44,8 @@ namespace CoveragePublisher.L0.Tests
         public void TestError()
         {
             var mockListener = new MockTraceListener();
-            TraceLogger logger = new TraceLogger(mockListener);
+            var logger = TraceLogger.Instance;
+            logger.AddListener(mockListener);
             logger.Error("something");
             Assert.AreEqual("something", mockListener.Message);
             Assert.AreEqual("CodeCoveragePublisherTrace Error: 0 : ", mockListener.WriteMessage);
