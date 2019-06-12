@@ -15,7 +15,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             var argsProcessor = new ArgumentsProcessor();
             var publisherConfiguration = argsProcessor.ProcessCommandLineArgs(args);
 
-            ConfigureLogging(publisherConfiguration);
+            if (publisherConfiguration != null)
+            {
+                ConfigureLogging(publisherConfiguration);
+            }
         }
 
         private static void ConfigureLogging(PublisherConfiguration config)

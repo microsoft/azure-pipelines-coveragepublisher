@@ -33,11 +33,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <summary>
         /// Gets the configuration for whether HTML reports should be generated or not.
         /// </summary>
-        public bool GenerateHTMLReport {
-            get
-            {
-                return !string.IsNullOrEmpty(ReportDirectory);
-            }
-        }
+        virtual public bool GenerateHTMLReport { get; set; }
+
+        /// <summary>
+        /// Gets the configuration for whether telemetry is disabled.
+        /// </summary>
+        virtual public bool DisableTelemetry { get; set; }
     }
 }

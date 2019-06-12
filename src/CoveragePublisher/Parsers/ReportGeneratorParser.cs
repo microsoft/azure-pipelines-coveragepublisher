@@ -114,16 +114,19 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                 try
                 {
+                    // Generate the html report with custom configuration for report generator.
                     var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
                         { "targetdir", config.ReportDirectory },
                         { "sourcedirs", string.IsNullOrEmpty(sourceDirectories) ? "" : sourceDirectories },
                         { "reporttypes", "HtmlInline_AzurePipelines" }
                     });
 
-
                     var generator = new Generator();
 
                     generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), parserResult);
+
+                    // Copy coverage input files to the report directory
+                    CopyCoverageInputFilesToReportDirectory(config);
                 }
                 catch(Exception e)
                 {
@@ -140,6 +143,31 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
 
             return false;
+        }
+
+        private void CopyCoverageInputFilesToReportDirectory(PublisherConfiguration config)
+        {
+            string summaryFilesSubDir;
+
+            // Create a unique folder
+            do
+            {
+                summaryFilesSubDir = Path.Combine(config.ReportDirectory, "Summary_" + Guid.NewGuid().ToString().Substring(0, 8));
+            } while (Directory.Exists(summaryFilesSubDir));
+
+            TraceLogger.Instance.Verbose("ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating summary file directory: " + summaryFilesSubDir);
+
+            Directory.CreateDirectory(summaryFilesSubDir);
+
+            // Copy the files
+            foreach (var summaryFile in config.CoverageFiles)
+            {
+                var summaryFileName = Path.GetFileName(summaryFile);
+                var destinationSummaryFile = Path.Combine(summaryFilesSubDir, summaryFileName);
+
+                TraceLogger.Instance.Verbose("ReportGeneratorParser.CreateHTMLReportFromParserResult: Copying summary file " + summaryFile);
+                File.Copy(summaryFile, destinationSummaryFile, true);
+            }
         }
     }
 }

@@ -107,7 +107,7 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLRepo
         [DataRow(new string[] { "SampleCoverage/Cobertura.xml" })]
         [DataRow(new string[] { "SampleCoverage/Jacoco.xml" })]
         [DataRow(new string[] { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/Jacoco.xml" })]
-        public void WillGenerateHTMLReport(string[] xmlFiles)
+        public void WillGenerateHTMLReportWithSummaryFilesCopied(string[] xmlFiles)
         {
             var tempDir1 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             var tempDir2 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -120,31 +120,50 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLRepo
             parser.GetFileCoverageInfos(new PublisherConfiguration()
             {
                 CoverageFiles = xmlFiles,
+                GenerateHTMLReport = true,
                 ReportDirectory = tempDir1
             });
 
             parser.GetCoverageSummary(new PublisherConfiguration()
             {
                 CoverageFiles = xmlFiles,
+                GenerateHTMLReport = true,
                 ReportDirectory = tempDir2
             });
 
             Assert.IsTrue(Directory.EnumerateFiles(tempDir1).Count() > 0);
             Assert.IsTrue(Directory.EnumerateFiles(tempDir2).Count() > 0);
+
+            var tempDir1Summary = Directory.EnumerateDirectories(tempDir1, "Summary_*").ToList()[0];
+            var tempDir2Summary = Directory.EnumerateDirectories(tempDir2, "Summary_*").ToList()[0];
             
+            foreach(var summaryFile in xmlFiles)
+            {
+                var fileName = Path.GetFileName(summaryFile);
+                Assert.IsTrue(File.Exists(Path.Combine(tempDir1Summary, fileName)));
+                Assert.IsTrue(File.Exists(Path.Combine(tempDir2Summary, fileName)));
+            }
+
             //cleanup
             Directory.Delete(tempDir1, true);
             Directory.Delete(tempDir2, true);
 
-            Assert.AreEqual(trace.Log.Trim(), @"
+            Assert.IsTrue(trace.Log.Contains(@"
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetFileCoverageInfo: Generating coverage info from coverage files.
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.".Trim()));
+
+            Assert.IsTrue(trace.Log.Contains(@"
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.".Trim()));
 
-".Trim());
+            Assert.IsTrue(trace.Log.Contains(@"
+CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating summary file directory:".Trim()));
+
+            Assert.IsTrue(trace.Log.Contains(@"
+CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Copying summary file".Trim()));
+
         }
     }
 }
