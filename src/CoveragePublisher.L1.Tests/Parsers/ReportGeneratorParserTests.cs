@@ -154,15 +154,70 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageF
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.".Trim()));
 
             Assert.IsTrue(trace.Log.Contains(@"
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.".Trim()));
+
+            Assert.IsTrue(trace.Log.Contains(@"
+CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CopyCoverageInputFilesToReportDirectory: Creating summary file directory:".Trim()));
+
+            Assert.IsTrue(trace.Log.Contains(@"
+CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CopyCoverageInputFilesToReportDirectory: Copying summary file".Trim()));
+
+        }
+
+        [TestMethod]
+        [DataRow(new string[] { "SampleCoverage/Clover.xml" })]
+        [DataRow(new string[] { "SampleCoverage/Cobertura.xml" })]
+        [DataRow(new string[] { "SampleCoverage/Jacoco.xml" })]
+        [DataRow(new string[] { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/Jacoco.xml" })]
+        public void WillCopySummaryFilesIfReportDirectoryIsSet(string[] xmlFiles)
+        {
+            var tempDir1 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var tempDir2 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            Directory.CreateDirectory(tempDir1);
+            Directory.CreateDirectory(tempDir2);
+
+            var parser = new ReportGeneratorParser();
+
+            parser.GetFileCoverageInfos(new PublisherConfiguration()
+            {
+                CoverageFiles = xmlFiles,
+                ReportDirectory = tempDir1
+            });
+
+            parser.GetCoverageSummary(new PublisherConfiguration()
+            {
+                CoverageFiles = xmlFiles,
+                ReportDirectory = tempDir2
+            });
+            
+            var tempDir1Summary = Directory.EnumerateDirectories(tempDir1, "Summary_*").ToList()[0];
+            var tempDir2Summary = Directory.EnumerateDirectories(tempDir2, "Summary_*").ToList()[0];
+
+            foreach (var summaryFile in xmlFiles)
+            {
+                var fileName = Path.GetFileName(summaryFile);
+                Assert.IsTrue(File.Exists(Path.Combine(tempDir1Summary, fileName)));
+                Assert.IsTrue(File.Exists(Path.Combine(tempDir2Summary, fileName)));
+            }
+
+            //cleanup
+            Directory.Delete(tempDir1, true);
+            Directory.Delete(tempDir2, true);
+
+            Assert.IsTrue(trace.Log.Contains(@"
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetFileCoverageInfo: Generating coverage info from coverage files.
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating HTML report.".Trim()));
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Skipping creation of HTML report.".Trim()));
 
             Assert.IsTrue(trace.Log.Contains(@"
-CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating summary file directory:".Trim()));
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorParser.GetCoverageSummary: Generate coverage summary for the coverage files.".Trim()));
 
             Assert.IsTrue(trace.Log.Contains(@"
-CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CreateHTMLReportFromParserResult: Copying summary file".Trim()));
+CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CopyCoverageInputFilesToReportDirectory: Creating summary file directory:".Trim()));
+
+            Assert.IsTrue(trace.Log.Contains(@"
+CodeCoveragePublisherTrace Verbose: 0 : ReportGeneratorParser.CopyCoverageInputFilesToReportDirectory: Copying summary file".Trim()));
 
         }
     }

@@ -106,7 +106,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return parser.ParseFiles(collection);
         }
 
-        private bool CreateHTMLReportFromParserResult(ParserResult parserResult, PublisherConfiguration config, string sourceDirectories)
+        private void CreateHTMLReportFromParserResult(ParserResult parserResult, PublisherConfiguration config, string sourceDirectories)
         {
             if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
             {
@@ -125,48 +125,53 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                     generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), parserResult);
 
-                    // Copy coverage input files to the report directory
-                    CopyCoverageInputFilesToReportDirectory(config);
                 }
                 catch(Exception e)
                 {
                     TraceLogger.Instance.Error(string.Format("ReportGeneratorParser.CreateHTMLReportFromParserResult: Error while generating HTML report, Error: {0}", e));
-                    return false;
                 }
-
-                return true;
-
             }
             else
             {
                 TraceLogger.Instance.Info("ReportGeneratorParser.CreateHTMLReportFromParserResult: Skipping creation of HTML report.");
             }
 
-            return false;
+            // Copy coverage when report directory is specified even if we're not creating custom html reports
+            if (!string.IsNullOrEmpty(config.ReportDirectory))
+            {
+                CopyCoverageInputFilesToReportDirectory(config);
+            }
         }
 
         private void CopyCoverageInputFilesToReportDirectory(PublisherConfiguration config)
         {
-            string summaryFilesSubDir;
-
-            // Create a unique folder
-            do
+            if (Directory.Exists(config.ReportDirectory))
             {
-                summaryFilesSubDir = Path.Combine(config.ReportDirectory, "Summary_" + Guid.NewGuid().ToString().Substring(0, 8));
-            } while (Directory.Exists(summaryFilesSubDir));
+                string summaryFilesSubDir;
 
-            TraceLogger.Instance.Verbose("ReportGeneratorParser.CreateHTMLReportFromParserResult: Creating summary file directory: " + summaryFilesSubDir);
+                // Create a unique folder
+                do
+                {
+                    summaryFilesSubDir = Path.Combine(config.ReportDirectory, "Summary_" + Guid.NewGuid().ToString().Substring(0, 8));
+                } while (Directory.Exists(summaryFilesSubDir));
 
-            Directory.CreateDirectory(summaryFilesSubDir);
+                TraceLogger.Instance.Verbose("ReportGeneratorParser.CopyCoverageInputFilesToReportDirectory: Creating summary file directory: " + summaryFilesSubDir);
 
-            // Copy the files
-            foreach (var summaryFile in config.CoverageFiles)
+                Directory.CreateDirectory(summaryFilesSubDir);
+
+                // Copy the files
+                foreach (var summaryFile in config.CoverageFiles)
+                {
+                    var summaryFileName = Path.GetFileName(summaryFile);
+                    var destinationSummaryFile = Path.Combine(summaryFilesSubDir, summaryFileName);
+
+                    TraceLogger.Instance.Verbose("ReportGeneratorParser.CopyCoverageInputFilesToReportDirectory: Copying summary file " + summaryFile);
+                    File.Copy(summaryFile, destinationSummaryFile, true);
+                }
+            }
+            else
             {
-                var summaryFileName = Path.GetFileName(summaryFile);
-                var destinationSummaryFile = Path.Combine(summaryFilesSubDir, summaryFileName);
-
-                TraceLogger.Instance.Verbose("ReportGeneratorParser.CreateHTMLReportFromParserResult: Copying summary file " + summaryFile);
-                File.Copy(summaryFile, destinationSummaryFile, true);
+                TraceLogger.Instance.Verbose("ReportGeneratorParser.CopyCoverageInputFilesToReportDirectory: Directory " + config.ReportDirectory + " doesn't exist, skipping copying of coverage input files.");
             }
         }
     }
