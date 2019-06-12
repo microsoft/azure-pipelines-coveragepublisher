@@ -16,8 +16,6 @@ namespace CoveragePublishe.L0.Tests
 
             --sourceDirectory    (Default: ) List of source directories separated by ';'.
             
-            --generateHtmlReport (Default: false) Generate custom HTML report.
-
             --diag               (Default: false) Enable diagnostics logging.
 
             --noTelemetry        (Default: false) Disable telemetry data collection.
@@ -82,17 +80,6 @@ namespace CoveragePublishe.L0.Tests
             var helpText = ConsoleWriter.ToString();
             Assert.IsTrue(helpText.Contains(@"ERROR(S):" + Environment.NewLine + "  Option '" + option + "' has no value."));
             Assert.IsTrue(Regex.Replace(helpText, @"\s+", "").Contains(UsageText), helpText);
-        }
-
-        [TestMethod]
-        public void WillThrowIfBothReportDirectoryAndGenerateReportSet()
-        {
-            var argsProcessor = new ArgumentsProcessor();
-
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                argsProcessor.ProcessCommandLineArgs(new string[] { "asdf", "--reportDirectory", "gg", "--generateHtmlReport" });
-            });
         }
 
         [DataTestMethod]

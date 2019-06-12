@@ -22,10 +22,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             [Option("sourceDirectory", Default = "", HelpText = "List of source directories separated by ';'.")]
             override public string SourceDirectories { get; set; }
-
-            [Option("generateHtmlReport", Default = false, HelpText = "Generate custom HTML report.")]
-            override public bool GenerateHTMLReport { get; set; }
-
+            
             [Option("diag", Default = false, HelpText = "Enable diagnostics logging.")]
             public override bool TraceLogging { get; set; }
 
@@ -42,28 +39,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts =>
                 {
-                    config = ValidateCliArgs(opts);
+                    config = opts;
                 });
 
             return config;
-        }
-
-        private PublisherConfiguration ValidateCliArgs(Options options)
-        {
-            PublisherConfiguration cliArgs = options;
-
-            if (!string.IsNullOrEmpty(cliArgs.ReportDirectory) && cliArgs.GenerateHTMLReport == true)
-            {
-                throw new ArgumentException("Cannot use both ReportDirectory and GenerateHTMLReport options in conjunction.");
-            }
-            else if (cliArgs.GenerateHTMLReport == true)
-            {
-                // if GenereteHTMLReport is set, then ReportDirectory will be the folder in which the html report is generated.
-                cliArgs.ReportDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-                Directory.CreateDirectory(cliArgs.ReportDirectory);
-            }
-
-            return cliArgs;
         }
     }
 }
