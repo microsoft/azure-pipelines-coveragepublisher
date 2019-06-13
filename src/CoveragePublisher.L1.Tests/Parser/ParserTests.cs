@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Parser;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -14,12 +14,18 @@ namespace CoveragePublisher.L1.Tests
     public class ParserTests
     {
         TestTraceListener trace;
+        Mock<IExecutionContext> mockContext;
+        Mock<ILogger> mockConsoleLogger;
 
         [TestInitialize]
         public void TestInitialize()
         {
             trace = new TestTraceListener();
             TraceLogger.Instance.AddListener(trace);
+
+            mockConsoleLogger = new Mock<ILogger>();
+            mockContext = new Mock<IExecutionContext>();
+            mockContext.SetupGet(x => x.ConsoleLogger).Returns(mockConsoleLogger.Object);
         }
 
         [TestMethod]
@@ -38,7 +44,7 @@ namespace CoveragePublisher.L1.Tests
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestableParser(config);
+            var parser = new TestableParser(config, mockContext.Object);
             parser.GenerateReport(mockTool.Object);
 
             var tempDirSummary = Directory.EnumerateDirectories(tempDir, "Summary_*").ToList()[0];
@@ -78,7 +84,7 @@ CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summa
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestableParser(config);
+            var parser = new TestableParser(config, mockContext.Object);
             parser.GenerateReport(mockTool.Object);
 
             //cleanup
@@ -87,6 +93,7 @@ CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summa
             Assert.IsTrue(trace.Log.Contains(@"
 CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Exception: error
 ".Trim()));
+            mockConsoleLogger.Verify(x => x.Error(It.Is<string>((str) => string.Equals(str,string.Format(Resources.HTMLReportError, "error")))));
         }
 
         [TestMethod]
@@ -103,7 +110,7 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestableParser(config);
+            var parser = new TestableParser(config, mockContext.Object);
             parser.GenerateReport(mockTool.Object);
             
             Assert.IsTrue(trace.Log.Contains("CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Directory".Trim()));
@@ -114,7 +121,7 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
 
     class TestableParser : Parser
     {
-        public TestableParser(PublisherConfiguration config) : base(config) { }
+        public TestableParser(PublisherConfiguration config, IExecutionContext context) : base(config, context) { }
 
         public void GenerateReport(ICoverageParserTool tool)
         {

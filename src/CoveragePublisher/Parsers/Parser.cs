@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parser
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
     public class Parser
     {
