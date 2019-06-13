@@ -15,8 +15,10 @@ namespace CoveragePublishe.L0.Tests
             --reportDirectory    (Default: ) Path to report directory.
 
             --sourceDirectory    (Default: ) List of source directories separated by ';'.
-
+            
             --diag               (Default: false) Enable diagnostics logging.
+
+            --noTelemetry        (Default: false) Disable telemetry data collection.
 
             --help               Display this help screen.
 
@@ -67,15 +69,16 @@ namespace CoveragePublishe.L0.Tests
             Assert.IsTrue(Regex.Replace(helpText, @"\s+", "").Contains(UsageText), helpText);
         }
 
-
-        [TestMethod]
-        public void WillPrintHelpTextForInvalidArgs_NoValueForOption()
+        [DataTestMethod]
+        [DataRow("reportDirectory")]
+        [DataRow("sourceDirectory")]
+        public void WillPrintHelpTextForInvalidArgs_NoValueForOption(string option)
         {
             var argsProcessor = new ArgumentsProcessor();
-            argsProcessor.ProcessCommandLineArgs(new string[] { "asdf", "--reportDirectory", });
+            argsProcessor.ProcessCommandLineArgs(new string[] { "asdf", "--" + option, });
 
             var helpText = ConsoleWriter.ToString();
-            Assert.IsTrue(helpText.Contains(@"ERROR(S):" + Environment.NewLine + "  Option 'reportDirectory' has no value."));
+            Assert.IsTrue(helpText.Contains(@"ERROR(S):" + Environment.NewLine + "  Option '" + option + "' has no value."));
             Assert.IsTrue(Regex.Replace(helpText, @"\s+", "").Contains(UsageText), helpText);
         }
 

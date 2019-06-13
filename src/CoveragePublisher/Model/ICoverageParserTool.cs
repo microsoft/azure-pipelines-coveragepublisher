@@ -8,20 +8,23 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     /// <summary>
     /// Model for tools that understand coverage formats and parse to IList<FileCoverageInfo>.
     /// </summary>
-    public interface ICoverageParser
+    public interface ICoverageParserTool
     {
         /// <summary>
         /// Get coverage information for individual files.
         /// </summary>
-        /// <param name="configuration"><see cref="PublisherConfiguration"/></param>
         /// <returns>List of <see cref="FileCoverageInfo"/></returns>
-        List<FileCoverageInfo> GetFileCoverageInfos(PublisherConfiguration configuration);
+        List<FileCoverageInfo> GetFileCoverageInfos();
         
         /// <summary>
         /// Get coverage summary, contains combined coverage summary data.
         /// </summary>
-        /// <param name="configuration"><see cref="PublisherConfiguration"/></param>
         /// <returns><see cref="CoverageSummary"/></returns>
-        CoverageSummary GetCoverageSummary(PublisherConfiguration configuration);
+        CoverageSummary GetCoverageSummary();
+
+        /// <summary>
+        /// Generate HTML report from the already parsed result.
+        /// </summary>
+        void GenerateHTMLReport();
     }
 }
