@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parser
 {
     // Will use ReportGenerator to parse xml files and generate IList<FileCoverageInfo>
     public class ReportGeneratorTool: ICoverageParserTool
@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public List<FileCoverageInfo> GetFileCoverageInfos()
         {
-            TraceLogger.Instance.Info("ReportGeneratorTool.GetCoverageSummary: Generating file coverage info from coverage files.");
+            TraceLogger.Instance.Info("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.");
 
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -26,7 +26,6 @@ namespace CoveragePublisher.L1.Tests
         public void WillGenerateHTMLReportWithSummaryFilesCopied()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var parser = new TestableParser();
             var mockTool = new Mock<ICoverageParserTool>();
 
             Directory.CreateDirectory(tempDir);
@@ -39,7 +38,8 @@ namespace CoveragePublisher.L1.Tests
                 ReportDirectory = tempDir
             };
 
-            parser.GenerateReport(mockTool.Object, config);
+            var parser = new TestableParser(config);
+            parser.GenerateReport(mockTool.Object);
 
             var tempDirSummary = Directory.EnumerateDirectories(tempDir, "Summary_*").ToList()[0];
 
@@ -66,7 +66,6 @@ CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summa
         public void WillSafelyLogException()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var parser = new TestableParser();
             var mockTool = new Mock<ICoverageParserTool>();
 
             Directory.CreateDirectory(tempDir);
@@ -79,7 +78,8 @@ CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summa
                 ReportDirectory = tempDir
             };
 
-            parser.GenerateReport(mockTool.Object, config);
+            var parser = new TestableParser(config);
+            parser.GenerateReport(mockTool.Object);
 
             //cleanup
             Directory.Delete(tempDir, true);
@@ -93,7 +93,6 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
         public void WillLogIfReportDirectoryDoesntExist()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var parser = new TestableParser();
             var mockTool = new Mock<ICoverageParserTool>();
 
             mockTool.Setup(x => x.GenerateHTMLReport());
@@ -104,7 +103,8 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
                 ReportDirectory = tempDir
             };
 
-            parser.GenerateReport(mockTool.Object, config);
+            var parser = new TestableParser(config);
+            parser.GenerateReport(mockTool.Object);
             
             Assert.IsTrue(trace.Log.Contains("CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Directory".Trim()));
             Assert.IsTrue(trace.Log.Contains("doesn't exist, skipping copying of coverage input files.".Trim()));
@@ -114,9 +114,11 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
 
     class TestableParser : Parser
     {
-        public void GenerateReport(ICoverageParserTool tool, PublisherConfiguration config)
+        public TestableParser(PublisherConfiguration config) : base(config) { }
+
+        public void GenerateReport(ICoverageParserTool tool)
         {
-            GenerateHTMLReport(tool, config);
+            GenerateHTMLReport(tool);
         }
     }
 }

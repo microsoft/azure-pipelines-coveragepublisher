@@ -36,7 +36,7 @@ namespace CoveragePublisher.L1.Tests
 
             Assert.AreEqual(trace.Log.Trim(), @"
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating file coverage info from coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
 ".Trim());
         }
 
@@ -71,7 +71,7 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSumma
 
             Assert.AreEqual(trace.Log.Trim(), @"
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool: No input coverage files to parse.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating file coverage info from coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
@@ -88,7 +88,7 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSumma
 
             Assert.AreEqual(trace.Log.Trim(), @"
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating file coverage info from coverage files.
+CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
 CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
