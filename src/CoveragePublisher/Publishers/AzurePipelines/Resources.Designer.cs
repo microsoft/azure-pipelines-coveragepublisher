@@ -70,6 +70,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} envrionment variable was null or empty..
+        /// </summary>
+        internal static string EnvVarNullOrEmpty {
+            get {
+                return ResourceManager.GetString("EnvVarNullOrEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error occurred while publishing code coverage files. Error: {0}..
         /// </summary>
         internal static string ErrorOccurredWhilePublishingCCFiles {

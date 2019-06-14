@@ -120,6 +120,9 @@
   <data name="DirectoryNotFound" xml:space="preserve">
     <value>"Directory not found: '{0}'.</value>
   </data>
+  <data name="EnvVarNullOrEmpty" xml:space="preserve">
+    <value>{0} envrionment variable was null or empty.</value>
+  </data>
   <data name="ErrorOccurredWhilePublishingCCFiles" xml:space="preserve">
     <value>Error occurred while publishing code coverage files. Error: {0}.</value>
   </data>

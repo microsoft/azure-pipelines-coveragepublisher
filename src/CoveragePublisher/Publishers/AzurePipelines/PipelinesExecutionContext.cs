@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
                 if (string.IsNullOrEmpty(accessToken))
                 {
-                    throw new ArgumentNullException(string.Format("{0} envrionment variable was null or empty.", Constants.EnvironmentVariables.AccessToken));
+                    throw new ArgumentNullException(string.Format(Resources.EnvVarNullOrEmpty, Constants.EnvironmentVariables.AccessToken));
                 }
 
                 return accessToken;
@@ -73,7 +73,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
                 if (string.IsNullOrEmpty(collectionUri))
                 {
-                    throw new ArgumentNullException(string.Format("{0} envrionment variable was null or empty.", Constants.EnvironmentVariables.CollectionUri));
+                    throw new ArgumentNullException(string.Format(Resources.EnvVarNullOrEmpty, Constants.EnvironmentVariables.CollectionUri));
                 }
 
                 return accessToken;
