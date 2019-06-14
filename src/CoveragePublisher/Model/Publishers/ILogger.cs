@@ -16,22 +16,28 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         void Error(string message);
 
         /// <summary>
-        /// Log error message.
+        /// Log verbose message.
         /// </summary>
         /// <param name="message">Message string.</param>
         void Verbose(string message);
 
 
         /// <summary>
-        /// Log error message.
+        /// Log warning message.
         /// </summary>
         /// <param name="message">Message string.</param>
         void Warning(string message);
 
         /// <summary>
-        /// Log error message.
+        /// Log informational message.
         /// </summary>
         /// <param name="message">Message string.</param>
         void Info(string message);
+
+        /// <summary>
+        /// Log debug message.
+        /// </summary>
+        /// <param name="message">Message string.</param>
+        void Debug(string message);
     }
 }

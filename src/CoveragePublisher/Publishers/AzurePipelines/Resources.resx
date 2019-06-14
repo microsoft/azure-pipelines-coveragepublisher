@@ -117,4 +117,67 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DirectoryNotFound" xml:space="preserve">
+    <value>"Directory not found: '{0}'.</value>
+  </data>
+  <data name="ErrorOccurredWhilePublishingCCFiles" xml:space="preserve">
+    <value>Error occurred while publishing code coverage files. Error: {0}.</value>
+  </data>
+  <data name="FileContainerUploadFailed" xml:space="preserve">
+    <value>Unable to copy file to server StatusCode={0}: {1}. Source file path: {2}. Target server path: {3}.</value>
+  </data>
+  <data name="FileUploadCancelled" xml:space="preserve">
+    <value>File upload has been cancelled during upload file: '{0}'.</value>
+  </data>
+  <data name="FileUploadDetailTrace" xml:space="preserve">
+    <value>Detail upload trace for file that fail to upload: {0}.</value>
+  </data>
+  <data name="FileUploadFailed" xml:space="preserve">
+    <value>Fail to upload '{0}' due to '{1}'.</value>
+  </data>
+  <data name="FileUploadFailedAfterRetry" xml:space="preserve">
+    <value>File upload failed even after retry.</value>
+  </data>
+  <data name="FileUploadFailedRetryLater" xml:space="preserve">
+    <value>{0} files failed to upload, retry these files after a minute.</value>
+  </data>
+  <data name="FileUploadFileOpenFailed" xml:space="preserve">
+    <value>File error '{0}' when uploading file '{1}'.</value>
+  </data>
+  <data name="FileUploadFinish" xml:space="preserve">
+    <value>File: '{0}' took {1} milliseconds to finish upload.</value>
+  </data>
+  <data name="FileUploadProgress" xml:space="preserve">
+    <value>Total file: {0} ---- Processed file: {1} ({2}%).</value>
+  </data>
+  <data name="FileUploadProgressDetail" xml:space="preserve">
+    <value>Uploading '{0}' ({1}%).</value>
+  </data>
+  <data name="FileUploadRetry" xml:space="preserve">
+    <value>Start retry {0} failed files upload.</value>
+  </data>
+  <data name="FileUploadRetryInSecond" xml:space="preserve">
+    <value>Retry file upload after {0} seconds.</value>
+  </data>
+  <data name="FileUploadRetrySucceed" xml:space="preserve">
+    <value>File upload succeed after retry.</value>
+  </data>
+  <data name="FileUploadSucceed" xml:space="preserve">
+    <value>File upload succeed.</value>
+  </data>
+  <data name="ModifyingCoberturaIndexFile" xml:space="preserve">
+    <value>Modifying Cobertura Index file.</value>
+  </data>
+  <data name="PublishedCodeCoverageArtifact" xml:space="preserve">
+    <value>Published '{0}' as artifact '{1}'.</value>
+  </data>
+  <data name="PublishingCodeCoverageFiles" xml:space="preserve">
+    <value>Publishing code coverage files.</value>
+  </data>
+  <data name="RenameIndexFileCoberturaFailed" xml:space="preserve">
+    <value>Renaming '{0}' to '{1}' failed while publishing code coverage files. Inner Exception: '{2}'.</value>
+  </data>
+  <data name="TotalUploadFiles" xml:space="preserve">
+    <value>Uploading {0} files.</value>
+  </data>
 </root>

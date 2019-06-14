@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using Microsoft.Azure.Pipelines.CoveragePublisher;
 
 namespace CoveragePublisher.L0.Tests
 {
-    class TestTraceListener : CoveragePublisherTraceListener
+    class TestTraceListener : TextWriterTraceListener
     {
         public string Log { get; set; } = "";
 

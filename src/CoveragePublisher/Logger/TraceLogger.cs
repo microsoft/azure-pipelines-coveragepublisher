@@ -54,6 +54,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             _traceSource.TraceEvent(TraceEventType.Error, 0, message);
         }
 
+        public void Debug(string message)
+        {
+            _traceSource.TraceEvent(TraceEventType.Verbose, 0, message);
+        }
+
         #endregion
 
         #region Private Methods

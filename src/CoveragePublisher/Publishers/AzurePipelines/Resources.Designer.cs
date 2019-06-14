@@ -59,5 +59,194 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;Directory not found: &apos;{0}&apos;..
+        /// </summary>
+        internal static string DirectoryNotFound {
+            get {
+                return ResourceManager.GetString("DirectoryNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error occurred while publishing code coverage files. Error: {0}..
+        /// </summary>
+        internal static string ErrorOccurredWhilePublishingCCFiles {
+            get {
+                return ResourceManager.GetString("ErrorOccurredWhilePublishingCCFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to copy file to server StatusCode={0}: {1}. Source file path: {2}. Target server path: {3}..
+        /// </summary>
+        internal static string FileContainerUploadFailed {
+            get {
+                return ResourceManager.GetString("FileContainerUploadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File upload has been cancelled during upload file: &apos;{0}&apos;..
+        /// </summary>
+        internal static string FileUploadCancelled {
+            get {
+                return ResourceManager.GetString("FileUploadCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detail upload trace for file that fail to upload: {0}..
+        /// </summary>
+        internal static string FileUploadDetailTrace {
+            get {
+                return ResourceManager.GetString("FileUploadDetailTrace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fail to upload &apos;{0}&apos; due to &apos;{1}&apos;..
+        /// </summary>
+        internal static string FileUploadFailed {
+            get {
+                return ResourceManager.GetString("FileUploadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File upload failed even after retry..
+        /// </summary>
+        internal static string FileUploadFailedAfterRetry {
+            get {
+                return ResourceManager.GetString("FileUploadFailedAfterRetry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} files failed to upload, retry these files after a minute..
+        /// </summary>
+        internal static string FileUploadFailedRetryLater {
+            get {
+                return ResourceManager.GetString("FileUploadFailedRetryLater", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File error &apos;{0}&apos; when uploading file &apos;{1}&apos;..
+        /// </summary>
+        internal static string FileUploadFileOpenFailed {
+            get {
+                return ResourceManager.GetString("FileUploadFileOpenFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File: &apos;{0}&apos; took {1} milliseconds to finish upload..
+        /// </summary>
+        internal static string FileUploadFinish {
+            get {
+                return ResourceManager.GetString("FileUploadFinish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total file: {0} ---- Processed file: {1} ({2}%)..
+        /// </summary>
+        internal static string FileUploadProgress {
+            get {
+                return ResourceManager.GetString("FileUploadProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploading &apos;{0}&apos; ({1}%)..
+        /// </summary>
+        internal static string FileUploadProgressDetail {
+            get {
+                return ResourceManager.GetString("FileUploadProgressDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start retry {0} failed files upload..
+        /// </summary>
+        internal static string FileUploadRetry {
+            get {
+                return ResourceManager.GetString("FileUploadRetry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Retry file upload after {0} seconds..
+        /// </summary>
+        internal static string FileUploadRetryInSecond {
+            get {
+                return ResourceManager.GetString("FileUploadRetryInSecond", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File upload succeed after retry..
+        /// </summary>
+        internal static string FileUploadRetrySucceed {
+            get {
+                return ResourceManager.GetString("FileUploadRetrySucceed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File upload succeed..
+        /// </summary>
+        internal static string FileUploadSucceed {
+            get {
+                return ResourceManager.GetString("FileUploadSucceed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Modifying Cobertura Index file..
+        /// </summary>
+        internal static string ModifyingCoberturaIndexFile {
+            get {
+                return ResourceManager.GetString("ModifyingCoberturaIndexFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Published &apos;{0}&apos; as artifact &apos;{1}&apos;..
+        /// </summary>
+        internal static string PublishedCodeCoverageArtifact {
+            get {
+                return ResourceManager.GetString("PublishedCodeCoverageArtifact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publishing code coverage files..
+        /// </summary>
+        internal static string PublishingCodeCoverageFiles {
+            get {
+                return ResourceManager.GetString("PublishingCodeCoverageFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Renaming &apos;{0}&apos; to &apos;{1}&apos; failed while publishing code coverage files. Inner Exception: &apos;{2}&apos;..
+        /// </summary>
+        internal static string RenameIndexFileCoberturaFailed {
+            get {
+                return ResourceManager.GetString("RenameIndexFileCoberturaFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploading {0} files..
+        /// </summary>
+        internal static string TotalUploadFiles {
+            get {
+                return ResourceManager.GetString("TotalUploadFiles", resourceCulture);
+            }
+        }
     }
 }

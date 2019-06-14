@@ -11,6 +11,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private long containerId = -1;
         private string accessToken = null;
         private Guid? projectId = null;
+        private string collectionUri = null;
 
         public ILogger ConsoleLogger { get; private set; }
 
@@ -45,7 +46,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public string AccessToken
         {
-
             get
             {
                 if (accessToken == null)
@@ -55,9 +55,27 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
                 if (string.IsNullOrEmpty(accessToken))
                 {
-                    throw new ArgumentNullException("AccessToken envrionment variable was null or empty.");
+                    throw new ArgumentNullException(string.Format("{0} envrionment variable was null or empty.", Constants.EnvironmentVariables.AccessToken));
                 }
-                
+
+                return accessToken;
+            }
+        }
+
+        public string CollectionUri
+        {
+            get
+            {
+                if (collectionUri == null)
+                {
+                    collectionUri = Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.CollectionUri) ?? "";
+                }
+
+                if (string.IsNullOrEmpty(collectionUri))
+                {
+                    throw new ArgumentNullException(string.Format("{0} envrionment variable was null or empty.", Constants.EnvironmentVariables.CollectionUri));
+                }
+
                 return accessToken;
             }
         }
