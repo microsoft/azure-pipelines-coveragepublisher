@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace CoveragePublisher.L0.Tests
+namespace CoveragePublisher.Tests
 {
     class TestTraceListener : TextWriterTraceListener
     {

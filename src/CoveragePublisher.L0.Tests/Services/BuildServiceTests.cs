@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace CoveragePublisher.L0.Tests.Services
+namespace CoveragePublisher.Tests.Services
 {
     [TestClass]
     public class BuildServiceTests

@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace CoveragePublisher.L0.Tests
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class TelemetryDataCollectorTests

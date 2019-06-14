@@ -16,4 +16,16 @@
     <ProjectReference Include="..\CoveragePublisher\CoveragePublisher.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="SampleCoverage\Clover.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SampleCoverage\Cobertura.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SampleCoverage\JaCoCo.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

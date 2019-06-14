@@ -7,7 +7,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CoveragePublisher.L0.Tests
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class PipelinesLoggerTests

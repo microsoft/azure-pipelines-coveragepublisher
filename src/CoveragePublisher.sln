@@ -5,9 +5,7 @@ VisualStudioVersion = 16.0.28714.193
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoveragePublisher", "CoveragePublisher\CoveragePublisher.csproj", "{30652AFE-214B-4203-B0D1-AF2E358B49F6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoveragePublisher.L0.Tests", "CoveragePublisher.L0.Tests\CoveragePublisher.L0.Tests.csproj", "{35364C4F-C447-4863-BAFB-F6B3EC636671}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoveragePublisher.L1.Tests", "CoveragePublisher.L1.Tests\CoveragePublisher.L1.Tests.csproj", "{EA29F60A-747D-4987-8DA9-FB7BBCAE445E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoveragePublisher.Tests", "CoveragePublisher.L0.Tests\CoveragePublisher.Tests.csproj", "{35364C4F-C447-4863-BAFB-F6B3EC636671}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{35364C4F-C447-4863-BAFB-F6B3EC636671}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35364C4F-C447-4863-BAFB-F6B3EC636671}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35364C4F-C447-4863-BAFB-F6B3EC636671}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EA29F60A-747D-4987-8DA9-FB7BBCAE445E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA29F60A-747D-4987-8DA9-FB7BBCAE445E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA29F60A-747D-4987-8DA9-FB7BBCAE445E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA29F60A-747D-4987-8DA9-FB7BBCAE445E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
