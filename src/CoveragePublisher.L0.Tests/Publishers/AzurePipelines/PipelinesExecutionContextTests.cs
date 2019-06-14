@@ -24,11 +24,13 @@ namespace CoveragePublisher.L0.Tests
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildContainerId, "1234");
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildId, "1234");
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.ProjectId, guid);
+            Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.CollectionUri, "uri");
 
             Assert.AreEqual("token", context.AccessToken);
             Assert.AreEqual((long)1234, context.ContainerId);
             Assert.AreEqual((int)1234, context.BuildId);
             Assert.AreEqual(guid, context.ProjectId.ToString());
+            Assert.AreEqual("uri", context.CollectionUri);
         }
 
         [TestMethod]
@@ -47,14 +49,17 @@ namespace CoveragePublisher.L0.Tests
         }
 
         [TestMethod]
-        public void WillThrowIfAccessTokenIsEmpty()
+        public void WillThrowIfAccessTokenAndCollectionUriAreEmpty()
         {
             var context = new PipelinesExecutionContext();
             Assert.IsNotNull(context.ConsoleLogger);
 
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken, "");
+            Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.CollectionUri, "");
 
             Assert.ThrowsException<ArgumentNullException>(() => { var a = context.AccessToken; });
+            Assert.ThrowsException<ArgumentNullException>(() => { var a = context.CollectionUri; });
         }
+        
     }
 }

@@ -11,6 +11,9 @@ using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
+    /// <summary>
+    /// We require FileContainerClientHelper because FileContainerHttpClient does not define its method as virtual
+    /// </summary>
     public class FileContainerClientHelper: IFileContainerClientHelper
     {
         private FileContainerHttpClient _client;
@@ -35,7 +38,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             _client.UploadFileReportTrace += InvokeClientUploadFileReportTrace;
         }
 
-        public Task<HttpResponseMessage> UploadFileAsync(
+        public async Task<HttpResponseMessage> UploadFileAsync(
             long containerId,
             string itemPath,
             Stream fileStream,
@@ -43,7 +46,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             CancellationToken cancellationToken,
             int chunkSize)
         {
-            return _client.UploadFileAsync(containerId, itemPath, fileStream, scopeIdentifier, cancellationToken, chunkSize: chunkSize);
+            return await _client.UploadFileAsync(containerId, itemPath, fileStream, scopeIdentifier, cancellationToken, chunkSize: chunkSize);
         }
 
         protected void InvokeClientUploadFileReportProgress(object sender, ReportProgressEventArgs e)

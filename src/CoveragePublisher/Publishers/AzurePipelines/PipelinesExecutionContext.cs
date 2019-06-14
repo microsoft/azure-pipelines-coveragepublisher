@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                     throw new ArgumentNullException(string.Format(Resources.EnvVarNullOrEmpty, Constants.EnvironmentVariables.CollectionUri));
                 }
 
-                return accessToken;
+                return collectionUri;
             }
         }
 
