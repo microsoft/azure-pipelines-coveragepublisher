@@ -41,12 +41,14 @@ namespace CoveragePublisher.L0.Tests
             logger.Verbose("message");
             logger.Warning("message");
             logger.Error("message");
+            logger.Debug("message");
 
             var log = ConsoleWriter.ToString();
             var expectedLog = "message" + Environment.NewLine +
                 "message" + Environment.NewLine +
                 "##vso[task.logissue type=warning]message" + Environment.NewLine +
-                "##vso[task.logissue type=error]message" + Environment.NewLine;
+                "##vso[task.logissue type=error]message" + Environment.NewLine +
+                "##vso[task.debug]message" + Environment.NewLine;
 
             Assert.AreEqual(expectedLog, log);
         }

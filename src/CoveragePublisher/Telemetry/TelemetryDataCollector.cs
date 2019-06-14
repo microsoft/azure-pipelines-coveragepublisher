@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
 using Microsoft.VisualStudio.Services.WebPlatform;
 

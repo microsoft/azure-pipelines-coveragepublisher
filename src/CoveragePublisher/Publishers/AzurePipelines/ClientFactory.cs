@@ -3,21 +3,26 @@
 
 using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
     public class ClientFactory : IClientFactory
     {
+        public VssConnection VssConnection { get; private set; }
+
         public ClientFactory(VssConnection vssConnection)
         {
-            _vssConnection = vssConnection;
+            VssConnection = vssConnection;
         }
 
-        /// <inheritdoc />
-        public virtual T GetClient<T>() where T : VssHttpClientBase
+        public T GetClient<T>() where T : VssHttpClientBase
         {
-            return _vssConnection.GetClient<T>();
+            return VssConnection.GetClient<T>();
         }
 
-        private readonly VssConnection _vssConnection;
+        public T GetClient<T>(VssClientHttpRequestSettings settings) where T : VssHttpClientBase
+        {
+            var connection = new VssConnection(VssConnection.Uri, VssConnection.Credentials, settings);
+            return VssConnection.GetClient<T>();
+        }
     }
 }

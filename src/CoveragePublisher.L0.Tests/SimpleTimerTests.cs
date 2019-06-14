@@ -3,10 +3,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
 using TraceLogger = Microsoft.Azure.Pipelines.CoveragePublisher.TraceLogger;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 
 namespace CoveragePublisher.L0.Tests
 {
@@ -28,7 +28,7 @@ namespace CoveragePublisher.L0.Tests
         {
             var logger = TraceLogger.Instance;
 
-            var clientFactory = new Mock<ClientFactory>(null);
+            var clientFactory = new Mock<IClientFactory>();
             var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger);
 
             clientFactory
@@ -46,7 +46,7 @@ namespace CoveragePublisher.L0.Tests
         {
             var logger = TraceLogger.Instance;
 
-            var clientFactory = new Mock<ClientFactory>(null);
+            var clientFactory = new Mock<IClientFactory>();
             var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger);
 
             clientFactory
@@ -65,7 +65,7 @@ namespace CoveragePublisher.L0.Tests
         {
             var logger = TraceLogger.Instance;
 
-            var clientFactory = new Mock<ClientFactory>(null);
+            var clientFactory = new Mock<IClientFactory>();
             var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object, logger);
 
             clientFactory

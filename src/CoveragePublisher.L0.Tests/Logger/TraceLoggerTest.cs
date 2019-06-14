@@ -19,7 +19,7 @@ namespace CoveragePublisher.L0.Tests
         }
 
         [TestMethod]
-        public void TestDebug()
+        public void TestVerbose()
         {
             var mockListener = new MockTraceListener();
             var logger = TraceLogger.Instance;
@@ -49,6 +49,17 @@ namespace CoveragePublisher.L0.Tests
             logger.Error("something");
             Assert.AreEqual("something", mockListener.Message);
             Assert.AreEqual("CodeCoveragePublisherTrace Error: 0 : ", mockListener.WriteMessage);
+        }
+
+        [TestMethod]
+        public void TestDebug()
+        {
+            var mockListener = new MockTraceListener();
+            var logger = TraceLogger.Instance;
+            logger.AddListener(mockListener);
+            logger.Debug("something");
+            Assert.AreEqual("something", mockListener.Message);
+            Assert.AreEqual("CodeCoveragePublisherTrace Verbose: 0 : ", mockListener.WriteMessage);
         }
     }
 

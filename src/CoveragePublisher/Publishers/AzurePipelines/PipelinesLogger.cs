@@ -28,5 +28,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             Console.WriteLine("##vso[task.logissue type=error]" + message);
         }
 
+        public void Debug(string message)
+        {
+            Console.WriteLine("##vso[task.debug]" + message);
+        }
+
     }
 }
