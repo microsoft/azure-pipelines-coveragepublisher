@@ -19,12 +19,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             _clientFactory = clientFactory;
         }
 
-        public async Task PublishHTMLReportAsync(PipelinesExecutionContext executionContext, string reportDirectory, CancellationToken cancellationToken)
+        public async Task PublishHTMLReportAsync(string reportDirectory, CancellationToken cancellationToken)
         {
          
         }
 
-        private async Task PublishCodeCoverageFilesAsync(PipelinesExecutionContext executionContext, List<Tuple<string, string>> files, bool browsable, CancellationToken cancellationToken)
+        private async Task PublishCodeCoverageFilesAsync(List<Tuple<string, string>> files, bool browsable, CancellationToken cancellationToken)
         {
 
         }

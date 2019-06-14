@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         {
             var publisher = new HTMLReportPublisher(_executionContext, _clientFactory);
 
-            publisher.PublishHTMLReportAsync(_executionContext, reportDirectory, new System.Threading.CancellationToken()).Wait();
+            publisher.PublishHTMLReportAsync(reportDirectory, new System.Threading.CancellationToken()).Wait();
         }
     }
 }
