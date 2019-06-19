@@ -48,4 +48,3 @@ steps:
     coverageFailOption: 'fixed'
     coverageType: 'lines'
     coverageThreshold: '88'
-    
