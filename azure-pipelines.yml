@@ -41,4 +41,11 @@ steps:
     testRunTitle: 'L0/L1'
     feedsToUse: 'select'
     versioningScheme: 'off'
+
+ - task: BuildQualityChecks@5
+  inputs:
+    checkCoverage: true
+    coverageFailOption: 'fixed'
+    coverageType: 'lines'
+    coverageThreshold: '88'
     
