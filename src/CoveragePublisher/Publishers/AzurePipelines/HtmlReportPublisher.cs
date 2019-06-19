@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Services.Commerce;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
-    internal class HTMLReportPublisher
+    internal class HtmlReportPublisher: IHtmlReportPublisher
     {
         private IPipelinesExecutionContext _executionContext;
         private IClientFactory _clientFactory;
@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private FileContainerService _fileContainerService;
         private BuildService _buildService;
 
-        public HTMLReportPublisher(
+        public HtmlReportPublisher(
             IPipelinesExecutionContext executionContext,
             IClientFactory clientFactory,
             ServiceFactory serviceFactory)
@@ -28,15 +28,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             _serviceFactory = serviceFactory;
         }
 
-        public HTMLReportPublisher(IPipelinesExecutionContext executionContext, IClientFactory clientFactory):
+        public HtmlReportPublisher(IPipelinesExecutionContext executionContext, IClientFactory clientFactory):
             this(executionContext, clientFactory, new ServiceFactory()) { }
 
-        /// <summary>
-        /// Publish code coverage files as build artifacts
-        /// </summary>
-        /// <param name="reportDirectory">Path to report directory.</param>
-        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
-        /// <returns></returns>
         public async Task PublishHTMLReportAsync(string reportDirectory, CancellationToken cancellationToken)
         {
             var buildId = _executionContext.BuildId.ToString();

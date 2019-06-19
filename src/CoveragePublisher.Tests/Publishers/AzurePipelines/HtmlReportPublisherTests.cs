@@ -76,7 +76,7 @@ namespace CoveragePublisher.Tests
         public void PublishHTMLReportTest()
         {
             var token = new CancellationToken();
-            var publisher = new HTMLReportPublisher(_context, _mockClientFactory.Object, _serviceFactory);
+            var publisher = new HtmlReportPublisher(_context, _mockClientFactory.Object, _serviceFactory);
             var containerPath = Constants.ReportDirectory + "_" + _context.BuildId;
 
             publisher.PublishHTMLReportAsync(_uploadDirectory, token).Wait();
@@ -105,7 +105,7 @@ namespace CoveragePublisher.Tests
         public void WillLogErrorIFDirectoryDoesntExist()
         {
             var token = new CancellationToken();
-            var publisher = new HTMLReportPublisher(_context, _mockClientFactory.Object, _serviceFactory);
+            var publisher = new HtmlReportPublisher(_context, _mockClientFactory.Object, _serviceFactory);
             var containerPath = Constants.ReportDirectory + "_" + _context.BuildId;
 
             var directory = "D:\\" + Guid.NewGuid();

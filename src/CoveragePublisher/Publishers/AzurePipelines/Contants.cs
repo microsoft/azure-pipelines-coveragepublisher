@@ -26,5 +26,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             public const string ArtifactType = "artifacttype";
             public const string Browsable = "Browsable";
         }
+
+        internal static class FeatureFlags
+        {
+            public const string EnablePublishToTcmServiceDirectlyFromTaskFF = "TestManagement.Server.EnablePublishToTcmServiceDirectlyFromTask";
+        }
     }
 }

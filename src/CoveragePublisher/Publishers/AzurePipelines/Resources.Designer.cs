@@ -61,6 +61,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}- {1} of {2} covered..
+        /// </summary>
+        internal static string CoveredStats {
+            get {
+                return ResourceManager.GetString("CoveredStats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &quot;Directory not found: &apos;{0}&apos;..
         /// </summary>
         internal static string DirectoryNotFound {
@@ -84,6 +93,33 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         internal static string ErrorOccurredWhilePublishingCCFiles {
             get {
                 return ResourceManager.GetString("ErrorOccurredWhilePublishingCCFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to get FF {0} Value. By default, publishing data to TCM..
+        /// </summary>
+        internal static string FailedToGetFeatureFlag {
+            get {
+                return ResourceManager.GetString("FailedToGetFeatureFlag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to upload coverage summary. Exception: {0}..
+        /// </summary>
+        internal static string FailedtoUploadCoverageSummary {
+            get {
+                return ResourceManager.GetString("FailedtoUploadCoverageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to upload file coverage data for {0}. Exception: {1}..
+        /// </summary>
+        internal static string FailedToUploadFileCoverage {
+            get {
+                return ResourceManager.GetString("FailedToUploadFileCoverage", resourceCulture);
             }
         }
         
@@ -228,6 +264,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         internal static string PublishedCodeCoverageArtifact {
             get {
                 return ResourceManager.GetString("PublishedCodeCoverageArtifact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publishing coverage summary data to TFS server..
+        /// </summary>
+        internal static string PublishingCodeCoverage {
+            get {
+                return ResourceManager.GetString("PublishingCodeCoverage", resourceCulture);
             }
         }
         
