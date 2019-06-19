@@ -42,7 +42,7 @@ steps:
     feedsToUse: 'select'
     versioningScheme: 'off'
 
- - task: BuildQualityChecks@5
+- task: BuildQualityChecks@5
   inputs:
     checkCoverage: true
     coverageFailOption: 'fixed'
