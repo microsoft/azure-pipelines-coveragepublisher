@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
-namespace CoveragePublisher.L1.Tests
+namespace CoveragePublisher.Tests
 {
     class TestLogger : ILogger
     {

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using TraceLogger = Microsoft.Azure.Pipelines.CoveragePublisher.TraceLogger;
 
-namespace CoveragePublisher.L0.Tests
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class TraceLoggerTest

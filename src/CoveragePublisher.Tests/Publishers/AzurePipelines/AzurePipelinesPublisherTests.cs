@@ -6,7 +6,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CoveragePublisher.L0.Tests
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class AzurePipelinesPublisherTests

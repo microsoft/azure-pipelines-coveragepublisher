@@ -8,7 +8,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace CoveragePublisher.L1.Tests
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class ParserTests

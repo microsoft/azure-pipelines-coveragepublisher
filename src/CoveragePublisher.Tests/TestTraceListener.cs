@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace CoveragePublisher.L1.Tests
+namespace CoveragePublisher.Tests
 {
     class TestTraceListener : TextWriterTraceListener
     {
-        public string Log { get; private set; } = "";
+        public string Log { get; set; } = "";
 
         public override void Write(string message)
         {

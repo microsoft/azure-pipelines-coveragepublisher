@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CoveragePublishe.L0.Tests
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class ArgumentsProcessorTests

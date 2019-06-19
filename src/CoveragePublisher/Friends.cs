@@ -5,6 +5,5 @@ using System.Runtime.CompilerServices;
 
 #region Test Assemblies
 
-[assembly: InternalsVisibleTo("CoveragePublisher.L0.Tests")]
-[assembly: InternalsVisibleTo("CoveragePublisher.L1.Tests")]
+[assembly: InternalsVisibleTo("CoveragePublisher.Tests")]
 #endregion

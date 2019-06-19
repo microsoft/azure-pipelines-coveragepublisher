@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
 using TraceLogger = Microsoft.Azure.Pipelines.CoveragePublisher.TraceLogger;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 
-namespace CoveragePublisher.L0.Tests
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class SimpleTimerTests
