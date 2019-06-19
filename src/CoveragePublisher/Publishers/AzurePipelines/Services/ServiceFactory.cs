@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.TeamFoundation.Dashboards.WebApi;
-
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+﻿namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
     public class ServiceFactory
     {
