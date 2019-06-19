@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
-    internal class BuildService
+    public class BuildService
     {
         private readonly BuildHttpClient _buildHttpClient;
         private Guid _projectId;
@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             _buildHttpClient = clientFactory.GetClient<BuildHttpClient>();
         }
 
-        public async Task<BuildArtifact> AssociateArtifact(
+        public virtual async Task<BuildArtifact> AssociateArtifact(
             int buildId,
             string name,
             string type,

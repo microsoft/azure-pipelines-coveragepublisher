@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
-    internal class PipelinesExecutionContext: IExecutionContext
+    internal class PipelinesExecutionContext: IPipelinesExecutionContext
     {
         private int buildId = -1;
         private long containerId = -1;

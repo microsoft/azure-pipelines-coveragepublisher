@@ -12,7 +12,7 @@ namespace CoveragePublisher.Tests
     {
         private static StringWriter ConsoleWriter = new StringWriter();
         private static string UsageText = @"
-            --reportDirectory    (Default: ) Path to report directory.
+            --reportDirectory    (Default: ) Path where html report will be generated.
 
             --sourceDirectory    (Default: ) List of source directories separated by ';'.
             
