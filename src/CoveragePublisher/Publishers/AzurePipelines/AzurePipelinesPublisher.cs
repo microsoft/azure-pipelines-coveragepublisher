@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
     internal class AzurePipelinesPublisher : ICoveragePublisher
     {
-        private PipelinesExecutionContext _executionContext = new PipelinesExecutionContext();
+        private IPipelinesExecutionContext _executionContext = new PipelinesExecutionContext();
         private ClientFactory _clientFactory;
 
         public AzurePipelinesPublisher()

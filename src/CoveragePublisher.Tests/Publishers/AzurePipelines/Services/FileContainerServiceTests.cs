@@ -18,15 +18,19 @@ namespace CoveragePublisher.Tests
     [TestClass]
     public class FileContainerServiceTests
     {
-        private Guid _projectId = Guid.Empty;
-        private long _container = 1234;
         private string _containerPath = "path";
         private Mock<IClientFactory> _mockFactory;
         private VssConnection _connection = new VssConnection(new Uri("http://localhost"), new VssCredentials());
         private TestLogger _logger = new TestLogger();
         private Mock<IFileContainerClientHelper> _mockClientHelper;
+        private IPipelinesExecutionContext _context;
 
         private static string _uploadDirectory;
+
+        public FileContainerServiceTests()
+        {
+            _context = new TestPipelinesExecutionContext(_logger);
+        }
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -67,7 +71,7 @@ namespace CoveragePublisher.Tests
         [TestMethod]
         public void WillInitializeClientWithSpecificTimeout()
         {
-            var service = new FileContainerService(_mockFactory.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockFactory.Object, _context);
 
             _mockFactory.Verify(x => x.GetClient<FileContainerHttpClient>(It.Is<VssClientHttpRequestSettings>(y => TimeSpan.Compare(y.SendTimeout, TimeSpan.FromSeconds(600)) >= 0)));
         }
@@ -85,15 +89,15 @@ namespace CoveragePublisher.Tests
             ))
             .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.Created)));
 
-            var service = new FileContainerService(_mockClientHelper.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
 
-            service.CopyToContainerAsync(_logger, _uploadDirectory, new CancellationToken()).Wait();
+            service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), new CancellationToken()).Wait();
 
             _mockClientHelper.Verify(y => y.UploadFileAsync(
-                It.Is<long>(x => x == _container),
+                It.Is<long>(x => x == _context.ContainerId),
                 It.Is<string>(x => x == "path/file0" || x == "path/file1" || x == "path/summary/file2" || x == "path/summary/file3"),
                 It.IsAny<FileStream>(),
-                It.Is<Guid>(x => x.Equals(Guid.Empty)),
+                It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
                 It.Is<int>(x => x == 4 * 1024 * 1024)), Times.Exactly(4));
         }
@@ -111,16 +115,16 @@ namespace CoveragePublisher.Tests
             ))
             .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.Conflict)));
 
-            var service = new FileContainerService(_mockClientHelper.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
 
-            var ex = Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(_logger, _uploadDirectory, new CancellationToken(), false).Wait());
+            var ex = Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), new CancellationToken(), false).Wait());
             Assert.IsTrue(string.Equals(ex.InnerExceptions[0].Message, Resources.FileUploadFailedAfterRetry));
 
             _mockClientHelper.Verify(y => y.UploadFileAsync(
-                It.Is<long>(x => x == _container),
+                It.Is<long>(x => x == _context.ContainerId),
                 It.Is<string>(x => x == "path/file0" || x == "path/file1" || x == "path/summary/file2" || x == "path/summary/file3"),
                 It.IsAny<FileStream>(),
-                It.Is<Guid>(x => x.Equals(Guid.Empty)),
+                It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
                 It.Is<int>(x => x == 4 * 1024 * 1024)), Times.Exactly(8));
         }
@@ -149,15 +153,15 @@ namespace CoveragePublisher.Tests
                 }
             });
 
-            var service = new FileContainerService(_mockClientHelper.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
 
-            service.CopyToContainerAsync(_logger, _uploadDirectory, new CancellationToken(), false).Wait();
+            service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), new CancellationToken(), false).Wait();
 
             _mockClientHelper.Verify(y => y.UploadFileAsync(
-                It.Is<long>(x => x == _container),
+                It.Is<long>(x => x == _context.ContainerId),
                 It.Is<string>(x => x == "path/file0" || x == "path/file1" || x == "path/summary/file2" || x == "path/summary/file3"),
                 It.IsAny<FileStream>(),
-                It.Is<Guid>(x => x.Equals(Guid.Empty)),
+                It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
                 It.Is<int>(x => x == 4 * 1024 * 1024)), Times.Exactly(8));
         }
@@ -176,13 +180,13 @@ namespace CoveragePublisher.Tests
                 It.IsAny<int>()
             )).Throws(new OperationCanceledException());
 
-            var service = new FileContainerService(_mockClientHelper.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
 
 
             var cancellationToken = new CancellationTokenSource();
             cancellationToken.Cancel();
 
-            var ex = Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(_logger, _uploadDirectory, cancellationToken.Token).Wait());
+            var ex = Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait());
         }
 
         [TestMethod]
@@ -203,9 +207,9 @@ namespace CoveragePublisher.Tests
                 throw new OperationCanceledException();
             });
 
-            var service = new FileContainerService(_mockClientHelper.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
 
-            Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(_logger, _uploadDirectory, cancellationToken.Token).Wait());
+            Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait());
 
             Assert.IsTrue(_logger.Log.Contains("File upload has been cancelled"));
         }
@@ -228,9 +232,9 @@ namespace CoveragePublisher.Tests
                 throw new Exception();
             });
 
-            var service = new FileContainerService(_mockClientHelper.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
 
-            Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(_logger, _uploadDirectory, cancellationToken.Token).Wait());
+            Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait());
 
             Assert.IsTrue(_logger.Log.Contains("Fail to upload"));
         }
@@ -257,9 +261,9 @@ namespace CoveragePublisher.Tests
                 return new HttpResponseMessage(HttpStatusCode.Created);
             });
 
-            var service = new FileContainerService(_mockClientHelper.Object, _projectId, _container, _containerPath);
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
 
-            service.CopyToContainerAsync(_logger, _uploadDirectory, cancellationToken.Token).Wait();
+            service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait();
 
             Assert.IsTrue(_logger.Log.Contains("Uploading 4 files."));
             Assert.IsTrue(_logger.Log.Contains(string.Format(@"File: '{0}\file1' took", _uploadDirectory)));

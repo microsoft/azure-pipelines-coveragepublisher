@@ -7,31 +7,31 @@ namespace CoveragePublisher.Tests
 {
     class TestLogger : ILogger
     {
-        public string Log { get; set; }
+        public string Log { get; set; } = "";
 
         public void Debug(string message)
         {
-            Log += message + Environment.NewLine;
+            Log += "debug: " + message + Environment.NewLine;
         }
 
         public void Error(string message)
         {
-            Log += message + Environment.NewLine;
+            Log += "error: " + message + Environment.NewLine;
         }
 
         public void Info(string message)
         {
-            Log += message + Environment.NewLine;
+            Log += "info: " + message + Environment.NewLine;
         }
 
         public void Verbose(string message)
         {
-            Log += message + Environment.NewLine;
+            Log += "verbose: " + message + Environment.NewLine;
         }
 
         public void Warning(string message)
         {
-            Log += message + Environment.NewLine;
+            Log += "warning: " + message + Environment.NewLine;
         }
     }
 }
