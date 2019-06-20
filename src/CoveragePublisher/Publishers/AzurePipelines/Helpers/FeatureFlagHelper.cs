@@ -12,11 +12,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             FeatureAvailabilityHttpClient featureAvailabilityHttpClient = clientFactory.GetClient<FeatureAvailabilityHttpClient>();
         }
 
-        public bool GetFeatureFlagState(string FFName, ILogger logger)
+        public bool GetFeatureFlagState(string featureFlagName, ILogger logger)
         {
             try
             {
-                var featureFlag = _featureAvailabilityHttpClient.GetFeatureFlagByNameAsync(FFName).Result;
+                var featureFlag = _featureAvailabilityHttpClient.GetFeatureFlagByNameAsync(featureFlagName).Result;
                 if (featureFlag != null && featureFlag.EffectiveState.Equals("Off", StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
@@ -24,8 +24,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             }
             catch
             {
-                logger.Debug(string.Format(Resources.FailedToGetFeatureFlag, FFName));
-                return true;
+                logger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
+                return false;
             }
             return true;
         }
