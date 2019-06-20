@@ -2,9 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Microsoft.TeamFoundation.TestClient.PublishTestResults;
+using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.TestResults.WebApi;
 using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
@@ -12,28 +20,104 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
     internal class AzurePipelinesPublisher : ICoveragePublisher
     {
         private IPipelinesExecutionContext _executionContext = new PipelinesExecutionContext();
-        private ClientFactory _clientFactory;
+        private IClientFactory _clientFactory;
+        private IFeatureFlagHelper _featureFlagHelper;
+        private IHtmlReportPublisher _htmlReportPublisher;
+        private ILogStoreHelper _logStoreHelper;
+
+        public AzurePipelinesPublisher(IPipelinesExecutionContext executionContext, IClientFactory clientFactory, IFeatureFlagHelper featureFlagHelper, IHtmlReportPublisher htmlReportPublisher, ILogStoreHelper logStoreHelper)
+        {
+            _executionContext = executionContext;
+            _clientFactory = clientFactory;
+            _featureFlagHelper = featureFlagHelper;
+            _htmlReportPublisher = htmlReportPublisher;
+            _logStoreHelper = logStoreHelper;
+        }
 
         public AzurePipelinesPublisher()
         {
             _executionContext = new PipelinesExecutionContext();
             _clientFactory = new ClientFactory(new VssConnection(new Uri(_executionContext.CollectionUri), new VssBasicCredential("", _executionContext.AccessToken)));
+            _featureFlagHelper = new FeatureFlagHelper(_clientFactory);
+            _htmlReportPublisher = new HtmlReportPublisher(_executionContext, _clientFactory);
+            _logStoreHelper = new LogStoreHelper(_clientFactory);
         }
 
-        public void PublishCoverageSummary(CoverageSummary coverageSummary)
+        public async Task PublishCoverageSummary(CoverageSummary coverageSummary, CancellationToken cancellationToken)
         {
+            var coverageData = coverageSummary.CodeCoverageData;
+            var coverageStats = coverageData?.CoverageStats;
 
+            if (coverageData != null && coverageStats != null && coverageStats.Count() > 0)
+            {
+                // log coverage stats
+                _executionContext.ConsoleLogger.Info(Resources.PublishingCodeCoverage);
+                foreach (var coverage in coverageStats)
+                {
+                    _executionContext.ConsoleLogger.Info(string.Format(Resources.CoveredStats, coverage.Label, coverage.Covered, coverage.Total));
+                }
+
+                try
+                {
+                    // Upload to tcm/tfs based on feature flag
+                    if (_featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF, _executionContext.ConsoleLogger))
+                    {
+                        TestResultsHttpClient tcmClient = _clientFactory.GetClient<TestResultsHttpClient>();
+                        await tcmClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        TestManagementHttpClient tfsClient = _clientFactory.GetClient<TestManagementHttpClient>();
+                        await tfsClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    _executionContext.ConsoleLogger.Error(string.Format(Resources.FailedtoUploadCoverageSummary, ex.ToString()));
+                }
+            }
         }
 
-        public void PublishFileCoverage(IList<FileCoverageInfo> coverageFiles)
+        public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)
         {
+            var maxParallelism = Math.Min(Math.Max(Environment.ProcessorCount / 2, 1), coverageInfos.Count);
+            var queue = new ConcurrentQueue<FileCoverageInfo>(coverageInfos);
+            var tasks = new List<Task>();
+
+            for(var i = 0; i < maxParallelism; i++)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    while (queue.TryDequeue(out FileCoverageInfo file) && !cancellationToken.IsCancellationRequested)
+                    {
+                        var jsonFile = Path.GetTempFileName();
+
+                        try
+                        {
+                            File.WriteAllText(jsonFile, JsonUtility.ToString(file));
+
+                            Dictionary<string, string> metaData = new Dictionary<string, string>();
+                            metaData.Add("ModuleName", Path.GetFileName(file.FilePath));
+                            await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, TestLogType.Intermediate, jsonFile, metaData, null, true, cancellationToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            _executionContext.ConsoleLogger.Error(string.Format(Resources.FailedToUploadFileCoverage, file.FilePath, ex.ToString()));
+                        }
+                        finally
+                        {
+                            File.Delete(jsonFile);
+                        }
+                    }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
         }
 
-        public void PublishHTMLReport(string reportDirectory)
+        public async Task PublishHTMLReport(string reportDirectory, CancellationToken token)
         {
-            var publisher = new HTMLReportPublisher(_executionContext, _clientFactory);
-
-            publisher.PublishHTMLReportAsync(reportDirectory, new System.Threading.CancellationToken()).Wait();
+            await _htmlReportPublisher.PublishHTMLReportAsync(reportDirectory, token);
         }
     }
 }

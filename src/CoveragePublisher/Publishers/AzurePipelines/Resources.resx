@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CoveredStats" xml:space="preserve">
+    <value>{0}- {1} of {2} covered.</value>
+  </data>
   <data name="DirectoryNotFound" xml:space="preserve">
     <value>"Directory not found: '{0}'.</value>
   </data>
@@ -125,6 +128,15 @@
   </data>
   <data name="ErrorOccurredWhilePublishingCCFiles" xml:space="preserve">
     <value>Error occurred while publishing code coverage files. Error: {0}.</value>
+  </data>
+  <data name="FailedToGetFeatureFlag" xml:space="preserve">
+    <value>Failed to get FF {0} Value. By default, publishing data to TCM.</value>
+  </data>
+  <data name="FailedtoUploadCoverageSummary" xml:space="preserve">
+    <value>Failed to upload coverage summary. Exception: {0}.</value>
+  </data>
+  <data name="FailedToUploadFileCoverage" xml:space="preserve">
+    <value>Failed to upload file coverage data for {0}. Exception: {1}.</value>
   </data>
   <data name="FileContainerUploadFailed" xml:space="preserve">
     <value>Unable to copy file to server StatusCode={0}: {1}. Source file path: {2}. Target server path: {3}.</value>
@@ -173,6 +185,9 @@
   </data>
   <data name="PublishedCodeCoverageArtifact" xml:space="preserve">
     <value>Published '{0}' as artifact '{1}'.</value>
+  </data>
+  <data name="PublishingCodeCoverage" xml:space="preserve">
+    <value>Publishing coverage summary data to TFS server.</value>
   </data>
   <data name="PublishingCodeCoverageFiles" xml:space="preserve">
     <value>Publishing code coverage files.</value>

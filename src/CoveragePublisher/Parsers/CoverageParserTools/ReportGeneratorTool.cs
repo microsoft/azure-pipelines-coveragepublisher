@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using Palmmedia.ReportGenerator.Core.Parser;

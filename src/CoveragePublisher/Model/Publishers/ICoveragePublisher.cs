@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
 {
@@ -13,19 +15,22 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <summary>
         /// Publish individual file coverage data.
         /// </summary>
-        /// <param name="coverageFiles">List of FileCoverageInfo objects.</param>
-        void PublishFileCoverage(IList<FileCoverageInfo> coverageFiles);
+        /// <param name="coverageInfos">List of FileCoverageInfo objects.</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken);
 
         /// <summary>
         /// Publish coverage summary.
         /// </summary>
         /// <param name="coverageSummary">CoverageSummary object.</param>
-        void PublishCoverageSummary(CoverageSummary coverageSummary);
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        Task PublishCoverageSummary(CoverageSummary coverageSummary, CancellationToken cancellationToken);
 
         /// <summary>
         /// Publish coverage HTML report.
         /// </summary>
         /// <param name="reportDirectory">Path to coverage report directory.</param>
-        void PublishHTMLReport(string reportDirectory);
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        Task PublishHTMLReport(string reportDirectory, CancellationToken cancellationToken);
     }
 }
