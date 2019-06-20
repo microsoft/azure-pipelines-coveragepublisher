@@ -7,6 +7,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Resources = Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.Resources;
 
 namespace CoveragePublisher.Tests
 {

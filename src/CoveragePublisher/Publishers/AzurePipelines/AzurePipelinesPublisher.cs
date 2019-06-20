@@ -19,11 +19,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 {
     internal class AzurePipelinesPublisher : ICoveragePublisher
     {
-        private IPipelinesExecutionContext _executionContext = new PipelinesExecutionContext();
         private IClientFactory _clientFactory;
         private IFeatureFlagHelper _featureFlagHelper;
         private IHtmlReportPublisher _htmlReportPublisher;
         private ILogStoreHelper _logStoreHelper;
+
+        private static IPipelinesExecutionContext _executionContext;
+
+        public static IPipelinesExecutionContext ExecutionContext
+        {
+            get
+            {
+                if (_executionContext == null)
+                {
+                    _executionContext = new PipelinesExecutionContext();
+                }
+                return _executionContext;
+            }
+        }
 
         public AzurePipelinesPublisher(IPipelinesExecutionContext executionContext, IClientFactory clientFactory, IFeatureFlagHelper featureFlagHelper, IHtmlReportPublisher htmlReportPublisher, ILogStoreHelper logStoreHelper)
         {
@@ -36,11 +49,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public AzurePipelinesPublisher()
         {
-            _executionContext = new PipelinesExecutionContext();
+            _executionContext = ExecutionContext;
             _clientFactory = new ClientFactory(new VssConnection(new Uri(_executionContext.CollectionUri), new VssBasicCredential("", _executionContext.AccessToken)));
             _featureFlagHelper = new FeatureFlagHelper(_clientFactory);
             _htmlReportPublisher = new HtmlReportPublisher(_executionContext, _clientFactory);
             _logStoreHelper = new LogStoreHelper(_clientFactory);
+        }
+
+        public bool IsFileCoverageJsonSupported()
+        {
+            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, _executionContext.ConsoleLogger);
         }
 
         public async Task PublishCoverageSummary(CoverageSummary coverageSummary, CancellationToken cancellationToken)
