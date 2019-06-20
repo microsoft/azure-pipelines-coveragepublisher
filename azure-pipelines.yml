@@ -37,7 +37,7 @@ steps:
   inputs:
     command: 'test'
     projects: '**/*.Tests.csproj'
-    arguments: '--collect "Code coverage" --settings "1.runsettings"'
+    arguments: '--Settings "1.runsettings"'
     testRunTitle: 'L0/L1'
     feedsToUse: 'select'
     versioningScheme: 'off'
