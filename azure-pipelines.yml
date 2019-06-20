@@ -37,7 +37,7 @@ steps:
   inputs:
     command: 'test'
     projects: '**/*.Tests.csproj'
-    arguments: '-s:"1.runsettings"'
+    arguments: '-s:"d:\a\1\s\src\1.runsettings"'
     testRunTitle: 'L0/L1'
     feedsToUse: 'select'
     versioningScheme: 'off'
