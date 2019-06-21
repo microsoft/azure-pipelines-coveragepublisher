@@ -16,11 +16,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             _clientFactory = clientFactory;
         }
 
-        public bool GetFeatureFlagState(string FFName, ILogger logger, bool isTcmFeature)
+        public bool GetFeatureFlagState(string featureFlagName, ILogger logger, bool isTcmFeature)
         {
             try
             {
-                var featureFlag = GetClient(isTcmFeature).GetFeatureFlagByNameAsync(FFName).Result;
+                var featureFlag = GetClient(isTcmFeature).GetFeatureFlagByNameAsync(featureFlagName).Result;
                 if (featureFlag != null && featureFlag.EffectiveState.Equals("Off", StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
@@ -28,8 +28,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             }
             catch
             {
-                logger.Debug(string.Format(Resources.FailedToGetFeatureFlag, FFName));
-                return true;
+                logger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
+                return false;
             }
             return true;
         }

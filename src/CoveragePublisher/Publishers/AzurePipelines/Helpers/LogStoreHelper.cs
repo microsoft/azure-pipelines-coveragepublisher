@@ -10,6 +10,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
     internal class LogStoreHelper: ILogStoreHelper
     {
         private TestLogStore _logStore;
+
         public LogStoreHelper(IClientFactory clientFactory)
         {
             _logStore = new TestLogStore(clientFactory.VssConnection, new CoveragePublisherTraceListener());

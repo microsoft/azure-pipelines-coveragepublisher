@@ -122,9 +122,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         {
                             _executionContext.ConsoleLogger.Error(string.Format(Resources.FailedToUploadFileCoverage, file.FilePath, ex.ToString()));
                         }
-                        finally
+
+                        try
                         {
-                            File.Delete(jsonFile);
+                            // Delete the generated json file
+                            if (File.Exists(jsonFile))
+                            {
+                                File.Delete(jsonFile);
+                            }
+                        }
+                        catch(Exception ex) {
+                            _executionContext.ConsoleLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile));
                         }
                     }
                 }));
