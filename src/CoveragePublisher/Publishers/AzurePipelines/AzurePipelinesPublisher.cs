@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public bool IsFileCoverageJsonSupported()
         {
-            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, _executionContext.ConsoleLogger);
+            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, _executionContext.ConsoleLogger, true);
         }
 
         public async Task PublishCoverageSummary(CoverageSummary coverageSummary, CancellationToken cancellationToken)
@@ -78,7 +78,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                 try
                 {
                     // Upload to tcm/tfs based on feature flag
-                    if (_featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF, _executionContext.ConsoleLogger))
+                    if (_featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF, _executionContext.ConsoleLogger, false))
                     {
                         TestResultsHttpClient tcmClient = _clientFactory.GetClient<TestResultsHttpClient>();
                         await tcmClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);

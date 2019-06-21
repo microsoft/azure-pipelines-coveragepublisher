@@ -18,6 +18,8 @@ namespace CoveragePublisher.Tests
             
             --diag               (Default: false) Enable diagnostics logging.
 
+            --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
+
             --noTelemetry        (Default: false) Disable telemetry data collection.
 
             --help               Display this help screen.

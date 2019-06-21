@@ -15,8 +15,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private IPipelinesExecutionContext _executionContext;
         private IClientFactory _clientFactory;
         private ServiceFactory _serviceFactory;
-        private FileContainerService _fileContainerService;
-        private BuildService _buildService;
 
         public HtmlReportPublisher(
             IPipelinesExecutionContext executionContext,

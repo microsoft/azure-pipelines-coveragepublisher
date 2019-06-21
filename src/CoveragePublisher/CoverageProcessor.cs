@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
@@ -13,7 +14,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     {
         private ICoveragePublisher _publisher;
         private IExecutionContext _executionContext;
-        private Parser _parser;
 
         public CoverageProcessor(ICoveragePublisher publisher, IExecutionContext context)
         {
@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             _executionContext = context;
         }
 
-        public void ParseAndPublishCoverage(PublisherConfiguration config, CancellationToken token, Parser parser)
+        public async Task ParseAndPublishCoverage(PublisherConfiguration config, CancellationToken token, Parser parser)
         {
             if (_publisher != null)
             {
@@ -30,18 +30,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 if (supportsFileCoverageJson)
                 {
                     var fileCoverage = parser.GetFileCoverageInfos();
-                    _publisher.PublishFileCoverage(fileCoverage, token).Wait();
+                    await _publisher.PublishFileCoverage(fileCoverage, token);
                 }
                 else
                 {
                     var summary = parser.GetCoverageSummary();
-                    _publisher.PublishCoverageSummary(summary, token).Wait();
+                    await _publisher.PublishCoverageSummary(summary, token);
                 }
 
 
                 if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
                 {
-                    _publisher.PublishHTMLReport(config.ReportDirectory, token).Wait();
+                    await _publisher.PublishHTMLReport(config.ReportDirectory, token);
                 }
             }
         }

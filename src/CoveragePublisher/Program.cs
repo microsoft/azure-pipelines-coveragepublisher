@@ -14,6 +14,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     public class Program
     {
         private static CancellationTokenSource _cancellationTokenSource;
+        private static bool publishSuccess = false;
 
         public static void Main(string[] args)
         {
@@ -59,12 +60,25 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 context.ConsoleLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex));
             }
 
-            new CoverageProcessor(publisher, context).ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context));
+            // By default wait for 2 minutes for coverage to publish
+            var publishTimedout = new CoverageProcessor(publisher, context).ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context)).Wait(120 * 1000, cancellationToken);
+
+            if(publishTimedout)
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            else
+            {
+                publishSuccess = true;
+            }
         }
 
         private static void ProcessExit(object sender, EventArgs e)
         {
-            _cancellationTokenSource.Cancel();
+            if (!publishSuccess)
+            {
+                _cancellationTokenSource.Cancel();
+            }
         }
     }
 }
