@@ -44,7 +44,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     _publisher.PublishHTMLReport(config.ReportDirectory, token).Wait();
                 }
             }
-
         }
     }
 }

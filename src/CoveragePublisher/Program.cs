@@ -59,7 +59,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 context.ConsoleLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex));
             }
 
-            new CoverageProcessor(publisher, context).ParseAndPublishCoverage(config, cancellationToken);
+            new CoverageProcessor(publisher, context).ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context));
         }
 
         private static void ProcessExit(object sender, EventArgs e)

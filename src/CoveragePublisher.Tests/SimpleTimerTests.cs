@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
-using TraceLogger = Microsoft.Azure.Pipelines.CoveragePublisher.TraceLogger;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 
 namespace CoveragePublisher.Tests
