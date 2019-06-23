@@ -47,4 +47,4 @@ steps:
     checkCoverage: true
     coverageFailOption: 'fixed'
     coverageType: 'lines'
-    coverageThreshold: '88'
+    coverageThreshold: '85'
