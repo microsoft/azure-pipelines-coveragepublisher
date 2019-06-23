@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
@@ -9,13 +10,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
     {
         private PublisherConfiguration _configuration;
         private Lazy<ICoverageParserTool> _coverageParserTool;
-        private IExecutionContext _context;
 
-        public Parser(PublisherConfiguration config, IExecutionContext context)
+        public Parser(PublisherConfiguration config)
         {
             _configuration = config;
             _coverageParserTool = new Lazy<ICoverageParserTool>(() => this.GetCoverageParserTool(_configuration));
-            _context = context;
         }
 
         public virtual List<FileCoverageInfo> GetFileCoverageInfos()
@@ -52,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             summaryFilesSubDir = Path.Combine(_configuration.ReportDirectory, "Summary_" + Guid.NewGuid().ToString().Substring(0, 8));
                         } while (Directory.Exists(summaryFilesSubDir));
 
-                        TraceLogger.Instance.Verbose("Parser.GenerateHTMLReport: Creating summary file directory: " + summaryFilesSubDir);
+                        TraceLogger.Debug("Parser.GenerateHTMLReport: Creating summary file directory: " + summaryFilesSubDir, TraceLevel.Info);
 
                         Directory.CreateDirectory(summaryFilesSubDir);
 
@@ -62,19 +61,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             var summaryFileName = Path.GetFileName(summaryFile);
                             var destinationSummaryFile = Path.Combine(summaryFilesSubDir, summaryFileName);
 
-                            TraceLogger.Instance.Verbose("Parser.GenerateHTMLReport: Copying summary file " + summaryFile);
+                            TraceLogger.Debug("Parser.GenerateHTMLReport: Copying summary file " + summaryFile, TraceLevel.Info);
                             File.Copy(summaryFile, destinationSummaryFile, true);
                         }
                     }
                     else
                     {
-                        TraceLogger.Instance.Verbose("Parser.GenerateHTMLReport: Directory " + _configuration.ReportDirectory + " doesn't exist, skipping copying of coverage input files.");
+                        TraceLogger.Debug("Parser.GenerateHTMLReport: Directory " + _configuration.ReportDirectory + " doesn't exist, skipping copying of coverage input files.", TraceLevel.Warning);
                     }
                 }
                 catch (Exception e)
                 {
-                    TraceLogger.Instance.Error("Parser.GenerateHTMLReport: Error " + e);
-                    _context.ConsoleLogger.Error(string.Format(Resources.HTMLReportError, e.Message));
+                    TraceLogger.Error(string.Format(Resources.HTMLReportError, e.Message));
                 }
             }
         }

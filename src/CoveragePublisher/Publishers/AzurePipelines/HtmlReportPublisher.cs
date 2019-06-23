@@ -43,17 +43,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                     throw new DirectoryNotFoundException(string.Format(Resources.DirectoryNotFound, reportDirectory));
                 }
 
-                _executionContext.ConsoleLogger.Info(Resources.ModifyingCoberturaIndexFile);
+                TraceLogger.Info(Resources.ModifyingCoberturaIndexFile);
 
                 uploadDirectories.Add(new Tuple<string, string>(reportDirectory, GetCoverageDirectoryName(buildId)));
 
-                _executionContext.ConsoleLogger.Info(Resources.PublishingCodeCoverageFiles);
+                TraceLogger.Info(Resources.PublishingCodeCoverageFiles);
 
                 await this.PublishCodeCoverageFilesAsync(uploadDirectories, File.Exists(Path.Combine(reportDirectory, Constants.DefaultIndexFile)), cancellationToken);
             }
             catch (Exception ex)
             {
-                _executionContext.ConsoleLogger.Error(string.Format(Resources.ErrorOccurredWhilePublishingCCFiles, ex));
+                TraceLogger.Error(string.Format(Resources.ErrorOccurredWhilePublishingCCFiles, ex));
             }
         }
 
@@ -77,7 +77,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                 // Associate with build artifact
                 var buildHelper = _serviceFactory.GetBuildService(_clientFactory, _executionContext);
                 await buildHelper.AssociateArtifact(_executionContext.BuildId, tuple.Item2, ArtifactResourceTypes.Container, fileContainerFullPath, artifactProperties, cancellationToken);
-                _executionContext.ConsoleLogger.Info(string.Format(Resources.PublishedCodeCoverageArtifact, tuple.Item1, tuple.Item2));
+                TraceLogger.Info(string.Format(Resources.PublishedCodeCoverageArtifact, tuple.Item1, tuple.Item2));
             });
 
             await Task.WhenAll(publishCCTasks);

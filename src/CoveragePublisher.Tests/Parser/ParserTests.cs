@@ -14,19 +14,18 @@ namespace CoveragePublisher.Tests
     [TestClass]
     public class ParserTests
     {
-        TestTraceListener trace;
-        Mock<IExecutionContext> mockContext;
-        Mock<ILogger> mockConsoleLogger;
+        private static TestLogger _logger = new TestLogger();
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            TraceLogger.Initialize(_logger);
+        }
 
         [TestInitialize]
         public void TestInitialize()
         {
-            trace = new TestTraceListener();
-            TraceLogger.Instance.AddListener(trace);
-
-            mockConsoleLogger = new Mock<ILogger>();
-            mockContext = new Mock<IExecutionContext>();
-            mockContext.SetupGet(x => x.ConsoleLogger).Returns(mockConsoleLogger.Object);
+            _logger.Log = "";
         }
 
         [TestMethod]
@@ -45,7 +44,7 @@ namespace CoveragePublisher.Tests
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestParser(config, mockContext.Object);
+            var parser = new TestParser(config);
             parser.GenerateReport(mockTool.Object);
 
             var tempDirSummary = Directory.EnumerateDirectories(tempDir, "Summary_*").ToList()[0];
@@ -59,12 +58,12 @@ namespace CoveragePublisher.Tests
             //cleanup
             Directory.Delete(tempDir, true);
 
-            Assert.IsTrue(trace.Log.Contains("CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Creating summary file directory:"));
+            Assert.IsTrue(_logger.Log.Contains("debug: Info: Parser.GenerateHTMLReport: Creating summary file directory:"));
 
-            Assert.IsTrue(trace.Log.Contains(@"
-CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Clover.xml
-CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Cobertura.xml
-CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
+            Assert.IsTrue(_logger.Log.Contains(@"
+debug: Info: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Clover.xml
+debug: Info: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Cobertura.xml
+debug: Info: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
 ".Trim()));
 
         }
@@ -85,16 +84,13 @@ CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summa
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestParser(config, mockContext.Object);
+            var parser = new TestParser(config);
             parser.GenerateReport(mockTool.Object);
 
             //cleanup
             Directory.Delete(tempDir, true);
 
-            Assert.IsTrue(trace.Log.Contains(@"
-CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Exception: error
-".Trim()));
-            mockConsoleLogger.Verify(x => x.Error(It.Is<string>((str) => string.Equals(str,string.Format(Resources.HTMLReportError, "error")))));
+            Assert.IsTrue(_logger.Log.Contains($"error: {string.Format(Resources.HTMLReportError, "error")}".Trim()));
         }
 
         [TestMethod]
@@ -111,11 +107,11 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestParser(config, mockContext.Object);
+            var parser = new TestParser(config);
             parser.GenerateReport(mockTool.Object);
             
-            Assert.IsTrue(trace.Log.Contains("CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Directory".Trim()));
-            Assert.IsTrue(trace.Log.Contains("doesn't exist, skipping copying of coverage input files.".Trim()));
+            Assert.IsTrue(_logger.Log.Contains("debug: Warning: Parser.GenerateHTMLReport: Directory".Trim()));
+            Assert.IsTrue(_logger.Log.Contains("doesn't exist, skipping copying of coverage input files.".Trim()));
         }
 
         [TestMethod]
@@ -124,7 +120,7 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
             var mockTool = new Mock<ICoverageParserTool>();
 
             var config = new PublisherConfiguration();
-            var parser = new Mock<TestParser>(config, mockContext.Object);
+            var parser = new Mock<TestParser>(config);
 
             parser.Setup(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
 
@@ -140,7 +136,7 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
             var mockTool = new Mock<ICoverageParserTool>();
 
             var config = new PublisherConfiguration();
-            var parser = new Mock<TestParser>(config, mockContext.Object);
+            var parser = new Mock<TestParser>(config);
 
             parser.Setup(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
 

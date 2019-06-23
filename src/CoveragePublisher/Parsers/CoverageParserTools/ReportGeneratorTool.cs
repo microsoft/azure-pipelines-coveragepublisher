@@ -10,6 +10,7 @@ using Palmmedia.ReportGenerator.Core.Parser.Filtering;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
@@ -25,7 +26,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             if (Configuration.CoverageFiles == null)
             {
-                TraceLogger.Instance.Info("ReportGeneratorTool: No input coverage files to parse.");
+                TraceLogger.Debug("ReportGeneratorTool: No input coverage files to parse.", TraceLevel.Info);
                 return;
             }
 
@@ -34,7 +35,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public List<FileCoverageInfo> GetFileCoverageInfos()
         {
-            TraceLogger.Instance.Info("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.");
+            TraceLogger.Debug("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.", TraceLevel.Info);
 
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
@@ -71,7 +72,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public CoverageSummary GetCoverageSummary()
         {
-            TraceLogger.Instance.Info("ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.");
+            TraceLogger.Debug("ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.", TraceLevel.Info);
 
             var summary = new CoverageSummary();
 
@@ -102,37 +103,28 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public void GenerateHTMLReport()
         {
-            TraceLogger.Instance.Info("ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.");
+            TraceLogger.Debug("ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.", TraceLevel.Info);
 
-            try
+            if (!Directory.Exists(Configuration.ReportDirectory))
             {
-                if (!Directory.Exists(Configuration.ReportDirectory))
-                {
-                    Directory.CreateDirectory(Configuration.ReportDirectory);
-                }
-
-                // Generate the html report with custom configuration for report generator.
-                var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
-                    { "targetdir", Configuration.ReportDirectory },
-                    { "sourcedirs", string.IsNullOrEmpty(Configuration.SourceDirectories) ? "" : Configuration.SourceDirectories },
-                    { "reporttypes", "HtmlInline_AzurePipelines" }
-                });
-
-                var generator = new Generator();
-
-                generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), _parserResult);
-
+                Directory.CreateDirectory(Configuration.ReportDirectory);
             }
-            catch (Exception e)
-            {
-                TraceLogger.Instance.Error(string.Format("ReportGeneratorTool.CreateHTMLReportFromParserResult: Error while generating HTML report, Error: {0}", e));
-            }
-            
+
+            // Generate the html report with custom configuration for report generator.
+            var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
+                { "targetdir", Configuration.ReportDirectory },
+                { "sourcedirs", string.IsNullOrEmpty(Configuration.SourceDirectories) ? "" : Configuration.SourceDirectories },
+                { "reporttypes", "HtmlInline_AzurePipelines" }
+            });
+
+            var generator = new Generator();
+
+            generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), _parserResult);
         }
 
         private ParserResult ParseCoverageFiles(List<string> coverageFiles)
         {
-            TraceLogger.Instance.Info("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
+            TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.", TraceLevel.Info);
 
             CoverageReportParser parser = new CoverageReportParser(1, new string[] { }, new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }),

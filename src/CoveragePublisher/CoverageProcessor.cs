@@ -13,12 +13,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     public class CoverageProcessor
     {
         private ICoveragePublisher _publisher;
-        private IExecutionContext _executionContext;
 
-        public CoverageProcessor(ICoveragePublisher publisher, IExecutionContext context)
+        public CoverageProcessor(ICoveragePublisher publisher)
         {
             _publisher = publisher;
-            _executionContext = context;
         }
 
         public async Task ParseAndPublishCoverage(PublisherConfiguration config, CancellationToken token, Parser parser)

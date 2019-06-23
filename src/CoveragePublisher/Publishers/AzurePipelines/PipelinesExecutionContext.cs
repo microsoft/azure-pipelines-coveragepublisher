@@ -11,11 +11,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private Guid? projectId = null;
         private string collectionUri = null;
 
-        public ILogger ConsoleLogger { get; private set; }
+        public ILogger Logger { get; private set; }
 
         public PipelinesExecutionContext()
         {
-            ConsoleLogger = new PipelinesLogger();
+            Logger = new PipelinesLogger();
         }
 
         public int BuildId

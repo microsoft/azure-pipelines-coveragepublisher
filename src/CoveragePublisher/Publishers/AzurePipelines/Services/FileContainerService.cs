@@ -23,7 +23,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> _fileUploadProgressLog = new ConcurrentDictionary<string, ConcurrentQueue<string>>();
         private readonly IFileContainerClientHelper _fileContainerHelper;
         private readonly IPipelinesExecutionContext _context;
-        private readonly ILogger _logger;
 
         private int filesProcessed = 0;
 
@@ -31,23 +30,20 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         {
             _fileContainerHelper = new FileContainerClientHelper(clientFactory);
             _context = context;
-            _logger = context.ConsoleLogger;
         }
 
         public FileContainerService(IFileContainerClientHelper fileContainerHelper, IPipelinesExecutionContext context)
         {
             _fileContainerHelper = fileContainerHelper;
             _context = context;
-            _logger = context.ConsoleLogger;
         }
 
         /// <summary>
         /// Copy files to container.
         /// </summary>
-        /// <param name="_logger"><see cref="ILogger"/> instance.</param>
-        /// <param name="uploadDirectory">Path to file or directory.</param>
-        /// <param name="cancellationToken"><see cref="CancellationToken"/>.</param>
-        /// <param name="retryDelay">Delay when retrying.</param>
+        /// <param name="directoryAndcontainerPath">Directory and container path as tuple.</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        /// <param name="retryDelay">Bool for weather to delay 1 minute before retrying.</param>
         /// <returns></returns>
         public virtual async Task CopyToContainerAsync(Tuple<string, string> directoryAndcontainerPath, CancellationToken cancellationToken, bool retryDelay = true)
         {
@@ -60,7 +56,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             files = Directory.EnumerateFiles(uploadDirectory, "*", SearchOption.AllDirectories).ToList();
             sourceParentDirectory = uploadDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-            _logger.Info(string.Format(Resources.TotalUploadFiles, files.Count()));
+            TraceLogger.Info(string.Format(Resources.TotalUploadFiles, files.Count()));
 
             using (var uploadCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
             {
@@ -76,12 +72,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                     if (failedFiles.Count == 0)
                     {
                         // all files have been upload succeed.
-                        _logger.Info(Resources.FileUploadSucceed);
+                        TraceLogger.Info(Resources.FileUploadSucceed);
                         return;
                     }
                     else
                     {
-                        _logger.Info(string.Format(Resources.FileUploadFailedRetryLater, failedFiles.Count));
+                        TraceLogger.Info(string.Format(Resources.FileUploadFailedRetryLater, failedFiles.Count));
                     }
 
                     if (retryDelay)
@@ -89,19 +85,19 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         // Delay 1 min then retry failed files.
                         for (int timer = 60; timer > 0; timer -= 5)
                         {
-                            _logger.Info(string.Format(Resources.FileUploadRetryInSecond, timer));
+                            TraceLogger.Info(string.Format(Resources.FileUploadRetryInSecond, timer));
                             await Task.Delay(TimeSpan.FromSeconds(5), uploadCancellationTokenSource.Token);
                         }
                     }
 
                     // Retry upload all failed files.
-                    _logger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
+                    TraceLogger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
                     failedFiles = await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
                         // all files have been upload succeed after retry.
-                        _logger.Info(Resources.FileUploadRetrySucceed);
+                        TraceLogger.Info(Resources.FileUploadRetrySucceed);
                         return;
                     }
                     else
@@ -120,9 +116,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         /// <summary>
         /// Creates tasks for uploading files.
         /// </summary>
-        /// <param name="_logger"><see cref="ILogger"/> instance</param>
         /// <param name="files">List of files to be uploaded.</param>
         /// <param name="sourceParentDirectory">Path to the parent directory of the files.</param>
+        /// <param name="containerPath">Container path.</param>
         /// <param name="concurrentUploads">Concurrency value.</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/>.</param>
         /// <returns>List of files failed to upload.</returns>
@@ -203,7 +199,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         }
                         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                         {
-                            _logger.Info(string.Format(Resources.FileUploadCancelled, fileToUpload));
+                            TraceLogger.Error(string.Format(Resources.FileUploadCancelled, fileToUpload));
                             if (response != null)
                             {
                                 response.Dispose();
@@ -215,8 +211,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         catch (Exception ex)
                         {
                             coughtExceptionDuringUpload = true;
-                            _logger.Info(string.Format(Resources.FileUploadFailed, fileToUpload, ex.Message));
-                            _logger.Info(ex.ToString());
+                            TraceLogger.Error(string.Format(Resources.FileUploadFailed, fileToUpload, ex));
                         }
 
                         uploadTimer.Stop();
@@ -224,18 +219,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         {
                             if (response != null)
                             {
-                                _logger.Info(string.Format(Resources.FileContainerUploadFailed, response.StatusCode, response.ReasonPhrase, fileToUpload, itemPath));
+                                TraceLogger.Info(string.Format(Resources.FileContainerUploadFailed, response.StatusCode, response.ReasonPhrase, fileToUpload, itemPath));
                             }
 
                             // output detail upload trace for the file.
                             ConcurrentQueue<string> logQueue;
                             if (_fileUploadTraceLog.TryGetValue(itemPath, out logQueue))
                             {
-                                _logger.Info(string.Format(Resources.FileUploadDetailTrace, itemPath));
+                                TraceLogger.Info(string.Format(Resources.FileUploadDetailTrace, itemPath));
                                 string message;
                                 while (logQueue.TryDequeue(out message))
                                 {
-                                    _logger.Info(message);
+                                    TraceLogger.Info(message);
                                 }
                             }
 
@@ -244,17 +239,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         }
                         else
                         {
-                            _logger.Debug(string.Format(Resources.FileUploadFinish, fileToUpload, uploadTimer.ElapsedMilliseconds));
+                            TraceLogger.Debug(string.Format(Resources.FileUploadFinish, fileToUpload, uploadTimer.ElapsedMilliseconds), TraceLevel.Info);
 
                             // debug detail upload trace for the file.
                             ConcurrentQueue<string> logQueue;
                             if (_fileUploadTraceLog.TryGetValue(itemPath, out logQueue))
                             {
-                                _logger.Debug($"Detail upload trace for file: {itemPath}");
+                                TraceLogger.Debug($"Detail upload trace for file: {itemPath}", TraceLevel.Info);
                                 string message;
                                 while (logQueue.TryDequeue(out message))
                                 {
-                                    _logger.Debug(message);
+                                    TraceLogger.Debug(message, TraceLevel.Info);
                                 }
                             }
                         }
@@ -270,7 +265,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                 }
                 catch (Exception ex)
                 {
-                    _logger.Info(string.Format(Resources.FileUploadFileOpenFailed, ex.Message, fileToUpload));
+                    TraceLogger.Error(string.Format(Resources.FileUploadFileOpenFailed, ex.Message, fileToUpload));
                     throw ex;
                 }
             }
@@ -290,14 +285,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                     while (file.Value.TryDequeue(out message))
                     {
                         hasDetailProgress = true;
-                        _logger.Info(message);
+                        TraceLogger.Info(message);
                     }
                 }
 
                 // trace total file progress every 25 seconds when there is no file level detail progress
                 if (++traceInterval % 2 == 0 && !hasDetailProgress)
                 {
-                    _logger.Info(string.Format(Resources.FileUploadProgress, totalFiles, filesProcessed, (filesProcessed * 100) / totalFiles));
+                    TraceLogger.Info(string.Format(Resources.FileUploadProgress, totalFiles, filesProcessed, (filesProcessed * 100) / totalFiles));
                 }
 
                 await Task.WhenAny(uploadFinished.Task, Task.Delay(5000, token));

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 using Microsoft.TeamFoundation.Build.WebApi;
@@ -17,16 +18,18 @@ namespace CoveragePublisher.Tests
     {
         private IPipelinesExecutionContext _context;
         private Mock<IClientFactory> _mockClientFactory;
-        private TestLogger _logger = new TestLogger();
         private TestServiceFactory _serviceFactory;
         private Mock<FileContainerService> _mockFileService;
         private Mock<BuildService> _mockBuildService;
 
+        private static TestLogger _logger = new TestLogger();
         private static string _uploadDirectory;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
+            TraceLogger.Initialize(_logger);
+
             _uploadDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(_uploadDirectory);
 

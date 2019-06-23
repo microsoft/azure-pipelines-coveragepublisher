@@ -21,7 +21,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <param name="message">Message string.</param>
         void Verbose(string message);
 
-
         /// <summary>
         /// Log warning message.
         /// </summary>

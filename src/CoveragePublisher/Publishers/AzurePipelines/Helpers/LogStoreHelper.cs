@@ -13,7 +13,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public LogStoreHelper(IClientFactory clientFactory)
         {
-            _logStore = new TestLogStore(clientFactory.VssConnection, new CoveragePublisherTraceListener());
+            // TODO
+            _logStore = new TestLogStore(clientFactory.VssConnection, null);
         }
 
         public Task<TestLogStatus> UploadTestBuildLogAsync(Guid projectId, int buildId, TestLogType logType, string logFileSourcePath, Dictionary<string, string> metaData, string destDirectoryPath, bool allowDuplicate, CancellationToken cancellationToken)
