@@ -65,7 +65,8 @@ namespace CoveragePublisher.Tests
             _mockClientFactory.Setup(x => x.GetClient<TestResultsHttpClient>()).Returns(mockClient.Object);
             _mockFFHelper.Setup(x => x.GetFeatureFlagState(
                 It.Is<string>(a => a == Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF),
-                It.IsAny<ILogger>())).Returns(true);
+                It.IsAny<ILogger>(),
+                It.Is<bool>(b => b == false))).Returns(true);
 
             publisher.PublishCoverageSummary(summary, token).Wait();
 
@@ -91,7 +92,8 @@ namespace CoveragePublisher.Tests
             _mockClientFactory.Setup(x => x.GetClient<TestManagementHttpClient>()).Returns(mockClient.Object);
             _mockFFHelper.Setup(x => x.GetFeatureFlagState(
                 It.Is<string>(a => a == Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF),
-                It.IsAny<ILogger>())).Returns(false);
+                It.IsAny<ILogger>(),
+                It.Is<bool>(b => b == false))).Returns(false);
 
             publisher.PublishCoverageSummary(summary, token).Wait();
 
@@ -115,7 +117,8 @@ namespace CoveragePublisher.Tests
             _mockClientFactory.Setup(x => x.GetClient<TestManagementHttpClient>()).Returns(mockClient.Object);
             _mockFFHelper.Setup(x => x.GetFeatureFlagState(
                 It.Is<string>(a => a == Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF),
-                It.IsAny<ILogger>())).Returns(false);
+                It.IsAny<ILogger>(),
+                It.Is<bool>(b => b == false))).Returns(false);
 
             _mockLogStoreHelper.Setup(x => x.UploadTestBuildLogAsync(
                 It.IsAny<Guid>(),

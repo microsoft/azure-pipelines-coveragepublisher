@@ -18,21 +18,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             _context = context;
         }
 
-        public List<FileCoverageInfo> GetFileCoverageInfos()
+        public virtual List<FileCoverageInfo> GetFileCoverageInfos()
         {
             var tool = _coverageParserTool.Value;
             GenerateHTMLReport(tool);
             return tool.GetFileCoverageInfos();
         }
 
-        public CoverageSummary GetCoverageSummary()
+        public virtual CoverageSummary GetCoverageSummary()
         {
             var tool = _coverageParserTool.Value;
             GenerateHTMLReport(tool);
             return tool.GetCoverageSummary();
         }
-        
-        protected void GenerateHTMLReport(ICoverageParserTool tool)
+
+        protected virtual void GenerateHTMLReport(ICoverageParserTool tool)
         {
             if (_configuration.GenerateHTMLReport)
             {

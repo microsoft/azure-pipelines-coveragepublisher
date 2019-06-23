@@ -41,6 +41,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         }
 
         /// <summary>
+        /// Gets the timeout for coverage publisher.
+        /// </summary>
+        virtual public int TimeoutInSeconds { get; set; }
+
+        /// <summary>
         /// Gets the configuration for whether telemetry is disabled.
         /// </summary>
         virtual public bool DisableTelemetry { get; set; }

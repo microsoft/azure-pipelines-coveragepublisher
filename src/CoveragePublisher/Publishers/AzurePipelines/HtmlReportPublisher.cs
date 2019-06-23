@@ -15,8 +15,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private IPipelinesExecutionContext _executionContext;
         private IClientFactory _clientFactory;
         private ServiceFactory _serviceFactory;
-        private FileContainerService _fileContainerService;
-        private BuildService _buildService;
 
         public HtmlReportPublisher(
             IPipelinesExecutionContext executionContext,
@@ -40,9 +38,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                 // map upload directory to its container name
                 var uploadDirectories = new List<Tuple<string, string>>();
 
-                if (!Directory.Exists((string)reportDirectory))
+                if (!Directory.Exists(reportDirectory))
                 {
-                    throw new DirectoryNotFoundException(string.Format(Resources.DirectoryNotFound, (object)reportDirectory));
+                    throw new DirectoryNotFoundException(string.Format(Resources.DirectoryNotFound, reportDirectory));
                 }
 
                 _executionContext.ConsoleLogger.Info(Resources.ModifyingCoberturaIndexFile);
@@ -51,7 +49,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
                 _executionContext.ConsoleLogger.Info(Resources.PublishingCodeCoverageFiles);
 
-                await this.PublishCodeCoverageFilesAsync(uploadDirectories, File.Exists(Path.Combine((string)reportDirectory, Constants.DefaultIndexFile)), cancellationToken);
+                await this.PublishCodeCoverageFilesAsync(uploadDirectories, File.Exists(Path.Combine(reportDirectory, Constants.DefaultIndexFile)), cancellationToken);
             }
             catch (Exception ex)
             {

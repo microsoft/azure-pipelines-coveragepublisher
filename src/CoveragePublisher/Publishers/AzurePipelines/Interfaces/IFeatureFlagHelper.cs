@@ -11,6 +11,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
     /// <returns>Feature flag state.</returns>
     public interface IFeatureFlagHelper
     {
-        bool GetFeatureFlagState(string featureFlagName, ILogger logger);
+        bool GetFeatureFlagState(string featureFlagName, ILogger logger, bool isTcmFeature);
     }
 }

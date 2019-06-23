@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
@@ -17,6 +18,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         public T GetClient<T>() where T : VssHttpClientBase
         {
             return VssConnection.GetClient<T>();
+        }
+
+        public T GetClient<T>(Guid serviceIdentifier) where T : VssHttpClientBase
+        {
+            return VssConnection.GetClient<T>(serviceIdentifier);
         }
 
         public T GetClient<T>(VssClientHttpRequestSettings settings) where T : VssHttpClientBase

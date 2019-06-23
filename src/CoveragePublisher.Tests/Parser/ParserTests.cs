@@ -7,6 +7,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Resources = Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.Resources;
 
 namespace CoveragePublisher.Tests
 {
@@ -44,7 +45,7 @@ namespace CoveragePublisher.Tests
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestableParser(config, mockContext.Object);
+            var parser = new TestParser(config, mockContext.Object);
             parser.GenerateReport(mockTool.Object);
 
             var tempDirSummary = Directory.EnumerateDirectories(tempDir, "Summary_*").ToList()[0];
@@ -84,7 +85,7 @@ CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Copying summa
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestableParser(config, mockContext.Object);
+            var parser = new TestParser(config, mockContext.Object);
             parser.GenerateReport(mockTool.Object);
 
             //cleanup
@@ -110,22 +111,43 @@ CodeCoveragePublisherTrace Error: 0 : Parser.GenerateHTMLReport: Error System.Ex
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestableParser(config, mockContext.Object);
+            var parser = new TestParser(config, mockContext.Object);
             parser.GenerateReport(mockTool.Object);
             
             Assert.IsTrue(trace.Log.Contains("CodeCoveragePublisherTrace Verbose: 0 : Parser.GenerateHTMLReport: Directory".Trim()));
             Assert.IsTrue(trace.Log.Contains("doesn't exist, skipping copying of coverage input files.".Trim()));
         }
 
-    }
-
-    class TestableParser : Parser
-    {
-        public TestableParser(PublisherConfiguration config, IExecutionContext context) : base(config, context) { }
-
-        public void GenerateReport(ICoverageParserTool tool)
+        [TestMethod]
+        public void WillGenerateReportWhenParsingSummary()
         {
-            GenerateHTMLReport(tool);
+            var mockTool = new Mock<ICoverageParserTool>();
+
+            var config = new PublisherConfiguration();
+            var parser = new Mock<TestParser>(config, mockContext.Object);
+
+            parser.Setup(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
+
+            parser.CallBase = true;
+            parser.Object.GetCoverageSummary();
+
+            parser.Verify(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
+        }
+
+        [TestMethod]
+        public void WillGenerateReportWhenParsingFileCoverage()
+        {
+            var mockTool = new Mock<ICoverageParserTool>();
+
+            var config = new PublisherConfiguration();
+            var parser = new Mock<TestParser>(config, mockContext.Object);
+
+            parser.Setup(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
+
+            parser.CallBase = true;
+            parser.Object.GetFileCoverageInfos();
+
+            parser.Verify(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
         }
     }
 }
