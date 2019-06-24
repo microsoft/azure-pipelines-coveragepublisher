@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.TeamFoundation.TestClient.PublishTestResults;
 using Microsoft.VisualStudio.Services.FeatureAvailability.WebApi;
@@ -16,7 +17,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             _clientFactory = clientFactory;
         }
 
-        public bool GetFeatureFlagState(string featureFlagName, ILogger logger, bool isTcmFeature)
+        public bool GetFeatureFlagState(string featureFlagName, bool isTcmFeature)
         {
             try
             {
@@ -28,7 +29,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             }
             catch
             {
-                logger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
+                TraceLogger.Error(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
                 return false;
             }
             return true;

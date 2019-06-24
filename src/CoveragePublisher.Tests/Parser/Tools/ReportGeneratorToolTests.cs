@@ -12,13 +12,18 @@ namespace CoveragePublisher.Tests
     [TestClass]
     public class ReportGeneratorToolTests
     {
-        TestTraceListener trace;
+        private static TestLogger _logger = new TestLogger();
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            TraceLogger.Initialize(_logger);
+        }
 
         [TestInitialize]
         public void TestInitialize()
         {
-            trace = new TestTraceListener();
-            TraceLogger.Instance.AddListener(trace);
+            _logger.Log = "";
         }
 
         [TestMethod]
@@ -34,9 +39,9 @@ namespace CoveragePublisher.Tests
 
             Assert.AreEqual(json, result);
 
-            Assert.AreEqual(trace.Log.Trim(), @"
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
+            Assert.AreEqual(_logger.Log.Trim(), @"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
 ".Trim());
         }
 
@@ -53,9 +58,9 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetFileCoverageI
 
             Assert.AreEqual(json, result);
 
-            Assert.AreEqual(trace.Log.Trim(), @"
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
+            Assert.AreEqual(_logger.Log.Trim(), @"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
 
@@ -69,10 +74,10 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSumma
             Assert.AreEqual(fileCoverage.Count, 0);
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats.Count, 0);
 
-            Assert.AreEqual(trace.Log.Trim(), @"
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool: No input coverage files to parse.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
+            Assert.AreEqual(_logger.Log.Trim(), @"
+debug: ReportGeneratorTool: No input coverage files to parse.
+debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
+debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
 
@@ -86,10 +91,10 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSumma
             Assert.AreEqual(fileCoverage.Count, 0);
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 0);
 
-            Assert.AreEqual(trace.Log.Trim(), @"
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
+            Assert.AreEqual(_logger.Log.Trim(), @"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
+debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
 
@@ -115,9 +120,9 @@ CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.GetCoverageSumma
             //cleanup
             Directory.Delete(tempDir, true);
 
-            Assert.IsTrue(trace.Log.Contains(@"
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-CodeCoveragePublisherTrace Information: 0 : ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
+            Assert.IsTrue(_logger.Log.Contains(@"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
 ".Trim()));
         }
     }

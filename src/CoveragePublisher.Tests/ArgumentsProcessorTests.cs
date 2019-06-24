@@ -15,8 +15,6 @@ namespace CoveragePublisher.Tests
             --reportDirectory    (Default: ) Path where html report will be generated.
 
             --sourceDirectory    (Default: ) List of source directories separated by ';'.
-            
-            --diag               (Default: false) Enable diagnostics logging.
 
             --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
 

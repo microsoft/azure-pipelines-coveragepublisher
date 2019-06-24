@@ -6,6 +6,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
 {
     public interface IExecutionContext
     {
-        ILogger ConsoleLogger { get; }
+        ILogger Logger { get; }
     }
 }

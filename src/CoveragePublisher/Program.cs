@@ -27,28 +27,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             if (config != null)
             {
-                ConfigureLogging(config);
                 ProcessCoverage(config, _cancellationTokenSource.Token);
             }
         }
-
-        private static void ConfigureLogging(PublisherConfiguration config)
-        {
-            if (config.TraceLogging)
-            {
-                var fileName = DateTime.UtcNow.ToString("CoveragePublisher.yyyy-MM-dd.HH-mm-ss." + Process.GetCurrentProcess().Id + ".log");
-                var logFilePath = Path.Combine(Path.GetTempPath(), fileName);
-
-                var listener = new TextWriterTraceListener(logFilePath);
-
-                TraceLogger.Instance.AddListener(listener);
-            }
-        }
-
+        
         private static void ProcessCoverage(PublisherConfiguration config, CancellationToken cancellationToken)
         {
             // Currently the publisher only works for azure pipelines, so we simply instansiate for Azure Pipelines
             var context = AzurePipelinesPublisher.ExecutionContext;
+            TraceLogger.Initialize(AzurePipelinesPublisher.ExecutionContext.Logger);
+
             AzurePipelinesPublisher publisher = null;
 
             try
@@ -57,13 +45,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception ex)
             {
-                context.ConsoleLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex));
+                TraceLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex));
             }
 
-            var processor = new CoverageProcessor(publisher, context);
+            var processor = new CoverageProcessor(publisher);
 
             // By default wait for 2 minutes for coverage to publish
-            var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context))
+            var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config))
                                            .Wait(config.TimeoutInSeconds * 1000, cancellationToken);
 
             if(publishTimedout)
@@ -75,7 +63,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 publishSuccess = true;
             }
         }
-
+        
         private static void ProcessExit(object sender, EventArgs e)
         {
             if (!publishSuccess)

@@ -6,12 +6,14 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.FileContainer.Client;
 using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Resources = Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines.Resources;
 
 namespace CoveragePublisher.Tests
 {
@@ -21,10 +23,10 @@ namespace CoveragePublisher.Tests
         private string _containerPath = "path";
         private Mock<IClientFactory> _mockFactory;
         private VssConnection _connection = new VssConnection(new Uri("http://localhost"), new VssCredentials());
-        private TestLogger _logger = new TestLogger();
         private Mock<IFileContainerClientHelper> _mockClientHelper;
         private IPipelinesExecutionContext _context;
 
+        private static TestLogger _logger = new TestLogger();
         private static string _uploadDirectory;
 
         public FileContainerServiceTests()
@@ -35,6 +37,8 @@ namespace CoveragePublisher.Tests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
+            TraceLogger.Initialize(_logger);
+
             _uploadDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(_uploadDirectory);
 

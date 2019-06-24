@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -58,7 +59,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public bool IsFileCoverageJsonSupported()
         {
-            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, _executionContext.ConsoleLogger, true);
+            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, true);
         }
 
         public async Task PublishCoverageSummary(CoverageSummary coverageSummary, CancellationToken cancellationToken)
@@ -69,16 +70,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             if (coverageData != null && coverageStats != null && coverageStats.Count() > 0)
             {
                 // log coverage stats
-                _executionContext.ConsoleLogger.Info(Resources.PublishingCodeCoverage);
+                TraceLogger.Info(Resources.PublishingCodeCoverage);
                 foreach (var coverage in coverageStats)
                 {
-                    _executionContext.ConsoleLogger.Info(string.Format(Resources.CoveredStats, coverage.Label, coverage.Covered, coverage.Total));
+                    TraceLogger.Info(string.Format(Resources.CoveredStats, coverage.Label, coverage.Covered, coverage.Total));
                 }
 
                 try
                 {
                     // Upload to tcm/tfs based on feature flag
-                    if (_featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF, _executionContext.ConsoleLogger, false))
+                    if (_featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF, false))
                     {
                         TestResultsHttpClient tcmClient = _clientFactory.GetClient<TestResultsHttpClient>();
                         await tcmClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
@@ -91,7 +92,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                 }
                 catch(Exception ex)
                 {
-                    _executionContext.ConsoleLogger.Error(string.Format(Resources.FailedtoUploadCoverageSummary, ex.ToString()));
+                    TraceLogger.Error(string.Format(Resources.FailedtoUploadCoverageSummary, ex.ToString()));
                 }
             }
         }
@@ -120,7 +121,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         }
                         catch (Exception ex)
                         {
-                            _executionContext.ConsoleLogger.Error(string.Format(Resources.FailedToUploadFileCoverage, file.FilePath, ex.ToString()));
+                            TraceLogger.Error(string.Format(Resources.FailedToUploadFileCoverage, file.FilePath, ex.ToString()));
                         }
 
                         try
@@ -131,8 +132,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                                 File.Delete(jsonFile);
                             }
                         }
-                        catch(Exception ex) {
-                            _executionContext.ConsoleLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile));
+                        catch (Exception) {
+                            TraceLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile));
                         }
                     }
                 }));

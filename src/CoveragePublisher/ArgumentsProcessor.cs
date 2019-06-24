@@ -22,9 +22,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             [Option("sourceDirectory", Default = "", HelpText = "List of source directories separated by ';'.")]
             override public string SourceDirectories { get; set; }
-            
-            [Option("diag", Default = false, HelpText = "Enable diagnostics logging.")]
-            public override bool TraceLogging { get; set; }
 
             [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
             public override int TimeoutInSeconds { get; set; }

@@ -13,13 +13,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
         /// Creates a timer with threshold. A perf message is logged only if
         /// the time elapsed is more than the threshold.
         /// </summary>
-        public SimpleTimer(string timerName, string telemetryArea, string telemetryEventName, ILogger logger,
-            ITelemetryDataCollector telemetryDataCollector, TimeSpan threshold, bool publishTelemetry = true)
+        public SimpleTimer(string timerName, string telemetryArea, string telemetryEventName, ITelemetryDataCollector telemetryDataCollector,
+            TimeSpan threshold, bool publishTelemetry = true)
         {
             _name = timerName;
             _telemetryEventName = telemetryEventName;
             _telemetryArea = telemetryArea;
-            _logger = logger;
             _telemetry = telemetryDataCollector;
             _threshold = threshold;
             _timer = Stopwatch.StartNew();
@@ -49,11 +48,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
 
             if (_timer.Elapsed > _threshold)
             {
-                _logger.Warning($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.");
+                TraceLogger.Debug($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.");
             }
             else
             {
-                _logger.Verbose($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.");
+                TraceLogger.Debug($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.");
             }
         }
 
@@ -73,7 +72,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
         #region private variables.
 
         private bool _disposed;
-        private readonly ILogger _logger;
         private readonly ITelemetryDataCollector _telemetry;
         private readonly Stopwatch _timer;
         private readonly string _name;

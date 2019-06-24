@@ -10,7 +10,7 @@ namespace CoveragePublisher.Tests
         private Guid _projectId;
         public TestPipelinesExecutionContext(ILogger consoleLogger)
         {
-            ConsoleLogger = consoleLogger;
+            Logger = consoleLogger;
             _projectId = Guid.NewGuid();
         }
 
@@ -24,6 +24,6 @@ namespace CoveragePublisher.Tests
 
         public Guid ProjectId => _projectId;
 
-        public ILogger ConsoleLogger { get; private set; }
+        public ILogger Logger { get; private set; }
     }
 }

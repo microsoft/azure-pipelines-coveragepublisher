@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
@@ -16,7 +17,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
     public class TelemetryDataCollector : ITelemetryDataCollector
     {
-        private readonly ILogger _logger;
         private readonly CustomerIntelligenceHttpClient _httpClient;
         private const string CumulativeTelemetryFeatureName = "ConsolidatedTelemetry";
         private readonly object _publishLockNode = new object();
@@ -24,9 +24,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
         public string Area => "TestResultParser";
 
-        public TelemetryDataCollector(IClientFactory clientFactory, ILogger logger)
+        public TelemetryDataCollector(IClientFactory clientFactory)
         {
-            _logger = logger;
             _httpClient = clientFactory.GetClient<CustomerIntelligenceHttpClient>();
         }
 
@@ -40,7 +39,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                _logger.Warning($"TelemetryDataCollector : AddOrUpdate : Failed to add {value} with key {propertyKey} due to {e}");
+                TraceLogger.Debug($"TelemetryDataCollector : AddOrUpdate : Failed to add {value} with key {propertyKey} due to {e}");
             }
         }
 
@@ -92,7 +91,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                _logger.Warning($"TelemetryDataCollector : AddAndAggregate : Failed to add {value} with key {propertyKey} due to {e}");
+                TraceLogger.Debug($"TelemetryDataCollector : AddAndAggregate : Failed to add {value} with key {propertyKey} due to {e}");
             }
         }
 
@@ -117,7 +116,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                _logger.Verbose($"TelemetryDataCollector : PublishCumulativeTelemetryAsync : Failed to publish telemetry due to {e}");
+                TraceLogger.Debug($"TelemetryDataCollector : PublishCumulativeTelemetryAsync : Failed to publish telemetry due to {e}");
             }
 
             return Task.CompletedTask;
@@ -139,7 +138,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                _logger.Verbose($"TelemetryDataCollector : PublishTelemetryAsync : Failed to publish telemetry due to {e}");
+                TraceLogger.Debug($"TelemetryDataCollector : PublishTelemetryAsync : Failed to publish telemetry due to {e}");
             }
 
             return Task.CompletedTask;

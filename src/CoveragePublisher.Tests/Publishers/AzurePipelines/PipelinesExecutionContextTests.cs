@@ -16,7 +16,7 @@ namespace CoveragePublisher.Tests
         public void WillInitializeProperties()
         {
             var context = new PipelinesExecutionContext();
-            Assert.IsNotNull(context.ConsoleLogger);
+            Assert.IsNotNull(context.Logger);
 
             var guid = Guid.NewGuid().ToString();
 
@@ -37,7 +37,7 @@ namespace CoveragePublisher.Tests
         public void WillInitializePropertiesWithEmptyValues()
         {
             var context = new PipelinesExecutionContext();
-            Assert.IsNotNull(context.ConsoleLogger);
+            Assert.IsNotNull(context.Logger);
 
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildContainerId, "");
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildId, "");
@@ -52,7 +52,7 @@ namespace CoveragePublisher.Tests
         public void WillThrowIfAccessTokenAndCollectionUriAreEmpty()
         {
             var context = new PipelinesExecutionContext();
-            Assert.IsNotNull(context.ConsoleLogger);
+            Assert.IsNotNull(context.Logger);
 
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken, "");
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.CollectionUri, "");
