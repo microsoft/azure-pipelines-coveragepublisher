@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 publishSuccess = true;
             }
         }
-
+        
         private static void ProcessExit(object sender, EventArgs e)
         {
             if (!publishSuccess)

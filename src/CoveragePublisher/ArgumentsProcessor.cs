@@ -22,9 +22,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             [Option("sourceDirectory", Default = "", HelpText = "List of source directories separated by ';'.")]
             override public string SourceDirectories { get; set; }
-            
-            [Option("timeout", Default = (uint)120, HelpText = "Timeout for CoveragePublisher in seconds.")]
-            public override uint TimeoutSeconds { get; set; }
+
+            [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
+            public override int TimeoutInSeconds { get; set; }
 
             [Option("noTelemetry", Default = false, HelpText = "Disable telemetry data collection.")]
             public override bool DisableTelemetry { get; set; }
