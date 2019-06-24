@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.TestClient.PublishTestResults;
@@ -13,13 +14,25 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public LogStoreHelper(IClientFactory clientFactory)
         {
-            // TODO
-            _logStore = new TestLogStore(clientFactory.VssConnection, null);
+            _logStore = new TestLogStore(clientFactory.VssConnection, new LogStoreTraceListener());
         }
 
         public Task<TestLogStatus> UploadTestBuildLogAsync(Guid projectId, int buildId, TestLogType logType, string logFileSourcePath, Dictionary<string, string> metaData, string destDirectoryPath, bool allowDuplicate, CancellationToken cancellationToken)
         {
             return _logStore.UploadTestBuildLogAsync(projectId, buildId, logType, logFileSourcePath, metaData, destDirectoryPath, allowDuplicate, cancellationToken);
+        }
+    }
+
+    internal class LogStoreTraceListener : TraceListener
+    {
+        public override void Write(string message)
+        {
+            TraceLogger.Debug(message);
+        }
+
+        public override void WriteLine(string message)
+        {
+            TraceLogger.Debug(message);
         }
     }
 }
