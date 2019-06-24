@@ -39,7 +39,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                TraceLogger.Debug($"TelemetryDataCollector : AddOrUpdate : Failed to add {value} with key {propertyKey} due to {e}", TraceLevel.Warning);
+                TraceLogger.Debug($"TelemetryDataCollector : AddOrUpdate : Failed to add {value} with key {propertyKey} due to {e}");
             }
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                TraceLogger.Debug($"TelemetryDataCollector : AddAndAggregate : Failed to add {value} with key {propertyKey} due to {e}", TraceLevel.Warning);
+                TraceLogger.Debug($"TelemetryDataCollector : AddAndAggregate : Failed to add {value} with key {propertyKey} due to {e}");
             }
         }
 
@@ -116,7 +116,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                TraceLogger.Debug($"TelemetryDataCollector : PublishCumulativeTelemetryAsync : Failed to publish telemetry due to {e}", TraceLevel.Verbose);
+                TraceLogger.Debug($"TelemetryDataCollector : PublishCumulativeTelemetryAsync : Failed to publish telemetry due to {e}");
             }
 
             return Task.CompletedTask;
@@ -138,7 +138,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception e)
             {
-                TraceLogger.Debug($"TelemetryDataCollector : PublishTelemetryAsync : Failed to publish telemetry due to {e}", TraceLevel.Verbose);
+                TraceLogger.Debug($"TelemetryDataCollector : PublishTelemetryAsync : Failed to publish telemetry due to {e}");
             }
 
             return Task.CompletedTask;

@@ -48,8 +48,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 TraceLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex));
             }
 
+            var processor = new CoverageProcessor(publisher);
+
             // By default wait for 2 minutes for coverage to publish
-            var publishTimedout = new CoverageProcessor(publisher).ParseAndPublishCoverage(config, cancellationToken, new Parser(config)).Wait(120 * 1000, cancellationToken);
+            var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config))
+                                           .Wait(config.TimeoutInSeconds * 1000, cancellationToken);
 
             if(publishTimedout)
             {

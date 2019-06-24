@@ -58,12 +58,12 @@ namespace CoveragePublisher.Tests
             //cleanup
             Directory.Delete(tempDir, true);
 
-            Assert.IsTrue(_logger.Log.Contains("debug: Info: Parser.GenerateHTMLReport: Creating summary file directory:"));
+            Assert.IsTrue(_logger.Log.Contains("debug: Parser.GenerateHTMLReport: Creating summary file directory:"));
 
             Assert.IsTrue(_logger.Log.Contains(@"
-debug: Info: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Clover.xml
-debug: Info: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Cobertura.xml
-debug: Info: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
+debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Clover.xml
+debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Cobertura.xml
+debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
 ".Trim()));
 
         }
@@ -110,7 +110,7 @@ debug: Info: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jaco
             var parser = new TestParser(config);
             parser.GenerateReport(mockTool.Object);
             
-            Assert.IsTrue(_logger.Log.Contains("debug: Warning: Parser.GenerateHTMLReport: Directory".Trim()));
+            Assert.IsTrue(_logger.Log.Contains("debug: Parser.GenerateHTMLReport: Directory".Trim()));
             Assert.IsTrue(_logger.Log.Contains("doesn't exist, skipping copying of coverage input files.".Trim()));
         }
 

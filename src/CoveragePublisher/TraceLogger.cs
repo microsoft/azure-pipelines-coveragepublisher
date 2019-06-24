@@ -7,12 +7,10 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
-    public class TraceLogger
+    public static class TraceLogger
     {
         private static ILogger _instance;
         
-        private TraceLogger() { }
-
         public static void Initialize(ILogger logger)
         {
             _instance = logger;
@@ -70,11 +68,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         /// Log debug message.
         /// </summary>
         /// <param name="message">Message string.</param>
-        public static void Debug(string message, TraceLevel traceLevel)
+        public static void Debug(string message)
         {
             if (_instance != null)
             {
-                _instance.Debug($"{Enum.GetName(typeof(TraceLevel), traceLevel)}: {message}");
+                _instance.Debug(message);
             }
         }
     }

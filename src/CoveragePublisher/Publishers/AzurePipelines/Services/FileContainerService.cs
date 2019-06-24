@@ -239,17 +239,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                         }
                         else
                         {
-                            TraceLogger.Debug(string.Format(Resources.FileUploadFinish, fileToUpload, uploadTimer.ElapsedMilliseconds), TraceLevel.Info);
+                            TraceLogger.Debug(string.Format(Resources.FileUploadFinish, fileToUpload, uploadTimer.ElapsedMilliseconds));
 
                             // debug detail upload trace for the file.
                             ConcurrentQueue<string> logQueue;
                             if (_fileUploadTraceLog.TryGetValue(itemPath, out logQueue))
                             {
-                                TraceLogger.Debug($"Detail upload trace for file: {itemPath}", TraceLevel.Info);
+                                TraceLogger.Debug($"Detail upload trace for file: {itemPath}");
                                 string message;
                                 while (logQueue.TryDequeue(out message))
                                 {
-                                    TraceLogger.Debug(message, TraceLevel.Info);
+                                    TraceLogger.Debug(message);
                                 }
                             }
                         }

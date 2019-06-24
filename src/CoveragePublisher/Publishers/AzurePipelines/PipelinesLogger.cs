@@ -9,7 +9,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
     {
         public void Verbose(string message)
         {
-            Console.WriteLine(message);
+            Debug("Verbose: " + message);
         }
 
         public void Info(string message)

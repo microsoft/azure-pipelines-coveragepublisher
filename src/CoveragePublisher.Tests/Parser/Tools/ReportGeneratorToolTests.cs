@@ -40,8 +40,8 @@ namespace CoveragePublisher.Tests
             Assert.AreEqual(json, result);
 
             Assert.AreEqual(_logger.Log.Trim(), @"
-debug: Info: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-debug: Info: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
 ".Trim());
         }
 
@@ -59,8 +59,8 @@ debug: Info: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage 
             Assert.AreEqual(json, result);
 
             Assert.AreEqual(_logger.Log.Trim(), @"
-debug: Info: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-debug: Info: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
 
@@ -75,9 +75,9 @@ debug: Info: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats.Count, 0);
 
             Assert.AreEqual(_logger.Log.Trim(), @"
-debug: Info: ReportGeneratorTool: No input coverage files to parse.
-debug: Info: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
-debug: Info: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
+debug: ReportGeneratorTool: No input coverage files to parse.
+debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
+debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
 
@@ -92,9 +92,9 @@ debug: Info: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary
             Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 0);
 
             Assert.AreEqual(_logger.Log.Trim(), @"
-debug: Info: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-debug: Info: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
-debug: Info: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
+debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
 
@@ -121,8 +121,8 @@ debug: Info: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary
             Directory.Delete(tempDir, true);
 
             Assert.IsTrue(_logger.Log.Contains(@"
-debug: Info: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
-debug: Info: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
 ".Trim()));
         }
     }

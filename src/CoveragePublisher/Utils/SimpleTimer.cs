@@ -48,11 +48,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
 
             if (_timer.Elapsed > _threshold)
             {
-                TraceLogger.Debug($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.", TraceLevel.Warning);
+                TraceLogger.Debug($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.");
             }
             else
             {
-                TraceLogger.Debug($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.", TraceLevel.Verbose);
+                TraceLogger.Debug($"PERF : {_name} : took {_timer.Elapsed.TotalMilliseconds} ms.");
             }
         }
 

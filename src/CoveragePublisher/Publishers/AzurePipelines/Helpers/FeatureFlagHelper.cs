@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             }
             catch
             {
-                TraceLogger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName), TraceLevel.Error);
+                TraceLogger.Error(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
                 return false;
             }
             return true;

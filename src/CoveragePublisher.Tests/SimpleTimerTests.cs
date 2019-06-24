@@ -40,7 +40,7 @@ namespace CoveragePublisher.Tests
 
             using (new SimpleTimer("testTimer", "Test", "test", telemetryDataCollector.Object, TimeSpan.FromHours(1), true)) { }
 
-            Assert.IsTrue(_logger.Log.Contains("Verbose"));
+            Assert.IsTrue(_logger.Log.Contains("debug: PERF : testTimer : took "));
         }
 
         [TestMethod]
@@ -57,7 +57,7 @@ namespace CoveragePublisher.Tests
 
             using (new SimpleTimer("testTimer", "Test", "test", telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true)) { }
 
-            Assert.IsTrue(_logger.Log.Contains("Warning"));
+            Assert.IsTrue(_logger.Log.Contains("debug: PERF : testTimer : took "));
         }
 
         [TestMethod]

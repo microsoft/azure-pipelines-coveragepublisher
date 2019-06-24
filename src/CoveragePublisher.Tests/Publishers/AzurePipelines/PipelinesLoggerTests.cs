@@ -37,21 +37,20 @@ namespace CoveragePublisher.Tests
             Console.SetOut(ConsoleWriter);
             Console.SetError(ConsoleWriter);
 
-            logger.Info("message");
-            logger.Verbose("message");
-            logger.Warning("message");
-            logger.Error("message");
-            logger.Debug("message");
+            logger.Info("info");
+            logger.Verbose("verbose");
+            logger.Warning("warning");
+            logger.Error("error");
+            logger.Debug("debug");
 
             var log = ConsoleWriter.ToString();
-            var expectedLog = "message" + Environment.NewLine +
-                "message" + Environment.NewLine +
-                "##vso[task.logissue type=warning]message" + Environment.NewLine +
-                "##vso[task.logissue type=error]message" + Environment.NewLine +
-                "##vso[task.debug]message" + Environment.NewLine;
+            var expectedLog = "info" + Environment.NewLine +
+                "##vso[task.debug]Verbose: verbose" + Environment.NewLine +
+                "##vso[task.logissue type=warning]warning" + Environment.NewLine +
+                "##vso[task.logissue type=error]error" + Environment.NewLine +
+                "##vso[task.debug]debug" + Environment.NewLine;
 
             Assert.AreEqual(expectedLog, log);
         }
-
     }
 }

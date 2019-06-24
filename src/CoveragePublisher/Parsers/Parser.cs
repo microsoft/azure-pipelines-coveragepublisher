@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             summaryFilesSubDir = Path.Combine(_configuration.ReportDirectory, "Summary_" + Guid.NewGuid().ToString().Substring(0, 8));
                         } while (Directory.Exists(summaryFilesSubDir));
 
-                        TraceLogger.Debug("Parser.GenerateHTMLReport: Creating summary file directory: " + summaryFilesSubDir, TraceLevel.Info);
+                        TraceLogger.Debug("Parser.GenerateHTMLReport: Creating summary file directory: " + summaryFilesSubDir);
 
                         Directory.CreateDirectory(summaryFilesSubDir);
 
@@ -61,13 +61,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             var summaryFileName = Path.GetFileName(summaryFile);
                             var destinationSummaryFile = Path.Combine(summaryFilesSubDir, summaryFileName);
 
-                            TraceLogger.Debug("Parser.GenerateHTMLReport: Copying summary file " + summaryFile, TraceLevel.Info);
+                            TraceLogger.Debug("Parser.GenerateHTMLReport: Copying summary file " + summaryFile);
                             File.Copy(summaryFile, destinationSummaryFile, true);
                         }
                     }
                     else
                     {
-                        TraceLogger.Debug("Parser.GenerateHTMLReport: Directory " + _configuration.ReportDirectory + " doesn't exist, skipping copying of coverage input files.", TraceLevel.Warning);
+                        TraceLogger.Debug("Parser.GenerateHTMLReport: Directory " + _configuration.ReportDirectory + " doesn't exist, skipping copying of coverage input files.");
                     }
                 }
                 catch (Exception e)

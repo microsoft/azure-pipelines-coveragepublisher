@@ -53,9 +53,8 @@ namespace CoveragePublisher.Tests
         [TestMethod]
         public void TestDebug()
         {
-            TraceLogger.Debug("something", TraceLevel.Info);
-            TraceLogger.Debug("something", TraceLevel.Error);
-            TraceLogger.Debug("something", TraceLevel.Warning);
+            TraceLogger.Debug("something");
+            Assert.AreEqual("debug: something", _logger.Log.Trim());
         }
     }
 }

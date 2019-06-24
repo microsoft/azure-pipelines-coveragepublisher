@@ -132,8 +132,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                                 File.Delete(jsonFile);
                             }
                         }
-                        catch(Exception) {
-                            TraceLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile), TraceLevel.Error);
+                        catch (Exception) {
+                            TraceLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile));
                         }
                     }
                 }));

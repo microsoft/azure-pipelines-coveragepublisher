@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             if (Configuration.CoverageFiles == null)
             {
-                TraceLogger.Debug("ReportGeneratorTool: No input coverage files to parse.", TraceLevel.Info);
+                TraceLogger.Debug("ReportGeneratorTool: No input coverage files to parse.");
                 return;
             }
 
@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public List<FileCoverageInfo> GetFileCoverageInfos()
         {
-            TraceLogger.Debug("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.", TraceLevel.Info);
+            TraceLogger.Debug("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.");
 
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public CoverageSummary GetCoverageSummary()
         {
-            TraceLogger.Debug("ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.", TraceLevel.Info);
+            TraceLogger.Debug("ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.");
 
             var summary = new CoverageSummary();
 
@@ -103,7 +103,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public void GenerateHTMLReport()
         {
-            TraceLogger.Debug("ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.", TraceLevel.Info);
+            TraceLogger.Debug("ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.");
 
             if (!Directory.Exists(Configuration.ReportDirectory))
             {
@@ -124,7 +124,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         private ParserResult ParseCoverageFiles(List<string> coverageFiles)
         {
-            TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.", TraceLevel.Info);
+            TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
 
             CoverageReportParser parser = new CoverageReportParser(1, new string[] { }, new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }),
