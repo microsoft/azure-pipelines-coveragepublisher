@@ -57,8 +57,8 @@ namespace CoveragePublisher.Tests
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken, "");
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.CollectionUri, "");
 
-            Assert.ThrowsException<ArgumentNullException>(() => { var a = context.AccessToken; });
-            Assert.ThrowsException<ArgumentNullException>(() => { var a = context.CollectionUri; });
+            Assert.ThrowsException<Exception>(() => { var a = context.AccessToken; });
+            Assert.ThrowsException<Exception>(() => { var a = context.CollectionUri; });
         }
         
     }

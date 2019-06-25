@@ -118,6 +118,26 @@ namespace CoveragePublisher.Tests
             Assert.IsTrue(_logger.Log.Contains("error"));
             Assert.IsTrue(_logger.Log.Contains("Directory not found"));
         }
+
+        [TestMethod]
+        public void WillRenameExtensionToHtml()
+        {
+            var token = new CancellationToken();
+            var publisher = new HtmlReportPublisher(_context, _mockClientFactory.Object, _serviceFactory);
+            var containerPath = Constants.ReportDirectory + "_" + _context.BuildId;
+
+            var htmIndex = Path.Join(_uploadDirectory, Constants.HtmIndexFile);
+            var defaultIndex = Path.Join(_uploadDirectory, Constants.DefaultIndexFile);
+
+            File.WriteAllText(htmIndex, "");
+            Assert.IsTrue(File.Exists(htmIndex));
+            Assert.IsFalse(File.Exists(defaultIndex));
+
+            publisher.PublishHTMLReportAsync(_uploadDirectory, token).Wait();
+            
+            Assert.IsFalse(File.Exists(htmIndex));
+            Assert.IsTrue(File.Exists(defaultIndex));
+        }
     }
 
     public class TestServiceFactory: ServiceFactory

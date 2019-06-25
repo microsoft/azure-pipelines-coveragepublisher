@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             if (coverageData != null && coverageStats != null && coverageStats.Count() > 0)
             {
                 // log coverage stats
-                TraceLogger.Info(Resources.PublishingCodeCoverage);
+                TraceLogger.Info(Resources.PublishingCodeCoverageSummary);
                 foreach (var coverage in coverageStats)
                 {
                     TraceLogger.Info(string.Format(Resources.CoveredStats, coverage.Label, coverage.Covered, coverage.Total));
@@ -99,6 +99,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)
         {
+            TraceLogger.Info(Resources.PublishingFileCoverage);
+
             var maxParallelism = Math.Min(Math.Max(Environment.ProcessorCount / 2, 1), coverageInfos.Count);
             var queue = new ConcurrentQueue<FileCoverageInfo>(coverageInfos);
             var tasks = new List<Task>();

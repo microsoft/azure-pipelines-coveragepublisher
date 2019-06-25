@@ -27,11 +27,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                 if (supportsFileCoverageJson)
                 {
+                    TraceLogger.Debug("Publishing file json coverage is supported.");
                     var fileCoverage = parser.GetFileCoverageInfos();
                     await _publisher.PublishFileCoverage(fileCoverage, token);
                 }
                 else
                 {
+                    TraceLogger.Debug("Publishing file json coverage is not supported.");
                     var summary = parser.GetCoverageSummary();
                     await _publisher.PublishCoverageSummary(summary, token);
                 }
