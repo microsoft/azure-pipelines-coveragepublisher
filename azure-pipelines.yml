@@ -56,3 +56,7 @@ steps:
     PathtoPublish: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netcoreapp2.1'
     ArtifactName: 'CoveragePublisher'
     publishLocation: 'Container'
+
+- task: PowerShell@2
+  inputs:
+    filePath: '$(Build.SourcesDirectory)/scripts/areatag.ps1'
