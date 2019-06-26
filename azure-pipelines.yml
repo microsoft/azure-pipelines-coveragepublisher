@@ -32,6 +32,7 @@ steps:
     projects: '**/*.sln'
     feedsToUse: 'select'
     versioningScheme: 'off'
+    arguments: '-c release'
 
 - task: DotNetCoreCLI@2
   inputs:
@@ -48,3 +49,9 @@ steps:
     coverageFailOption: 'fixed'
     coverageType: 'lines'
     coverageThreshold: '88'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netcoreapp2.1'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
