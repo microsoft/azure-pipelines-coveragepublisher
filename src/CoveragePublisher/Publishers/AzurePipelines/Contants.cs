@@ -13,6 +13,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             public const string AccessToken = "SYSTEM_ACCESSTOKEN";
             public const string ProjectId = "SYSTEM_TEAMPROJECTID";
             public const string CollectionUri = "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI";
+            public const string AgentTempPath = "AGENT_TEMPPATH";
         }
 
         internal static class ArtifactUploadEventProperties
