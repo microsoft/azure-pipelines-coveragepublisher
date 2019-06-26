@@ -18,6 +18,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
         public static void Main(string[] args)
         {
+            DebugBreakIfEnvSet();
+
             var argsProcessor = new ArgumentsProcessor();
             var config = argsProcessor.ProcessCommandLineArgs(args);
 
@@ -45,7 +47,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception ex)
             {
-                TraceLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex));
+                TraceLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex.Message));
             }
 
             var processor = new CoverageProcessor(publisher);
@@ -64,6 +66,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
         }
         
+        private static void DebugBreakIfEnvSet()
+        {
+            var debugEnvFlag = Environment.GetEnvironmentVariable("PIPELINES_COVERAGEPUBLISHER_DEBUG");
+            if (debugEnvFlag == "1")
+            {
+                Debugger.Launch();
+            }
+        }
+
         private static void ProcessExit(object sender, EventArgs e)
         {
             if (!publishSuccess)

@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             if (coverageData != null && coverageStats != null && coverageStats.Count() > 0)
             {
                 // log coverage stats
-                TraceLogger.Info(Resources.PublishingCodeCoverage);
+                TraceLogger.Info(Resources.PublishingCodeCoverageSummary);
                 foreach (var coverage in coverageStats)
                 {
                     TraceLogger.Info(string.Format(Resources.CoveredStats, coverage.Label, coverage.Covered, coverage.Total));
@@ -99,47 +99,37 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
         public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)
         {
+            TraceLogger.Info(Resources.PublishingFileCoverage);
+
             var maxParallelism = Math.Min(Math.Max(Environment.ProcessorCount / 2, 1), coverageInfos.Count);
             var queue = new ConcurrentQueue<FileCoverageInfo>(coverageInfos);
             var tasks = new List<Task>();
+            var jsonFile = Path.Combine(_executionContext.TempPath, Guid.NewGuid().ToString() + _executionContext.BuildId.ToString() + ".cjson");
 
-            for(var i = 0; i < maxParallelism; i++)
+            try
             {
-                tasks.Add(Task.Run(async () =>
-                {
-                    while (queue.TryDequeue(out FileCoverageInfo file) && !cancellationToken.IsCancellationRequested)
-                    {
-                        var jsonFile = Path.GetTempFileName();
+                File.WriteAllText(jsonFile, JsonUtility.ToString(coverageInfos));
 
-                        try
-                        {
-                            File.WriteAllText(jsonFile, JsonUtility.ToString(file));
-
-                            Dictionary<string, string> metaData = new Dictionary<string, string>();
-                            metaData.Add("ModuleName", Path.GetFileName(file.FilePath));
-                            await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, TestLogType.Intermediate, jsonFile, metaData, null, true, cancellationToken);
-                        }
-                        catch (Exception ex)
-                        {
-                            TraceLogger.Error(string.Format(Resources.FailedToUploadFileCoverage, file.FilePath, ex.ToString()));
-                        }
-
-                        try
-                        {
-                            // Delete the generated json file
-                            if (File.Exists(jsonFile))
-                            {
-                                File.Delete(jsonFile);
-                            }
-                        }
-                        catch (Exception) {
-                            TraceLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile));
-                        }
-                    }
-                }));
+                Dictionary<string, string> metaData = new Dictionary<string, string>();
+                await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, TestLogType.Intermediate, jsonFile, metaData, null, true, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                TraceLogger.Error(string.Format(Resources.FailedToUploadFileCoverage, ex));
             }
 
-            await Task.WhenAll(tasks);
+            try
+            {
+                // Delete the generated json file
+                if (File.Exists(jsonFile))
+                {
+                    File.Delete(jsonFile);
+                }
+            }
+            catch (Exception)
+            {
+                TraceLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile));
+            }
         }
 
         public async Task PublishHTMLReport(string reportDirectory, CancellationToken token)

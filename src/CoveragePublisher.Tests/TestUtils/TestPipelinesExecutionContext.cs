@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 
@@ -25,5 +26,7 @@ namespace CoveragePublisher.Tests
         public Guid ProjectId => _projectId;
 
         public ILogger Logger { get; private set; }
+
+        public string TempPath => Path.GetTempPath();
     }
 }

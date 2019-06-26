@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
@@ -10,6 +11,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private string accessToken = null;
         private Guid? projectId = null;
         private string collectionUri = null;
+        private string tempPath = null;
 
         public ILogger Logger { get; private set; }
 
@@ -53,7 +55,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
                 if (string.IsNullOrEmpty(accessToken))
                 {
-                    throw new ArgumentNullException(string.Format(Resources.EnvVarNullOrEmpty, Constants.EnvironmentVariables.AccessToken));
+                    throw new Exception(string.Format(Resources.EnvVarNullOrEmpty, Constants.EnvironmentVariables.AccessToken));
                 }
 
                 return accessToken;
@@ -71,7 +73,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
 
                 if (string.IsNullOrEmpty(collectionUri))
                 {
-                    throw new ArgumentNullException(string.Format(Resources.EnvVarNullOrEmpty, Constants.EnvironmentVariables.CollectionUri));
+                    throw new Exception(string.Format(Resources.EnvVarNullOrEmpty, Constants.EnvironmentVariables.CollectionUri));
                 }
 
                 return collectionUri;
@@ -88,6 +90,23 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                     projectId = parsedGuid;
                 }
                 return (Guid)projectId;
+            }
+        }
+
+        public string TempPath
+        {
+            get
+            {
+                if (tempPath == null)
+                {
+                    tempPath = Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.AgentTempPath) ?? "";
+
+                    if(string.IsNullOrEmpty(tempPath) || !Directory.Exists(tempPath))
+                    {
+                        tempPath = Path.GetTempPath();
+                    }
+                }
+                return tempPath;
             }
         }
     }

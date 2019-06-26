@@ -136,7 +136,7 @@
     <value>Failed to upload coverage summary. Exception: {0}.</value>
   </data>
   <data name="FailedToUploadFileCoverage" xml:space="preserve">
-    <value>Failed to upload file coverage data for {0}. Exception: {1}.</value>
+    <value>Failed to upload file coverage data. Exception: {1}</value>
   </data>
   <data name="FileContainerUploadFailed" xml:space="preserve">
     <value>Unable to copy file to server StatusCode={0}: {1}. Source file path: {2}. Target server path: {3}.</value>
@@ -180,22 +180,25 @@
   <data name="FileUploadSucceed" xml:space="preserve">
     <value>File upload succeed.</value>
   </data>
-  <data name="ModifyingCoberturaIndexFile" xml:space="preserve">
-    <value>Modifying Cobertura Index file.</value>
-  </data>
   <data name="PublishedCodeCoverageArtifact" xml:space="preserve">
     <value>Published '{0}' as artifact '{1}'.</value>
   </data>
-  <data name="PublishingCodeCoverage" xml:space="preserve">
-    <value>Publishing coverage summary data to TFS server.</value>
+  <data name="PublishingCodeCoverageSummary" xml:space="preserve">
+    <value>Publishing coverage summary data.</value>
   </data>
-  <data name="PublishingCodeCoverageFiles" xml:space="preserve">
-    <value>Publishing code coverage files.</value>
+  <data name="PublishingCodeCoverageReport" xml:space="preserve">
+    <value>Publishing code coverage HTML report.</value>
   </data>
   <data name="RenameIndexFileCoberturaFailed" xml:space="preserve">
     <value>Renaming '{0}' to '{1}' failed while publishing code coverage files. Inner Exception: '{2}'.</value>
   </data>
   <data name="TotalUploadFiles" xml:space="preserve">
     <value>Uploading {0} files.</value>
+  </data>
+  <data name="CouldNotRenameExtension" xml:space="preserve">
+    <value>Could not rename index.htm to index.html in report directory. Exception: {0}</value>
+  </data>
+  <data name="PublishingFileCoverage" xml:space="preserve">
+    <value>Publishing file coverage data.</value>
   </data>
 </root>

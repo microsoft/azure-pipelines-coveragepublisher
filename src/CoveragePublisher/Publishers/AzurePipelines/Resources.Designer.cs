@@ -61,6 +61,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not rename index.htm to index.html in report directory. Exception: {0}.
+        /// </summary>
+        internal static string CouldNotRenameExtension {
+            get {
+                return ResourceManager.GetString("CouldNotRenameExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0}- {1} of {2} covered..
         /// </summary>
         internal static string CoveredStats {
@@ -115,7 +124,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to upload file coverage data for {0}. Exception: {1}..
+        ///   Looks up a localized string similar to Failed to upload file coverage data. Exception: {1}.
         /// </summary>
         internal static string FailedToUploadFileCoverage {
             get {
@@ -250,15 +259,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Modifying Cobertura Index file..
-        /// </summary>
-        internal static string ModifyingCoberturaIndexFile {
-            get {
-                return ResourceManager.GetString("ModifyingCoberturaIndexFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Published &apos;{0}&apos; as artifact &apos;{1}&apos;..
         /// </summary>
         internal static string PublishedCodeCoverageArtifact {
@@ -268,20 +268,29 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Publishing coverage summary data to TFS server..
+        ///   Looks up a localized string similar to Publishing code coverage HTML report..
         /// </summary>
-        internal static string PublishingCodeCoverage {
+        internal static string PublishingCodeCoverageReport {
             get {
-                return ResourceManager.GetString("PublishingCodeCoverage", resourceCulture);
+                return ResourceManager.GetString("PublishingCodeCoverageReport", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Publishing code coverage files..
+        ///   Looks up a localized string similar to Publishing coverage summary data..
         /// </summary>
-        internal static string PublishingCodeCoverageFiles {
+        internal static string PublishingCodeCoverageSummary {
             get {
-                return ResourceManager.GetString("PublishingCodeCoverageFiles", resourceCulture);
+                return ResourceManager.GetString("PublishingCodeCoverageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publishing file coverage data..
+        /// </summary>
+        internal static string PublishingFileCoverage {
+            get {
+                return ResourceManager.GetString("PublishingFileCoverage", resourceCulture);
             }
         }
         

@@ -43,11 +43,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
                     throw new DirectoryNotFoundException(string.Format(Resources.DirectoryNotFound, reportDirectory));
                 }
 
-                TraceLogger.Info(Resources.ModifyingCoberturaIndexFile);
-
+                RenameIndexHtmExtensionIfRequired(reportDirectory);
                 uploadDirectories.Add(new Tuple<string, string>(reportDirectory, GetCoverageDirectoryName(buildId)));
 
-                TraceLogger.Info(Resources.PublishingCodeCoverageFiles);
+                TraceLogger.Info(Resources.PublishingCodeCoverageReport);
 
                 await this.PublishCodeCoverageFilesAsync(uploadDirectories, File.Exists(Path.Combine(reportDirectory, Constants.DefaultIndexFile)), cancellationToken);
             }
@@ -86,6 +85,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         private string GetCoverageDirectoryName(string buildId)
         {
             return Constants.ReportDirectory + "_" + buildId;
+        }
+
+        private void RenameIndexHtmExtensionIfRequired(string reportDirectory)
+        {
+            try
+            {
+                var indexHtm = Path.Combine(reportDirectory, Constants.HtmIndexFile);
+                var indexHtml = Path.Combine(reportDirectory, Constants.DefaultIndexFile);
+
+                if (File.Exists(indexHtm) && !File.Exists(indexHtml))
+                {
+                    File.Move(indexHtm, indexHtml);
+                }
+            }
+            catch(Exception ex)
+            {
+                TraceLogger.Error(string.Format(Resources.CouldNotRenameExtension, ex));
+            }
         }
     }
 }

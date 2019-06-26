@@ -16,5 +16,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
         string CollectionUri { get; }
 
         Guid ProjectId { get; }
+
+        string TempPath { get; }
     }
 }

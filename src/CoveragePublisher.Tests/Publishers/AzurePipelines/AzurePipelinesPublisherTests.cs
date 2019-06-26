@@ -8,6 +8,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.TestResults.WebApi;
+using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -162,8 +163,8 @@ namespace CoveragePublisher.Tests
                 It.Is<Guid>(a => a == _context.ProjectId),
                 It.Is<int>(b => b == _context.BuildId),
                 It.Is<TestLogType>(c => c == TestLogType.Intermediate),
-                It.Is<string>(d => data.ContainsKey(d)),
-                It.Is<Dictionary<string, string>>(e => e["ModuleName"] == Path.GetFileName("C:\\a.cs") || e["ModuleName"] == Path.GetFileName("C:\\b.cs")),
+                It.Is<string>(d => data.ContainsKey(d) && data[d] == JsonUtility.ToString(fileCoverage)),
+                It.IsAny<Dictionary<string, string>>(),
                 It.Is<string>(f => f == null),
                 It.Is<bool>(g => g == true),
                 It.Is<CancellationToken>(e => e == token)));
