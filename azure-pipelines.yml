@@ -51,6 +51,7 @@ steps:
     coverageThreshold: '88'
 
 - task: PublishBuildArtifacts@1
+  condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
     PathtoPublish: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netcoreapp2.1'
     ArtifactName: 'CoveragePublisher'
