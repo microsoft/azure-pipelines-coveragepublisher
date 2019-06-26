@@ -124,7 +124,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines 
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to upload file coverage data for {0}. Exception: {1}.
+        ///   Looks up a localized string similar to Failed to upload file coverage data. Exception: {1}.
         /// </summary>
         internal static string FailedToUploadFileCoverage {
             get {

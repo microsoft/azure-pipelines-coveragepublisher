@@ -136,7 +136,7 @@
     <value>Failed to upload coverage summary. Exception: {0}.</value>
   </data>
   <data name="FailedToUploadFileCoverage" xml:space="preserve">
-    <value>Failed to upload file coverage data for {0}. Exception: {1}</value>
+    <value>Failed to upload file coverage data. Exception: {1}</value>
   </data>
   <data name="FileContainerUploadFailed" xml:space="preserve">
     <value>Unable to copy file to server StatusCode={0}: {1}. Source file path: {2}. Target server path: {3}.</value>
