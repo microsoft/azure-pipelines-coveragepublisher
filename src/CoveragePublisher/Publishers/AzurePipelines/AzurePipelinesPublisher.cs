@@ -104,13 +104,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
             var maxParallelism = Math.Min(Math.Max(Environment.ProcessorCount / 2, 1), coverageInfos.Count);
             var queue = new ConcurrentQueue<FileCoverageInfo>(coverageInfos);
             var tasks = new List<Task>();
-
-            string jsonFile;
-
-            do
-            {
-                jsonFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".cjson");
-            } while (File.Exists(jsonFile));
+            var jsonFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + _executionContext.BuildId.ToString() + ".cjson");
 
             try
             {
