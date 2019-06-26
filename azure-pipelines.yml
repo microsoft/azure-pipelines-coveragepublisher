@@ -53,5 +53,5 @@ steps:
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netcoreapp2.1'
-    ArtifactName: 'drop'
+    ArtifactName: 'CoveragePublisher'
     publishLocation: 'Container'
