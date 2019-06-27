@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 

@@ -1,4 +1,4 @@
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher
 {
     internal static class Constants
     {

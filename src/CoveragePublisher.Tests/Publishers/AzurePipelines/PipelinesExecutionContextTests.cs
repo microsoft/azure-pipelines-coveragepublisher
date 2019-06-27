@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
+using Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CoveragePublisher.Tests

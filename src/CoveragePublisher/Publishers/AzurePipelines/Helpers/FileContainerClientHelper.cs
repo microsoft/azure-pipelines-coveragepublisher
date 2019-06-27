@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.FileContainer.Client;
-using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher
 {
     /// <summary>
     /// We require FileContainerClientHelper because FileContainerHttpClient does not define its method as virtual

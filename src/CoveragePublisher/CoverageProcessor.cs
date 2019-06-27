@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
+using Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
