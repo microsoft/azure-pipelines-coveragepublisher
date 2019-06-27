@@ -1,10 +1,6 @@
 $buildReason = ${env:BUILD_REASON}
 
-if($buildReason -eq "PullRequest")
-{
-    Write-Host "##vso[build.addbuildtag]PR"
-}
-else
+if($buildReason -neq "PullRequest")
 {
     Write-Host "##vso[build.addbuildtag]CI"
 }
