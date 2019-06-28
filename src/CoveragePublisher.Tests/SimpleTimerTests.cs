@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
-using Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 
 namespace CoveragePublisher.Tests
 {

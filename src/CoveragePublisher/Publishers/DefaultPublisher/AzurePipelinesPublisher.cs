@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.TestResults.WebApi;
 using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     internal class AzurePipelinesPublisher : ICoveragePublisher
     {

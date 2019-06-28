@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.TeamFoundation.TestClient.PublishTestResults;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     internal class LogStoreHelper: ILogStoreHelper
     {

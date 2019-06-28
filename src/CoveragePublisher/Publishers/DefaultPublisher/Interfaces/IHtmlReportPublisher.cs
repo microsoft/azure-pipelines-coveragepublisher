@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public interface IHtmlReportPublisher
     {

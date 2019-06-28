@@ -1,6 +1,6 @@
 ﻿using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     /// <summary>
     /// Gets feature flag state.

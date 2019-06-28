@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
-using Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.TeamFoundation.Build.WebApi;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

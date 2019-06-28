@@ -6,13 +6,13 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
-using Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.FileContainer.Client;
 using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Resources = Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher.Resources;
+using Resources = Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher.Resources;
 
 namespace CoveragePublisher.Tests
 {

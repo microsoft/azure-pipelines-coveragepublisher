@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
-using Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {

@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher
+﻿namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public class ServiceFactory
     {

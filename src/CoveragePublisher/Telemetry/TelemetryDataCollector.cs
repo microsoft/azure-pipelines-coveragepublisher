@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Pipelines.CoveragePublisher.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
 using Microsoft.VisualStudio.Services.WebPlatform;
 
