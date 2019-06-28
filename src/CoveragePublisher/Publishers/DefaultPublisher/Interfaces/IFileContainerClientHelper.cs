@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Services.FileContainer.Client;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public interface IFileContainerClientHelper
     {

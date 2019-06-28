@@ -1,5 +1,5 @@
 ﻿using Microsoft.Azure.Pipelines.CoveragePublisher;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CoveragePublisher.Tests.Publishers.AzurePipelines.Helpers

@@ -4,9 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.Build.WebApi;
 using Microsoft.TeamFoundation.Core.WebApi;
-using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public class BuildService
     {

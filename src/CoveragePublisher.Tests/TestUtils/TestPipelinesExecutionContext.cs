@@ -1,8 +1,8 @@
 ﻿
 using System;
 using System.IO;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
 
 namespace CoveragePublisher.Tests
 {

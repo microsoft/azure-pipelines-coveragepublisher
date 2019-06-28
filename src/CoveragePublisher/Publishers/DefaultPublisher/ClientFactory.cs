@@ -4,7 +4,7 @@
 using System;
 using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public class ClientFactory : IClientFactory
     {

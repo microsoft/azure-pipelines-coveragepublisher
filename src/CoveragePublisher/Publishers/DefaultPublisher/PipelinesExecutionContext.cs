@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     internal class PipelinesExecutionContext: IPipelinesExecutionContext
     {

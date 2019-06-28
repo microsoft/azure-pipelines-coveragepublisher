@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.TeamFoundation.Build.WebApi;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

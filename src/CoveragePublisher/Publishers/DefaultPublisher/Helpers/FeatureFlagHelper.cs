@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.TeamFoundation.TestClient.PublishTestResults;
 using Microsoft.VisualStudio.Services.FeatureAvailability.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public class FeatureFlagHelper: IFeatureFlagHelper
     {

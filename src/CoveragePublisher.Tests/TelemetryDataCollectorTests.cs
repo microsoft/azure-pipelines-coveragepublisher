@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

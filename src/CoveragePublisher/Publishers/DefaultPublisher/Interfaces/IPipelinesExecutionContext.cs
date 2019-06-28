@@ -1,9 +1,7 @@
 ﻿using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public interface IPipelinesExecutionContext: IExecutionContext
     {

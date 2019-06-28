@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.VisualStudio.Services.FileContainer.Client;
-using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.AzurePipelines
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
     public class FileContainerService
     {
