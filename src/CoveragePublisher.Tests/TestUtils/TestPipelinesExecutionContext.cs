@@ -28,5 +28,7 @@ namespace CoveragePublisher.Tests
         public ILogger Logger { get; private set; }
 
         public string TempPath => Path.GetTempPath();
+
+        public ITelemetryDataCollector TelemetryDataCollector { get; private set; }
     }
 }

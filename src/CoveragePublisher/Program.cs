@@ -35,24 +35,26 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         private static void ProcessCoverage(PublisherConfiguration config, CancellationToken cancellationToken)
         {
             // Currently the publisher only works for azure pipelines, so we simply instansiate for Azure Pipelines
-            var context = AzurePipelinesPublisher.ExecutionContext;
-            TraceLogger.Initialize(AzurePipelinesPublisher.ExecutionContext.Logger);
-
             AzurePipelinesPublisher publisher = null;
+            IExecutionContext context = null;
 
             try
             {
                 publisher = new AzurePipelinesPublisher();
+                context = publisher.ExecutionContext;
+                TraceLogger.Initialize(context.Logger);
             }
             catch (Exception ex)
             {
-                TraceLogger.Error(string.Format(Resources.CouldNotConnectToAzurePipelines, ex.Message));
+                Console.Error.Write(string.Format(Resources.CouldNotConnectToAzurePipelines, ex.Message));
+                return;
             }
 
-            var processor = new CoverageProcessor(publisher);
+
+            var processor = new CoverageProcessor(publisher, context.TelemetryDataCollector);
 
             // By default wait for 2 minutes for coverage to publish
-            var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config))
+            var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context.TelemetryDataCollector))
                                            .Wait(config.TimeoutInSeconds * 1000, cancellationToken);
 
             if(publishTimedout)

@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.Pipelines.CoveragePublisher
+namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
 {
     public interface ITelemetryDataCollector
     {
@@ -30,6 +31,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             = null);
 
         /// <summary>
+        /// Add an exception to the list of failures to telemetry
+        /// <param name="exception">Exception occured.</param>
+        /// </summary>
+        void AddFailure(Exception exception);
+
+        /// <summary>
         /// Publish the cumulative telemetry accrued over time and resets the collection
         /// </summary>
         Task PublishCumulativeTelemetryAsync();
@@ -40,5 +47,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         /// <param name="properties">Custom set of properties to publish</param>
         /// </summary>
         Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties);
+
     }
 }

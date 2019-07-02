@@ -7,5 +7,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
     public interface IExecutionContext
     {
         ILogger Logger { get; }
+
+        ITelemetryDataCollector TelemetryDataCollector { get; }
     }
 }

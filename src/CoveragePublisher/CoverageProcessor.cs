@@ -10,10 +10,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     public class CoverageProcessor
     {
         private ICoveragePublisher _publisher;
+        private ITelemetryDataCollector _telemetry;
 
-        public CoverageProcessor(ICoveragePublisher publisher)
+        public CoverageProcessor(ICoveragePublisher publisher, ITelemetryDataCollector telemetry)
         {
             _publisher = publisher;
+            _telemetry = telemetry;
         }
 
         public async Task ParseAndPublishCoverage(PublisherConfiguration config, CancellationToken token, Parser parser)
@@ -26,6 +28,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 {
                     TraceLogger.Debug("Publishing file json coverage is supported.");
                     var fileCoverage = parser.GetFileCoverageInfos();
+
+                    _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
+
                     await _publisher.PublishFileCoverage(fileCoverage, token);
                 }
                 else

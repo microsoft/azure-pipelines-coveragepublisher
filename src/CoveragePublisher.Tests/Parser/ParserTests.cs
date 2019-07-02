@@ -15,6 +15,7 @@ namespace CoveragePublisher.Tests
     public class ParserTests
     {
         private static TestLogger _logger = new TestLogger();
+        private Mock<ITelemetryDataCollector> _mockTelemetry = new Mock<ITelemetryDataCollector>();
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -44,7 +45,7 @@ namespace CoveragePublisher.Tests
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestParser(config);
+            var parser = new TestParser(config, _mockTelemetry.Object);
             parser.GenerateReport(mockTool.Object);
 
             var tempDirSummary = Directory.EnumerateDirectories(tempDir, "Summary_*").ToList()[0];
@@ -84,7 +85,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestParser(config);
+            var parser = new TestParser(config, _mockTelemetry.Object);
             parser.GenerateReport(mockTool.Object);
 
             //cleanup
@@ -107,7 +108,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
                 ReportDirectory = tempDir
             };
 
-            var parser = new TestParser(config);
+            var parser = new TestParser(config, _mockTelemetry.Object);
             parser.GenerateReport(mockTool.Object);
             
             Assert.IsTrue(_logger.Log.Contains("debug: Parser.GenerateHTMLReport: Directory".Trim()));
@@ -120,7 +121,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
             var mockTool = new Mock<ICoverageParserTool>();
 
             var config = new PublisherConfiguration();
-            var parser = new Mock<TestParser>(config);
+            var parser = new Mock<TestParser>(config, _mockTelemetry.Object);
 
             parser.Setup(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
 
@@ -136,7 +137,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
             var mockTool = new Mock<ICoverageParserTool>();
 
             var config = new PublisherConfiguration();
-            var parser = new Mock<TestParser>(config);
+            var parser = new Mock<TestParser>(config, _mockTelemetry.Object);
 
             parser.Setup(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
 

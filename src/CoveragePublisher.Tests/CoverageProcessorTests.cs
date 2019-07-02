@@ -15,11 +15,12 @@ namespace CoveragePublisher.Tests
         private Mock<ICoveragePublisher> _mockPublisher = new Mock<ICoveragePublisher>();
         private PublisherConfiguration _config = new PublisherConfiguration() { ReportDirectory = "directory" };
         private Mock<Parser> _mockParser;
+        private Mock<ITelemetryDataCollector> _mockTelemetryDataCollector = new Mock<ITelemetryDataCollector>();
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _mockParser = new Mock<Parser>(_config);
+            _mockParser = new Mock<Parser>(_config, _mockTelemetryDataCollector.Object);
 
             _mockPublisher.Setup(x => x.PublishCoverageSummary(It.IsAny<CoverageSummary>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
@@ -30,7 +31,7 @@ namespace CoveragePublisher.Tests
         public void ParseAndPublishCoverageWillPublishSummary()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var summary = new CoverageSummary();
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
@@ -47,7 +48,7 @@ namespace CoveragePublisher.Tests
         public void ParseAndPublishCoverageWillPublishFileCoverage()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var coverage = new List<FileCoverageInfo>();
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
@@ -60,5 +61,4 @@ namespace CoveragePublisher.Tests
                 It.Is<CancellationToken>(b => b == token)));
         }
     }
-    
 }
