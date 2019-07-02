@@ -37,8 +37,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Utils
         {
             _timer.Stop();
 
-            _telemetry.AddAndAggregate(_telemetryEventName, _timer.Elapsed.TotalMilliseconds, _telemetryArea);
-            TraceLogger.Debug($"PERF : {_telemetryArea}.{_telemetryEventName} : took {_timer.Elapsed.TotalMilliseconds} ms.");
+            var telemetryKey = $"{_telemetryArea}.{_telemetryEventName}";
+
+            _telemetry.AddAndAggregate(telemetryKey, _timer.Elapsed.TotalMilliseconds, _telemetryArea);
+            TraceLogger.Debug($"PERF : {telemetryKey} : took {_timer.Elapsed.TotalMilliseconds} ms.");
 
         }
 
