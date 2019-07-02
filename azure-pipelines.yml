@@ -48,7 +48,7 @@ steps:
     checkCoverage: true
     coverageFailOption: 'fixed'
     coverageType: 'lines'
-    coverageThreshold: '88'
+    coverageThreshold: '87'
 
 - task: PublishBuildArtifacts@1
   condition: ne(variables['Build.Reason'], 'PullRequest')
