@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
@@ -31,19 +32,29 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                     _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
 
-                    await _publisher.PublishFileCoverage(fileCoverage, token);
+                    using(new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                    {
+                        await _publisher.PublishFileCoverage(fileCoverage, token);
+                    }
                 }
                 else
                 {
                     TraceLogger.Debug("Publishing file json coverage is not supported.");
                     var summary = parser.GetCoverageSummary();
-                    await _publisher.PublishCoverageSummary(summary, token);
+
+                    using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
+                    {
+                        await _publisher.PublishCoverageSummary(summary, token);
+                    }
                 }
 
 
                 if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
                 {
-                    await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                    using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                    {
+                        await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                    }
                 }
             }
         }

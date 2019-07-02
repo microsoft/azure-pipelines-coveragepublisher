@@ -78,6 +78,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             });
 
             await Task.WhenAll(publishCCTasks);
+
+            // TODO task exceptions? 
         }
 
         private string GetCoverageDirectoryName(string buildId)
