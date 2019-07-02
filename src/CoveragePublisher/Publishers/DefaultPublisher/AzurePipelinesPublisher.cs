@@ -25,13 +25,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         private static IPipelinesExecutionContext _executionContext;
 
-        public static IPipelinesExecutionContext ExecutionContext
+        public IPipelinesExecutionContext ExecutionContext
         {
             get
             {
                 if (_executionContext == null)
                 {
-                    _executionContext = new PipelinesExecutionContext();
+                    _executionContext = new PipelinesExecutionContext(_clientFactory);
                 }
                 return _executionContext;
             }

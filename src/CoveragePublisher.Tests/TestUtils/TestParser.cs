@@ -9,7 +9,7 @@ namespace CoveragePublisher.Tests
 
     public class TestParser: Parser
     {
-        public TestParser(PublisherConfiguration config) : base(config) { }
+        public TestParser(PublisherConfiguration config, ITelemetryDataCollector telemetryDataCollector) : base(config, telemetryDataCollector) { }
         
         protected override void GenerateHTMLReport(ICoverageParserTool tool)
         {

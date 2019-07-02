@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace CoveragePublisher.Tests
 {
@@ -31,23 +32,23 @@ namespace CoveragePublisher.Tests
         {
 
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object);
+            var telemetryDataCollector = new Mock<ITelemetryDataCollector>();
 
             clientFactory
                 .Setup(x => x.GetClient<CustomerIntelligenceHttpClient>())
                 .Returns((CustomerIntelligenceHttpClient)null);
             telemetryDataCollector.Setup(x => x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
-            using (new SimpleTimer("testTimer", "Test", "test", telemetryDataCollector.Object, TimeSpan.FromHours(1), true)) { }
+            using (new SimpleTimer("Test", "test", telemetryDataCollector.Object)) { }
 
-            Assert.IsTrue(_logger.Log.Contains("debug: PERF : testTimer : took "));
+            Assert.IsTrue(_logger.Log.Contains("debug: PERF : Test.test : took "));
         }
 
         [TestMethod]
         public void SimpleTimeWhenOutSideThreshold()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object);
+            var telemetryDataCollector = new Mock<ITelemetryDataCollector>();
 
             clientFactory
                 .Setup(x => x.GetClient<CustomerIntelligenceHttpClient>())
@@ -55,23 +56,23 @@ namespace CoveragePublisher.Tests
             telemetryDataCollector.Setup(x =>
                 x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
-            using (new SimpleTimer("testTimer", "Test", "test", telemetryDataCollector.Object, TimeSpan.FromMilliseconds(0), true)) { }
+            using (new SimpleTimer("Test", "test", telemetryDataCollector.Object)) { }
 
-            Assert.IsTrue(_logger.Log.Contains("debug: PERF : testTimer : took "));
+            Assert.IsTrue(_logger.Log.Contains("debug: PERF : Test.test : took "));
         }
 
         [TestMethod]
         public void SimpleTimeWorksWhenDisposedCalledTwice()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new Mock<TelemetryDataCollector>(clientFactory.Object);
+            var telemetryDataCollector = new Mock<ITelemetryDataCollector>();
 
             clientFactory
                 .Setup(x => x.GetClient<CustomerIntelligenceHttpClient>())
                 .Returns((CustomerIntelligenceHttpClient)null);
             telemetryDataCollector.Setup(x => x.PublishTelemetryAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()));
 
-            var timer = new SimpleTimer("testTimer", "Test", "test", telemetryDataCollector.Object, TimeSpan.FromMilliseconds(10), true);
+            var timer = new SimpleTimer("Test", "test", telemetryDataCollector.Object);
 
             timer.Dispose();
             timer.Dispose();

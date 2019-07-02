@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
@@ -11,13 +12,13 @@ using Moq;
 namespace CoveragePublisher.Tests
 {
     [TestClass]
-    public class TelemetryDataCollectorTests
+    public class PipelinesTelemetryTests
     {
         [TestMethod]
         public void PublishTelemetryAsyncTest()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object);
+            var telemetryDataCollector = new PipelinesTelemetry(clientFactory.Object);
             var ciHttpClient =
                 new Mock<CustomerIntelligenceHttpClient>(new Uri("https://somename.Visualstudio.com"), new VssCredentials());
 
@@ -32,7 +33,7 @@ namespace CoveragePublisher.Tests
         public void AddOrUpdateWithDupsWorksFine()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object);
+            var telemetryDataCollector = new PipelinesTelemetry(clientFactory.Object);
 
             telemetryDataCollector.AddOrUpdate("Property", "Value");
             telemetryDataCollector.AddOrUpdate("Property", "Someothervalue");
@@ -44,7 +45,7 @@ namespace CoveragePublisher.Tests
         public void AddAndAggregateWithDupsWorksFine()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object);
+            var telemetryDataCollector = new PipelinesTelemetry(clientFactory.Object);
 
             telemetryDataCollector.AddAndAggregate("Property", "Value");
             telemetryDataCollector.AddAndAggregate("Property", "Someothervalue");
@@ -65,7 +66,7 @@ namespace CoveragePublisher.Tests
         public void AddAndAggregateWithDupsWorksFineWithInt()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object);
+            var telemetryDataCollector = new PipelinesTelemetry(clientFactory.Object);
 
             telemetryDataCollector.AddAndAggregate("Property", 1);
             telemetryDataCollector.AddAndAggregate("Property", 1);
@@ -77,7 +78,7 @@ namespace CoveragePublisher.Tests
         public void AddAndAggregateWithDupsWorksFineWithDouble()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object);
+            var telemetryDataCollector = new PipelinesTelemetry(clientFactory.Object);
 
             telemetryDataCollector.AddAndAggregate("Property", 1.1);
             telemetryDataCollector.AddAndAggregate("Property", 1.1);
@@ -89,7 +90,7 @@ namespace CoveragePublisher.Tests
         public void PublishCumulativeTelemetryAsyncTest()
         {
             var clientFactory = new Mock<IClientFactory>();
-            var telemetryDataCollector = new TelemetryDataCollector(clientFactory.Object);
+            var telemetryDataCollector = new PipelinesTelemetry(clientFactory.Object);
 
             telemetryDataCollector.AddAndAggregate("Property", 1.1);
             telemetryDataCollector.AddAndAggregate("Property", 1.1);
@@ -99,6 +100,27 @@ namespace CoveragePublisher.Tests
             telemetryDataCollector.PublishCumulativeTelemetryAsync();
 
             Assert.IsTrue(telemetryDataCollector.Properties.Count == 0);
+        }
+
+        [TestMethod]
+
+        public void AddFailureWorksFine()
+        {
+            var clientFactory = new Mock<IClientFactory>();
+            var telemetryDataCollector = new PipelinesTelemetry(clientFactory.Object);
+
+            Assert.AreEqual(((ConcurrentBag<Exception>)telemetryDataCollector.Properties["Failures"]).Count, 0);
+
+            var error = new Exception();
+
+            telemetryDataCollector.AddFailure(error);
+            telemetryDataCollector.AddFailure(error);
+
+            var enumerator = ((ConcurrentBag<Exception>)telemetryDataCollector.Properties["Failures"]).GetEnumerator();
+            enumerator.MoveNext();
+
+            Assert.AreEqual(((ConcurrentBag<Exception>)telemetryDataCollector.Properties["Failures"]).Count, 2);
+            Assert.AreEqual(enumerator.Current, error);
         }
     }
 }

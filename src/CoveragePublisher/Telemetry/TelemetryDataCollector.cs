@@ -5,26 +5,22 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
-using Microsoft.VisualStudio.Services.CustomerIntelligence.WebApi;
-using Microsoft.VisualStudio.Services.WebPlatform;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
-    public class TelemetryDataCollector : ITelemetryDataCollector
+    public abstract class TelemetryDataCollector : ITelemetryDataCollector
     {
-        private readonly CustomerIntelligenceHttpClient _httpClient;
-        private const string CumulativeTelemetryFeatureName = "ConsolidatedTelemetry";
-        private readonly object _publishLockNode = new object();
-        private readonly ConcurrentDictionary<string, object> _properties = new ConcurrentDictionary<string, object>();
+        protected const string CumulativeTelemetryFeatureName = "ConsolidatedTelemetry";
+        protected readonly ConcurrentDictionary<string, object> _properties = new ConcurrentDictionary<string, object>();
+        private readonly ConcurrentBag<Exception> _failures = new ConcurrentBag<Exception>();
 
         public string Area => "TestResultParser";
 
-        public TelemetryDataCollector(IClientFactory clientFactory)
+        public TelemetryDataCollector()
         {
-            _httpClient = clientFactory.GetClient<CustomerIntelligenceHttpClient>();
+            _properties["Failures"] = _failures;
         }
 
         public virtual void AddOrUpdate(string property, object value, string subArea = null)
@@ -93,54 +89,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
         }
 
-        public virtual Task PublishCumulativeTelemetryAsync()
+        public void AddFailure(Exception exception)
         {
-            try
-            {
-                lock (_publishLockNode)
-                {
-                    var ciEvent = new CustomerIntelligenceEvent
-                    {
-                        Area = Area,
-                        Feature = CumulativeTelemetryFeatureName,
-                        Properties = _properties.ToDictionary(entry => entry.Key, entry => entry.Value)
-                    };
-
-                    // This is to ensure that the single ci event is never fired more than once.
-                    _properties.Clear();
-
-                    return _httpClient.PublishEventsAsync(new[] { ciEvent });
-                }
-            }
-            catch (Exception e)
-            {
-                TraceLogger.Debug($"TelemetryDataCollector : PublishCumulativeTelemetryAsync : Failed to publish telemetry due to {e}");
-            }
-
-            return Task.CompletedTask;
+            _failures.Add(exception);
+            AddOrUpdate("FailureCount", _failures.Count);
         }
+
+        public abstract Task PublishCumulativeTelemetryAsync();
 
         /// <inheritdoc />
-        public virtual Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties)
-        {
-            try
-            {
-                var ciEvent = new CustomerIntelligenceEvent
-                {
-                    Area = Area,
-                    Feature = feature,
-                    Properties = properties
-                };
-
-                return _httpClient.PublishEventsAsync(new[] { ciEvent });
-            }
-            catch (Exception e)
-            {
-                TraceLogger.Debug($"TelemetryDataCollector : PublishTelemetryAsync : Failed to publish telemetry due to {e}");
-            }
-
-            return Task.CompletedTask;
-        }
+        public abstract Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties);
 
         public ConcurrentDictionary<string, object> Properties => _properties;
     }
