@@ -26,6 +26,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             _properties["Failures"] = _failures;
         }
 
+        public abstract Task PublishCumulativeTelemetryAsync();
+
+        public abstract Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties);
+
         public virtual void AddOrUpdate(string property, Func<object> value, string subArea = null)
         {
             if(TelemetryCollectionEnabled)
@@ -121,10 +125,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 AddOrUpdate("FailureCount", _failures.Count);
             }
         }
-
-        public abstract Task PublishCumulativeTelemetryAsync();
-
-        public abstract Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties);
 
         public ConcurrentDictionary<string, object> Properties => _properties;
     }
