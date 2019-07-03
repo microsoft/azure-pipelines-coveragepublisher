@@ -18,33 +18,36 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly object _publishLockNode = new object();
         private readonly CustomerIntelligenceHttpClient _httpClient;
 
-        public PipelinesTelemetry(IClientFactory clientFactory)
+        public PipelinesTelemetry(IClientFactory clientFactory, bool enableTelemetryCollection): base(enableTelemetryCollection)
         {
             _httpClient = clientFactory.GetClient<CustomerIntelligenceHttpClient>();
         }
 
         public override Task PublishCumulativeTelemetryAsync()
         {
-            try
+            if (TelemetryCollectionEnabled)
             {
-                lock (_publishLockNode)
+                try
                 {
-                    var ciEvent = new CustomerIntelligenceEvent
+                    lock (_publishLockNode)
                     {
-                        Area = Area,
-                        Feature = CumulativeTelemetryFeatureName,
-                        Properties = _properties.ToDictionary(entry => entry.Key, entry => entry.Value)
-                    };
+                        var ciEvent = new CustomerIntelligenceEvent
+                        {
+                            Area = Area,
+                            Feature = CumulativeTelemetryFeatureName,
+                            Properties = _properties.ToDictionary(entry => entry.Key, entry => entry.Value)
+                        };
 
-                    // This is to ensure that the single ci event is never fired more than once.
-                    _properties.Clear();
+                        // This is to ensure that the single ci event is never fired more than once.
+                        _properties.Clear();
 
-                    return _httpClient.PublishEventsAsync(new[] { ciEvent });
+                        return _httpClient.PublishEventsAsync(new[] { ciEvent });
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                TraceLogger.Debug($"TelemetryDataCollector : PublishCumulativeTelemetryAsync : Failed to publish telemetry due to {e}");
+                catch (Exception e)
+                {
+                    TraceLogger.Debug($"TelemetryDataCollector : PublishCumulativeTelemetryAsync : Failed to publish telemetry due to {e}");
+                }
             }
 
             return Task.CompletedTask;
@@ -53,20 +56,23 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         /// <inheritdoc />
         public override Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties)
         {
-            try
+            if (TelemetryCollectionEnabled)
             {
-                var ciEvent = new CustomerIntelligenceEvent
+                try
                 {
-                    Area = Area,
-                    Feature = feature,
-                    Properties = properties
-                };
+                    var ciEvent = new CustomerIntelligenceEvent
+                    {
+                        Area = Area,
+                        Feature = feature,
+                        Properties = properties
+                    };
 
-                return _httpClient.PublishEventsAsync(new[] { ciEvent });
-            }
-            catch (Exception e)
-            {
-                TraceLogger.Debug($"TelemetryDataCollector : PublishTelemetryAsync : Failed to publish telemetry due to {e}");
+                    return _httpClient.PublishEventsAsync(new[] { ciEvent });
+                }
+                catch (Exception e)
+                {
+                    TraceLogger.Debug($"TelemetryDataCollector : PublishTelemetryAsync : Failed to publish telemetry due to {e}");
+                }
             }
 
             return Task.CompletedTask;

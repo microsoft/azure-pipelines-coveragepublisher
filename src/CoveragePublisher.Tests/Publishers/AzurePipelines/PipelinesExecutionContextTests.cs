@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -12,7 +13,7 @@ namespace CoveragePublisher.Tests
         [TestMethod]
         public void WillInitializeProperties()
         {
-            var context = new PipelinesExecutionContext(new Mock<IClientFactory>().Object);
+            var context = new PipelinesExecutionContext(new Mock<ITelemetryDataCollector>().Object);
             Assert.IsNotNull(context.Logger);
 
             var guid = Guid.NewGuid().ToString();
@@ -35,7 +36,7 @@ namespace CoveragePublisher.Tests
         [TestMethod]
         public void WillInitializePropertiesWithEmptyValues()
         {
-            var context = new PipelinesExecutionContext(new Mock<IClientFactory>().Object);
+            var context = new PipelinesExecutionContext(new Mock<ITelemetryDataCollector>().Object);
             Assert.IsNotNull(context.Logger);
 
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.BuildContainerId, "");
@@ -52,7 +53,7 @@ namespace CoveragePublisher.Tests
         [TestMethod]
         public void WillThrowIfAccessTokenAndCollectionUriAreEmpty()
         {
-            var context = new PipelinesExecutionContext(new Mock<IClientFactory>().Object);
+            var context = new PipelinesExecutionContext(new Mock<ITelemetryDataCollector>().Object);
             Assert.IsNotNull(context.Logger);
 
             Environment.SetEnvironmentVariable(Constants.EnvironmentVariables.AccessToken, "");

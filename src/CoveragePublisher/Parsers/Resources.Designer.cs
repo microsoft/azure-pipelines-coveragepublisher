@@ -68,5 +68,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers {
                 return ResourceManager.GetString("HTMLReportError", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error occured while parsing coverage files..
+        /// </summary>
+        internal static string ParsingError {
+            get {
+                return ResourceManager.GetString("ParsingError", resourceCulture);
+            }
+        }
     }
 }

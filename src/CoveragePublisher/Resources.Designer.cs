@@ -61,7 +61,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not connect to azure pipelines. Exception: {0}..
+        ///   Looks up a localized string similar to Could not connect to azure pipelines. Exception: {0}.
         /// </summary>
         internal static string CouldNotConnectToAzurePipelines {
             get {
@@ -70,11 +70,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to An error occured while trying to publish coverage files. {0}.
         /// </summary>
-        internal static string String1 {
+        internal static string ErrorOccuredWhilePublishing {
             get {
-                return ResourceManager.GetString("String1", resourceCulture);
+                return ResourceManager.GetString("ErrorOccuredWhilePublishing", resourceCulture);
             }
         }
     }

@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
+using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
 {
@@ -23,38 +24,51 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         {
             if (_publisher != null)
             {
-                var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
-
-                if (supportsFileCoverageJson)
+                try
                 {
-                    TraceLogger.Debug("Publishing file json coverage is supported.");
-                    var fileCoverage = parser.GetFileCoverageInfos();
+                    _telemetry.AddOrUpdate("PublisherConfig", JsonUtility.Serialize(config));
 
-                    _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
+                    var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
 
-                    using(new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                    if (supportsFileCoverageJson)
                     {
-                        await _publisher.PublishFileCoverage(fileCoverage, token);
+                        TraceLogger.Debug("Publishing file json coverage is supported.");
+                        var fileCoverage = parser.GetFileCoverageInfos();
+
+                        _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
+
+                        using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                        {
+                            await _publisher.PublishFileCoverage(fileCoverage, token);
+                        }
+                    }
+                    else
+                    {
+                        TraceLogger.Debug("Publishing file json coverage is not supported.");
+                        var summary = parser.GetCoverageSummary();
+
+                        using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
+                        {
+                            await _publisher.PublishCoverageSummary(summary, token);
+                        }
+                    }
+
+
+                    if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
+                    {
+                        using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                        {
+                            await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                        }
                     }
                 }
-                else
+                catch(ParsingException ex)
                 {
-                    TraceLogger.Debug("Publishing file json coverage is not supported.");
-                    var summary = parser.GetCoverageSummary();
-
-                    using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
-                    {
-                        await _publisher.PublishCoverageSummary(summary, token);
-                    }
+                    TraceLogger.Error(ex.Message + ex);
                 }
-
-
-                if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
+                catch(Exception ex)
                 {
-                    using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
-                    {
-                        await _publisher.PublishHTMLReport(config.ReportDirectory, token);
-                    }
+                    TraceLogger.Error(string.Format(Resources.ErrorOccuredWhilePublishing, ex));
                 }
             }
         }

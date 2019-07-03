@@ -124,14 +124,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         private ParserResult ParseCoverageFiles(List<string> coverageFiles)
         {
-            TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
+            try
+            {
+                TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
 
-            CoverageReportParser parser = new CoverageReportParser(1, new string[] { }, new DefaultFilter(new string[] { }),
-                new DefaultFilter(new string[] { }),
-                new DefaultFilter(new string[] { }));
+                CoverageReportParser parser = new CoverageReportParser(1, new string[] { }, new DefaultFilter(new string[] { }),
+                    new DefaultFilter(new string[] { }),
+                    new DefaultFilter(new string[] { }));
 
-            ReadOnlyCollection<string> collection = new ReadOnlyCollection<string>(coverageFiles);
-            return parser.ParseFiles(collection);
+                ReadOnlyCollection<string> collection = new ReadOnlyCollection<string>(coverageFiles);
+                return parser.ParseFiles(collection);
+            }
+            catch(Exception ex)
+            {
+                throw new ParsingException(Resources.ParsingError, ex);
+            }
         }
     }
 }

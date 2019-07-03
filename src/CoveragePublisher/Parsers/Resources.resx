@@ -120,4 +120,7 @@
   <data name="HTMLReportError" xml:space="preserve">
     <value>Error occured while generating HTML report. Error message: {0}.</value>
   </data>
+  <data name="ParsingError" xml:space="preserve">
+    <value>Error occured while parsing coverage files.</value>
+  </data>
 </root>

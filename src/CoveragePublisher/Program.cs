@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             try
             {
-                publisher = new AzurePipelinesPublisher();
+                publisher = new AzurePipelinesPublisher(true);
                 context = publisher.ExecutionContext;
                 TraceLogger.Initialize(context.Logger);
             }

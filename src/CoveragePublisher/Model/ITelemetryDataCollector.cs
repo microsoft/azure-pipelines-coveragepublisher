@@ -21,6 +21,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         void AddAndAggregate(string property, object value, string subArea = null);
 
         /// <summary>
+        /// Accumulate data through out the life cycle of the data collector until PublishCumulativeTelemetryAsync is called
+        /// This is used when the same data point is hit multiple times in an execution flow and firing an event each time
+        /// is a costly operations. This helps is aggregating the data that would otherwise have been done later and the 
+        /// individual data points themselves are of no interest.
+        /// </summary>
+        /// <param name="property">Name of the data point</param>
+        /// <param name="value">Lambda to data point value to be stored</param>
+        /// <param name="subArea">Sub area of the data point. This is along with the eventName forms the property name</param>
+        void AddAndAggregate(string property, Func<object> value, string subArea = null);
+
+        /// <summary>
         /// Adds a new property or overwrites it if it already exists. Accumulate data through out the life cycle of the data collector until 
         /// PublishCumulativeTelemetryAsync is called.
         /// </summary>
@@ -28,6 +39,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <param name="value">Data point value to be stored</param>
         /// <param name="subArea">Sub area of the data point. This is along with the eventName forms the property name</param>
         void AddOrUpdate(string property, object value, string subArea
+            = null);
+
+        /// <summary>
+        /// Adds a new property or overwrites it if it already exists. Accumulate data through out the life cycle of the data collector until 
+        /// PublishCumulativeTelemetryAsync is called.
+        /// </summary>
+        /// <param name="property">Name of the data point</param>
+        /// <param name="value">Lambda to data point value to be stored</param>
+        /// <param name="subArea">Sub area of the data point. This is along with the eventName forms the property name</param>
+        void AddOrUpdate(string property, Func<object> value, string subArea
             = null);
 
         /// <summary>

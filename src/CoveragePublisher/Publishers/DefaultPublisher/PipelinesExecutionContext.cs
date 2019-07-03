@@ -14,10 +14,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private string tempPath = null;
 
 
-        public PipelinesExecutionContext(IClientFactory clientFactory)
+        public PipelinesExecutionContext(ITelemetryDataCollector telemetry)
         {
             Logger = new PipelinesLogger();
-            TelemetryDataCollector = new PipelinesTelemetry(clientFactory);
+            TelemetryDataCollector = telemetry;
         }
 
         public ILogger Logger { get; private set; }
