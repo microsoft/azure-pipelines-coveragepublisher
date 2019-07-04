@@ -18,87 +18,113 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
         public string Area => "TestResultParser";
 
-        public TelemetryDataCollector()
+        public bool TelemetryCollectionEnabled { get; private set; }
+
+        public TelemetryDataCollector(bool telemetryCollectionEnabled)
         {
+            TelemetryCollectionEnabled = telemetryCollectionEnabled;
             _properties["Failures"] = _failures;
+        }
+
+        public abstract Task PublishCumulativeTelemetryAsync();
+
+        public abstract Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties);
+
+        public virtual void AddOrUpdate(string property, Func<object> value, string subArea = null)
+        {
+            if(TelemetryCollectionEnabled)
+            {
+                AddOrUpdate(property, value(), subArea);
+            }
         }
 
         public virtual void AddOrUpdate(string property, object value, string subArea = null)
         {
-            var propertyKey = !string.IsNullOrEmpty(subArea) ? $"{subArea}:{property}" : property;
+            if (TelemetryCollectionEnabled)
+            {
+                var propertyKey = !string.IsNullOrEmpty(subArea) ? $"{subArea}:{property}" : property;
 
-            try
-            {
-                _properties[propertyKey] = value;
-            }
-            catch (Exception e)
-            {
-                TraceLogger.Debug($"TelemetryDataCollector : AddOrUpdate : Failed to add {value} with key {propertyKey} due to {e}");
+                try
+                {
+                    _properties[propertyKey] = value;
+                }
+                catch (Exception e)
+                {
+                    TraceLogger.Debug($"TelemetryDataCollector : AddOrUpdate : Failed to add {value} with key {propertyKey} due to {e}");
+                }
             }
         }
 
-        /// <inheritdoc />
+        public virtual void AddAndAggregate(string property, Func<object> value, string subArea = null)
+        {
+            if(TelemetryCollectionEnabled)
+            {
+                AddAndAggregate(property, value(), subArea);
+            }
+        }
+
         public virtual void AddAndAggregate(string property, object value, string subArea = null)
         {
-            var propertyKey = !string.IsNullOrEmpty(subArea) ? $"{subArea}:{property}" : property;
-
-            try
+            if (TelemetryCollectionEnabled)
             {
-                // If key does not exist or aggregate option is false add value blindly
-                if (!_properties.ContainsKey(propertyKey))
-                {
-                    _properties[propertyKey] = value;
-                    return;
-                }
+                var propertyKey = !string.IsNullOrEmpty(subArea) ? $"{subArea}:{property}" : property;
 
-                // If key exists and the value is a list, assume that existing value is a list and concat them
-                if (value is IList list)
+                try
                 {
-                    foreach (var element in list)
+                    // If key does not exist or aggregate option is false add value blindly
+                    if (!_properties.ContainsKey(propertyKey))
                     {
-                        (_properties[propertyKey] as IList)?.Add(element);
+                        _properties[propertyKey] = value;
+                        return;
                     }
-                    return;
-                }
 
-                // If key exists and is a list add new items to list
-                if (_properties[propertyKey] is IList)
-                {
-                    ((IList) _properties[propertyKey]).Add(value);
-                    return;
-                }
+                    // If key exists and the value is a list, assume that existing value is a list and concat them
+                    if (value is IList list)
+                    {
+                        foreach (var element in list)
+                        {
+                            (_properties[propertyKey] as IList)?.Add(element);
+                        }
+                        return;
+                    }
 
-                // If the key exists and value is integer or double arithmetically add them
-                if (_properties[propertyKey] is int)
-                {
-                    _properties[propertyKey] = (int)_properties[propertyKey] + (int)value;
+                    // If key exists and is a list add new items to list
+                    if (_properties[propertyKey] is IList)
+                    {
+                        ((IList)_properties[propertyKey]).Add(value);
+                        return;
+                    }
+
+                    // If the key exists and value is integer or double arithmetically add them
+                    if (_properties[propertyKey] is int)
+                    {
+                        _properties[propertyKey] = (int)_properties[propertyKey] + (int)value;
+                    }
+                    else if (_properties[propertyKey] is double)
+                    {
+                        _properties[propertyKey] = (double)_properties[propertyKey] + (double)value;
+                    }
+                    else
+                    {
+                        // If unknown type just blindly set value
+                        _properties[propertyKey] = value;
+                    }
                 }
-                else if (_properties[propertyKey] is double)
+                catch (Exception e)
                 {
-                    _properties[propertyKey] = (double)_properties[propertyKey] + (double)value;
+                    TraceLogger.Debug($"TelemetryDataCollector : AddAndAggregate : Failed to add {value} with key {propertyKey} due to {e}");
                 }
-                else
-                {
-                    // If unknown type just blindly set value
-                    _properties[propertyKey] = value;
-                }
-            }
-            catch (Exception e)
-            {
-                TraceLogger.Debug($"TelemetryDataCollector : AddAndAggregate : Failed to add {value} with key {propertyKey} due to {e}");
             }
         }
 
         public void AddFailure(Exception exception)
         {
-            _failures.Add(exception);
-            AddOrUpdate("FailureCount", _failures.Count);
+            if (TelemetryCollectionEnabled)
+            {
+                _failures.Add(exception);
+                AddOrUpdate("FailureCount", _failures.Count);
+            }
         }
-
-        public abstract Task PublishCumulativeTelemetryAsync();
-
-        /// <inheritdoc />
-        public abstract Task PublishTelemetryAsync(string feature, Dictionary<string, object> properties);
 
         public ConcurrentDictionary<string, object> Properties => _properties;
     }

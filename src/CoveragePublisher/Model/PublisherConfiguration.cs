@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <summary>
         /// List of coverage files.
         /// </summary>
-        virtual public IEnumerable<string> CoverageFiles { get; set; }
+        virtual public IList<string> CoverageFiles { get; set; }
 
         /// <summary>
         /// Path to coverage report directory. If set to null or empty, publisher will not create/publish an html report
@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <summary>
         /// Semi-colon separated list of source directories. Required for creating html reports for jacoco.
         /// </summary>
-        virtual public string SourceDirectories { get; set; }
+        virtual public string SourceDirectory { get; set; }
         
         /// <summary>
         /// Gets the configuration for whether HTML reports should be generated or not.

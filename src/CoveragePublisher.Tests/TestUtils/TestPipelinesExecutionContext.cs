@@ -3,12 +3,14 @@ using System;
 using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Moq;
 
 namespace CoveragePublisher.Tests
 {
     public class TestPipelinesExecutionContext : IPipelinesExecutionContext
     {
         private Guid _projectId;
+        private ITelemetryDataCollector _mockTelemetry = new Mock<ITelemetryDataCollector>().Object;
         public TestPipelinesExecutionContext(ILogger consoleLogger)
         {
             Logger = consoleLogger;
@@ -29,6 +31,16 @@ namespace CoveragePublisher.Tests
 
         public string TempPath => Path.GetTempPath();
 
-        public ITelemetryDataCollector TelemetryDataCollector { get; private set; }
+        public ITelemetryDataCollector TelemetryDataCollector
+        {
+            get
+            {
+                return _mockTelemetry;
+            }
+            set
+            {
+                _mockTelemetry = value;
+            }
+        }
     }
 }

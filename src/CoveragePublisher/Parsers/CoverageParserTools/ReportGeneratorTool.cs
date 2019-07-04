@@ -113,7 +113,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             // Generate the html report with custom configuration for report generator.
             var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
                 { "targetdir", Configuration.ReportDirectory },
-                { "sourcedirs", string.IsNullOrEmpty(Configuration.SourceDirectories) ? "" : Configuration.SourceDirectories },
+                { "sourcedirs", string.IsNullOrEmpty(Configuration.SourceDirectory) ? "" : Configuration.SourceDirectory },
                 { "reporttypes", "HtmlInline_AzurePipelines" }
             });
 
@@ -124,14 +124,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         private ParserResult ParseCoverageFiles(List<string> coverageFiles)
         {
-            TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
+            try
+            {
+                TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
 
-            CoverageReportParser parser = new CoverageReportParser(1, new string[] { }, new DefaultFilter(new string[] { }),
-                new DefaultFilter(new string[] { }),
-                new DefaultFilter(new string[] { }));
+                CoverageReportParser parser = new CoverageReportParser(1, new string[] { }, new DefaultFilter(new string[] { }),
+                    new DefaultFilter(new string[] { }),
+                    new DefaultFilter(new string[] { }));
 
-            ReadOnlyCollection<string> collection = new ReadOnlyCollection<string>(coverageFiles);
-            return parser.ParseFiles(collection);
+                ReadOnlyCollection<string> collection = new ReadOnlyCollection<string>(coverageFiles);
+                return parser.ParseFiles(collection);
+            }
+            catch(Exception ex)
+            {
+                throw new ParsingException(Resources.ParsingError, ex);
+            }
         }
     }
 }

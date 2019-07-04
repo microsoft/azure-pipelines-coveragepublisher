@@ -39,7 +39,7 @@ namespace CoveragePublisher.Tests
         [TestMethod]
         public void WillPublishHtmlReport()
         {
-            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object);
+            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
             var token = new CancellationToken();
 
             _mockHtmlPublisher.Setup(x => x.PublishHTMLReportAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
@@ -60,7 +60,7 @@ namespace CoveragePublisher.Tests
             summary.AddCoverageStatistics("lines", 10, 5, CoverageSummary.Priority.Line);
             summary.AddCoverageStatistics("blocks", 10, 5, CoverageSummary.Priority.Other);
 
-            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object);
+            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
             var mockClient = new Mock<TestResultsHttpClient>(new Uri("http://localhost"), new VssCredentials());
 
             _mockClientFactory.Setup(x => x.GetClient<TestResultsHttpClient>()).Returns(mockClient.Object);
@@ -86,7 +86,7 @@ namespace CoveragePublisher.Tests
             summary.AddCoverageStatistics("blocks", 10, 5, CoverageSummary.Priority.Other);
 
             var token = new CancellationToken();
-            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object);
+            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
             var mockClient = new Mock<TestManagementHttpClient>(new Uri("http://localhost"), new VssCredentials());
 
             _mockClientFactory.Setup(x => x.GetClient<TestManagementHttpClient>()).Returns(mockClient.Object);
@@ -108,7 +108,7 @@ namespace CoveragePublisher.Tests
         public void WillPublishFileCoverage()
         {
             var token = new CancellationToken();
-            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object);
+            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
             var mockClient = new Mock<TestManagementHttpClient>(new Uri("http://localhost"), new VssCredentials());
 
             var data = new Dictionary<string, string>();

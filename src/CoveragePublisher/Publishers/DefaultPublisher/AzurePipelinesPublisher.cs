@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.TestResults.WebApi;
@@ -22,6 +23,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private IFeatureFlagHelper _featureFlagHelper;
         private IHtmlReportPublisher _htmlReportPublisher;
         private ILogStoreHelper _logStoreHelper;
+        private bool _telemetryEnabled;
 
         private static IPipelinesExecutionContext _executionContext;
 
@@ -31,14 +33,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             {
                 if (_executionContext == null)
                 {
-                    _executionContext = new PipelinesExecutionContext(_clientFactory);
+                    _executionContext = new PipelinesExecutionContext(new PipelinesTelemetry(_clientFactory, _telemetryEnabled));
                 }
                 return _executionContext;
             }
         }
 
-        public AzurePipelinesPublisher(IPipelinesExecutionContext executionContext, IClientFactory clientFactory, IFeatureFlagHelper featureFlagHelper, IHtmlReportPublisher htmlReportPublisher, ILogStoreHelper logStoreHelper)
+        public AzurePipelinesPublisher(IPipelinesExecutionContext executionContext, IClientFactory clientFactory, IFeatureFlagHelper featureFlagHelper, IHtmlReportPublisher htmlReportPublisher, ILogStoreHelper logStoreHelper, bool enableTelemetry)
         {
+            _telemetryEnabled = enableTelemetry;
             _executionContext = executionContext;
             _clientFactory = clientFactory;
             _featureFlagHelper = featureFlagHelper;
@@ -46,8 +49,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _logStoreHelper = logStoreHelper;
         }
 
-        public AzurePipelinesPublisher()
+        public AzurePipelinesPublisher(bool enableTelemetry)
         {
+            _telemetryEnabled = enableTelemetry;
             _executionContext = ExecutionContext;
             _clientFactory = new ClientFactory(new VssConnection(new Uri(_executionContext.CollectionUri), new VssBasicCredential("", _executionContext.AccessToken)));
             _featureFlagHelper = new FeatureFlagHelper(_clientFactory);
@@ -76,16 +80,26 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                 try
                 {
+                    var uploadToTcm = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF, false);
+                    _executionContext.TelemetryDataCollector.AddOrUpdate("UploadToTcm", uploadToTcm.ToString());
+
                     // Upload to tcm/tfs based on feature flag
-                    if (_featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF, false))
+                    if (uploadToTcm)
                     {
                         TestResultsHttpClient tcmClient = _clientFactory.GetClient<TestResultsHttpClient>();
-                        await tcmClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                        using (new SimpleTimer("AzurePipelinesPublisher", "UploadSummary", _executionContext.TelemetryDataCollector))
+                        {
+                            await tcmClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                        }
                     }
                     else
                     {
+
                         TestManagementHttpClient tfsClient = _clientFactory.GetClient<TestManagementHttpClient>();
-                        await tfsClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                        using (new SimpleTimer("AzurePipelinesPublisher", "UploadSummary", _executionContext.TelemetryDataCollector))
+                        {
+                            await tfsClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                        }
                     }
                 }
                 catch(Exception ex)
@@ -106,10 +120,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
             try
             {
-                File.WriteAllText(jsonFile, JsonUtility.ToString(coverageInfos));
+                var fileContent = JsonUtility.ToString(coverageInfos);
+                File.WriteAllText(jsonFile, fileContent);
+
+                _executionContext.TelemetryDataCollector.AddOrUpdate("FileCoverageLength", fileContent.Length);
 
                 Dictionary<string, string> metaData = new Dictionary<string, string>();
-                await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, TestLogType.Intermediate, jsonFile, metaData, null, true, cancellationToken);
+                using (new SimpleTimer("AzurePipelinesPublisher", "UploadFileCoverage", _executionContext.TelemetryDataCollector))
+                {
+                    await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, TestLogType.Intermediate, jsonFile, metaData, null, true, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
