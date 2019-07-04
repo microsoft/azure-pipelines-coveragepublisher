@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             try
             {
-                publisher = new AzurePipelinesPublisher(true);
+                publisher = new AzurePipelinesPublisher(/*enableTelemetry*/ !config.DisableTelemetry);
                 context = publisher.ExecutionContext;
                 TraceLogger.Initialize(context.Logger);
             }

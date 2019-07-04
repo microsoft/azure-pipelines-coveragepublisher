@@ -121,6 +121,6 @@
     <value>Could not connect to azure pipelines. Exception: {0}</value>
   </data>
   <data name="ErrorOccuredWhilePublishing" xml:space="preserve">
-    <value>An error occured while trying to publish coverage files. {0}</value>
+    <value>An error occured while publishing coverage files. {0}</value>
   </data>
 </root>

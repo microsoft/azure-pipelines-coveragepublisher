@@ -26,7 +26,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             {
                 try
                 {
-                    _telemetry.AddOrUpdate("PublisherConfig", JsonUtility.Serialize(config));
+                    _telemetry.AddOrUpdate("PublisherConfig", () =>
+                    {
+                        return "{" +
+                            $"\"InputFilesCount\": {config.CoverageFiles.Count}," +
+                            $"\"SourceDirectoryProvided\": {config.SourceDirectory != ""}," +
+                            $"\"GenerateHtmlReport\": {config.GenerateHTMLReport}," +
+                            $"\"GenerateHtmlReport\": {config.TimeoutInSeconds}" +
+                        "}";
+                    });
 
                     var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
 
@@ -64,7 +72,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 }
                 catch(ParsingException ex)
                 {
-                    TraceLogger.Error(ex.Message + ex);
+                    TraceLogger.Error(ex.Message + ex.InnerException);
                 }
                 catch(Exception ex)
                 {

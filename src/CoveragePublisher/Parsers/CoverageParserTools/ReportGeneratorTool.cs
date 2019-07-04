@@ -113,7 +113,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             // Generate the html report with custom configuration for report generator.
             var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
                 { "targetdir", Configuration.ReportDirectory },
-                { "sourcedirs", string.IsNullOrEmpty(Configuration.SourceDirectories) ? "" : Configuration.SourceDirectories },
+                { "sourcedirs", string.IsNullOrEmpty(Configuration.SourceDirectory) ? "" : Configuration.SourceDirectory },
                 { "reporttypes", "HtmlInline_AzurePipelines" }
             });
 

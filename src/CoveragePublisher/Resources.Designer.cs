@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An error occured while trying to publish coverage files. {0}.
+        ///   Looks up a localized string similar to An error occured while publishing coverage files. {0}.
         /// </summary>
         internal static string ErrorOccuredWhilePublishing {
             get {

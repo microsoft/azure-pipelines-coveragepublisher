@@ -15,13 +15,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         public class Options : PublisherConfiguration
         {
             [Value(0, Required = true, HelpText = "Set of coverage files to be published.")]
-            override public IEnumerable<string> CoverageFiles { get; set; }
+            override public IList<string> CoverageFiles { get; set; }
 
             [Option("reportDirectory", Default = "", HelpText = "Path where html report will be generated.")]
             override public string ReportDirectory { get; set; }
 
             [Option("sourceDirectory", Default = "", HelpText = "List of source directories separated by ';'.")]
-            override public string SourceDirectories { get; set; }
+            override public string SourceDirectory { get; set; }
 
             [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
             public override int TimeoutInSeconds { get; set; }
