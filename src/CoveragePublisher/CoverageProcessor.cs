@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 }
                 catch(ParsingException ex)
                 {
-                    TraceLogger.Error(ex.Message + ex.InnerException);
+                    TraceLogger.Error($"{ex.Message} {ex.InnerException}");
                 }
                 catch(Exception ex)
                 {

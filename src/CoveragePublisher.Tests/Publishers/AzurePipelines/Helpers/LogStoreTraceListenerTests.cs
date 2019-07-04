@@ -2,7 +2,7 @@
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CoveragePublisher.Tests.Publishers.AzurePipelines.Helpers
+namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class LogStoreTraceListenerTests

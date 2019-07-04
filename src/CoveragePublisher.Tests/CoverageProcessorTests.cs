@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
@@ -59,6 +60,32 @@ namespace CoveragePublisher.Tests
             _mockPublisher.Verify(x => x.PublishFileCoverage(
                 It.Is<List<FileCoverageInfo>>(a => a == coverage),
                 It.Is<CancellationToken>(b => b == token)));
+        }
+
+        [TestMethod]
+        public void WillCatchAndReportExceptions()
+        {
+            var logger = new TestLogger();
+            TraceLogger.Initialize(logger);
+
+            var token = new CancellationToken();
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var coverage = new List<FileCoverageInfo>();
+
+            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
+            _mockParser.Setup(x => x.GetFileCoverageInfos()).Throws(new ParsingException("message", new Exception("error")));
+
+            processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
+
+            Assert.IsTrue(logger.Log.Contains("error: message System.Exception: error"));
+
+            logger.Log = "";
+
+            _mockParser.Setup(x => x.GetFileCoverageInfos()).Throws(new Exception("error"));
+
+            processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
+
+            Assert.IsTrue(logger.Log.Contains("error: An error occured while publishing coverage files. System.Exception: error"));
         }
     }
 }
