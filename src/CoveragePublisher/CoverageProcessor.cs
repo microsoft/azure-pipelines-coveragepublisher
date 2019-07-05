@@ -70,12 +70,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
                 }
+                // Only catastrophic failures should trickle down to these catch blocks
                 catch(ParsingException ex)
                 {
+                    _telemetry.AddFailure(ex);
                     TraceLogger.Error($"{ex.Message} {ex.InnerException}");
                 }
                 catch(Exception ex)
                 {
+                    _telemetry.AddFailure(ex);
                     TraceLogger.Error(string.Format(Resources.ErrorOccuredWhilePublishing, ex));
                 }
             }
