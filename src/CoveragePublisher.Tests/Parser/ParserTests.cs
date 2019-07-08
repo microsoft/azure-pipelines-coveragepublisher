@@ -118,8 +118,6 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
         [TestMethod]
         public void WillGenerateReportWhenParsingSummary()
         {
-            var mockTool = new Mock<ICoverageParserTool>();
-
             var config = new PublisherConfiguration();
             var parser = new Mock<TestParser>(config, _mockTelemetry.Object);
 
@@ -134,8 +132,6 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
         [TestMethod]
         public void WillGenerateReportWhenParsingFileCoverage()
         {
-            var mockTool = new Mock<ICoverageParserTool>();
-
             var config = new PublisherConfiguration();
             var parser = new Mock<TestParser>(config, _mockTelemetry.Object);
 
@@ -145,6 +141,24 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
             parser.Object.GetFileCoverageInfos();
 
             parser.Verify(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
+        }
+
+        [TestMethod]
+        public void ParsingException()
+        {
+            var mockTool = new Mock<ICoverageParserTool>();
+
+            var config = new PublisherConfiguration() { };
+            var parser = new Mock<TestParser>(config, _mockTelemetry.Object, mockTool.Object);
+
+            mockTool.Setup(x => x.GetCoverageSummary()).Throws(new Exception("error"));
+            mockTool.Setup(x => x.GetFileCoverageInfos()).Throws(new Exception("error"));
+
+            parser.Setup(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
+
+            parser.CallBase = true;
+            Assert.ThrowsException<ParsingException>(() => parser.Object.GetFileCoverageInfos());
+            Assert.ThrowsException<ParsingException>(() => parser.Object.GetCoverageSummary());
         }
     }
 }

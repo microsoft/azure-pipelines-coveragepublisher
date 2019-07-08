@@ -9,7 +9,12 @@ namespace CoveragePublisher.Tests
 
     public class TestParser: Parser
     {
+        private ICoverageParserTool _tool;
+
         public TestParser(PublisherConfiguration config, ITelemetryDataCollector telemetryDataCollector) : base(config, telemetryDataCollector) { }
+        public TestParser(PublisherConfiguration config, ITelemetryDataCollector telemetryDataCollector, ICoverageParserTool tool) : base(config, telemetryDataCollector) {
+            _tool = tool;
+        }
         
         protected override void GenerateHTMLReport(ICoverageParserTool tool)
         {
@@ -19,6 +24,16 @@ namespace CoveragePublisher.Tests
         public virtual void GenerateReport(ICoverageParserTool tool)
         {
             base.GenerateHTMLReport(tool);
+        }
+
+        protected override ICoverageParserTool GetCoverageParserTool(PublisherConfiguration config)
+        {
+            if(_tool != null)
+            {
+                return _tool;
+            }
+
+            return base.GetCoverageParserTool(config);
         }
     }
 }

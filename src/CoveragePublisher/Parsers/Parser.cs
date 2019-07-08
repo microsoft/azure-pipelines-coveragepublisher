@@ -26,16 +26,30 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public virtual List<FileCoverageInfo> GetFileCoverageInfos()
         {
-            var tool = _coverageParserTool.Value;
-            GenerateHTMLReport(tool);
-            return tool.GetFileCoverageInfos();
+            try
+            {
+                var tool = _coverageParserTool.Value;
+                GenerateHTMLReport(tool);
+                return tool.GetFileCoverageInfos();
+            }
+            catch (Exception ex)
+            {
+                throw new ParsingException(Resources.ParsingError, ex);
+            }
         }
 
         public virtual CoverageSummary GetCoverageSummary()
         {
-            var tool = _coverageParserTool.Value;
-            GenerateHTMLReport(tool);
-            return tool.GetCoverageSummary();
+            try
+            {
+                var tool = _coverageParserTool.Value;
+                GenerateHTMLReport(tool);
+                return tool.GetCoverageSummary();
+            }
+            catch (Exception ex)
+            {
+                throw new ParsingException(Resources.ParsingError, ex);
+            }
         }
 
         protected virtual void GenerateHTMLReport(ICoverageParserTool tool)
@@ -82,12 +96,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
                 catch (Exception e)
                 {
+                    _telemetry.AddFailure(e);
                     TraceLogger.Error(string.Format(Resources.HTMLReportError, e.Message));
                 }
             }
         }
 
-        private ICoverageParserTool GetCoverageParserTool(PublisherConfiguration config)
+        protected virtual ICoverageParserTool GetCoverageParserTool(PublisherConfiguration config)
         {
             // Currently there's only one parser tool, so simply return that instead of having a factory
             return new ReportGeneratorTool(config);
