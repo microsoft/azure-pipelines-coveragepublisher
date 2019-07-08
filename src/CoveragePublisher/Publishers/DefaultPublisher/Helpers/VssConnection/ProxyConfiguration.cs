@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
-    public class ProxyConfiguration
+    internal class ProxyConfiguration
     {
         private static ProxyConfiguration _proxyInstance;
         private static readonly object SyncLock = new Object();

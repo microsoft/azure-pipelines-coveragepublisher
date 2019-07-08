@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
-    class VssSettingsConfiguration
+    internal class VssSettingsConfiguration
     {
         public static VssClientHttpRequestSettings GetSettings()
         {

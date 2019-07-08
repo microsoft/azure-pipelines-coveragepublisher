@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
-    class VssProxyHelper
+    internal class VssProxyHelper
     {
         public static WebProxy GetProxy()
         {
