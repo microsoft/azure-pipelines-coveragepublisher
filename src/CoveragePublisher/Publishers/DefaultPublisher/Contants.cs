@@ -14,6 +14,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             public const string ProjectId = "SYSTEM_TEAMPROJECTID";
             public const string CollectionUri = "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI";
             public const string AgentTempPath = "AGENT_TEMPPATH";
+
+            public static class ProxyConfiguration
+            {
+                public const string ProxyUrl = "proxyurl";
+                public const string ProxyUserName = "proxyusername";
+                public const string ProxyPassword = "proxypassword";
+                public const string ProxyByPassList = "proxybypasslist";
+            }
         }
 
         internal static class ArtifactUploadEventProperties

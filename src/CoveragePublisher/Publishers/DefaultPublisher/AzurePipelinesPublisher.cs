@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             _telemetryEnabled = enableTelemetry;
             _executionContext = ExecutionContext;
-            _clientFactory = new ClientFactory(new VssConnection(new Uri(_executionContext.CollectionUri), new VssBasicCredential("", _executionContext.AccessToken)));
+            _clientFactory = new ClientFactory(this.GetVssConnection());
             _featureFlagHelper = new FeatureFlagHelper(_clientFactory);
             _htmlReportPublisher = new HtmlReportPublisher(_executionContext, _clientFactory);
             _logStoreHelper = new LogStoreHelper(_clientFactory);
@@ -153,6 +153,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         public async Task PublishHTMLReport(string reportDirectory, CancellationToken token)
         {
             await _htmlReportPublisher.PublishHTMLReportAsync(reportDirectory, token);
+        }
+
+        private VssConnection GetVssConnection()
+        {
+            var proxy = VssProxyHelper.GetProxy();
+            if (proxy != null)
+            {
+                VssHttpMessageHandler.DefaultWebProxy = proxy;
+            }
+
+            var connectionSettings = VssSettingsConfiguration.GetSettings();
+            return new VssConnection(new Uri(_executionContext.CollectionUri), new VssBasicCredential("", _executionContext.AccessToken), connectionSettings);
         }
     }
 }
