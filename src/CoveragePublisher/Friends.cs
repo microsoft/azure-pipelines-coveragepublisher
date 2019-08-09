@@ -3,7 +3,5 @@
 
 using System.Runtime.CompilerServices;
 
-#region Test Assemblies
-
 [assembly: InternalsVisibleTo("CoveragePublisher.Tests")]
-#endregion
+[assembly: InternalsVisibleTo("CoveragePublisher.Console")]
