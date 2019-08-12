@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.153.0-preview" />
     <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="16.153.0-preview" />
     <PackageReference Include="ReportGenerator.Core" Version="4.2.2" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
