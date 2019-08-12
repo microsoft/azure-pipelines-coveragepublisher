@@ -53,20 +53,17 @@ steps:
 - task: CopyFiles@2
   condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netstandard2.0'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/netcoreapp2.1'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
 - task: CopyFiles@2
   condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net461'
     Contents: |
-      netcoreapp2.1/CoveragePublisher.Console.deps.json
-      netcoreapp2.1/CoveragePublisher.Console.dll
-      netcoreapp2.1/CoveragePublisher.Console.runtimeconfig.json
-      net461/CoveragePublisher.Console.exe
-      net461/CoveragePublisher.Console.exe.config
+      CoveragePublisher.Console.exe
+      CoveragePublisher.Console.exe.config
 
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
     flattenFolders: true
