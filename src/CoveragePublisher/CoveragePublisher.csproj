@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <OutputType>library</OutputType>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>Microsoft.Azure.Pipelines.CoveragePublisher</RootNamespace>
     <AssemblyName>Microsoft.Azure.Pipelines.CoveragePublisher</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.153.0-preview" />
     <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="16.153.0-preview" />
     <PackageReference Include="ReportGenerator.Core" Version="4.2.2" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

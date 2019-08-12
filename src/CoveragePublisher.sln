@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.539
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoveragePublisher", "CoveragePublisher\CoveragePublisher.csproj", "{30652AFE-214B-4203-B0D1-AF2E358B49F6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoveragePublisher.Tests", "CoveragePublisher.Tests\CoveragePublisher.Tests.csproj", "{81994946-11AD-44E2-AA9E-C34F0EE69A95}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoveragePublisher.Console", "CoveragePublisher.Console\CoveragePublisher.Console.csproj", "{D4A2E5B5-16AB-4FD5-BB64-9BE72A80B321}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{81994946-11AD-44E2-AA9E-C34F0EE69A95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81994946-11AD-44E2-AA9E-C34F0EE69A95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81994946-11AD-44E2-AA9E-C34F0EE69A95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4A2E5B5-16AB-4FD5-BB64-9BE72A80B321}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4A2E5B5-16AB-4FD5-BB64-9BE72A80B321}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4A2E5B5-16AB-4FD5-BB64-9BE72A80B321}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4A2E5B5-16AB-4FD5-BB64-9BE72A80B321}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
