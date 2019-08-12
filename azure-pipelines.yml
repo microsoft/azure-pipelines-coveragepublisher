@@ -66,6 +66,11 @@ steps:
       net461/CoveragePublisher.Console.exe.config
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: 'ls $(Build.ArtifactStagingDirectory)'
+
 - task: PublishBuildArtifacts@1
   condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
