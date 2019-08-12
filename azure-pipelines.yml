@@ -55,7 +55,7 @@ steps:
     SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/netcoreapp2.1'
     Contents: |
       **
-      !ConveragePublisher.Console.deps.json
+      !CoveragePublisher.Console.deps.json
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
 - task: CopyFiles@2
