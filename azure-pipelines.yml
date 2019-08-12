@@ -52,7 +52,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netcoreapp2.1'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netstandard2.0'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
