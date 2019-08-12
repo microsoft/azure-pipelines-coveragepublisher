@@ -51,14 +51,14 @@ steps:
     coverageThreshold: '84'
 
 - task: CopyFiles@2
-  condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/netcoreapp2.1'
-    Contents: '**'
+    Contents: |
+      **
+      !ConveragePublisher.Console.deps.json
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
 - task: CopyFiles@2
-  condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net461'
     Contents: |
@@ -69,7 +69,6 @@ steps:
     flattenFolders: true
 
 - task: PowerShell@2
-  condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
     targetType: 'inline'
     script: 'ls $(Build.ArtifactStagingDirectory)'
