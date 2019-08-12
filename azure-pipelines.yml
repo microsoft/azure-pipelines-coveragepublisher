@@ -65,6 +65,7 @@ steps:
       net461/CoveragePublisher.Console.exe
       net461/CoveragePublisher.Console.exe.config
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    flattenFolders: true
 
 - task: PowerShell@2
   inputs:
