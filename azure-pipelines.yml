@@ -50,9 +50,25 @@ steps:
     coverageType: 'lines'
     coverageThreshold: '84'
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netcoreapp2.1'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release'
+    Contents: |
+      netcoreapp2.1/CoveragePublisher.Console.deps.json
+      netcoreapp2.1/CoveragePublisher.Console.dll
+      net461/CoveragePublisher.Console.exe
+      net461/CoveragePublisher.Console.exe.config
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
 - task: PublishBuildArtifacts@1
   condition: ne(variables['Build.Reason'], 'PullRequest')
   inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)/src/CoveragePublisher/bin/release/netcoreapp2.1'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'CoveragePublisher'
     publishLocation: 'Container'
