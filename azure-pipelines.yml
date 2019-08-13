@@ -53,9 +53,7 @@ steps:
 - task: CopyFiles@2
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/netcoreapp2.1'
-    Contents: |
-      **
-      !CoveragePublisher.Console.deps.json
+    Contents: '**/*.dll'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
 - task: CopyFiles@2
