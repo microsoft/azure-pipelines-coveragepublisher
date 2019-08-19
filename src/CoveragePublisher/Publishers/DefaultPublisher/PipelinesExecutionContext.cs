@@ -13,16 +13,23 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private string collectionUri = null;
         private string tempPath = null;
 
-
-        public PipelinesExecutionContext(ITelemetryDataCollector telemetry)
+        public PipelinesExecutionContext()
         {
             Logger = new PipelinesLogger();
-            TelemetryDataCollector = telemetry;
         }
 
         public ILogger Logger { get; private set; }
 
         public ITelemetryDataCollector TelemetryDataCollector { get; private set; }
+
+        public void SetTelemetryDataCollector(ITelemetryDataCollector telemetry)
+        {
+            // only keep the first set value
+            if(TelemetryDataCollector == null)
+            {
+                TelemetryDataCollector = telemetry;
+            }
+        }
 
         public int BuildId
         {
