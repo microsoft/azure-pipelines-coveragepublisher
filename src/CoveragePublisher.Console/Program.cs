@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
             catch (Exception ex)
             {
-                Console.Error.Write(string.Format(Resources.CouldNotConnectToAzurePipelines, ex.Message));
+                Console.Error.Write(string.Format(Resources.CouldNotConnectToAzurePipelines, ex));
                 return;
             }
 

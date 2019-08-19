@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             {
                 if (_executionContext == null)
                 {
-                    _executionContext = new PipelinesExecutionContext(new PipelinesTelemetry(_clientFactory, _telemetryEnabled));
+                    _executionContext = new PipelinesExecutionContext();
                 }
                 return _executionContext;
             }
@@ -42,8 +42,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         public AzurePipelinesPublisher(IPipelinesExecutionContext executionContext, IClientFactory clientFactory, IFeatureFlagHelper featureFlagHelper, IHtmlReportPublisher htmlReportPublisher, ILogStoreHelper logStoreHelper, bool enableTelemetry)
         {
             _telemetryEnabled = enableTelemetry;
-            _executionContext = executionContext;
             _clientFactory = clientFactory;
+            _executionContext = executionContext;
             _featureFlagHelper = featureFlagHelper;
             _htmlReportPublisher = htmlReportPublisher;
             _logStoreHelper = logStoreHelper;
@@ -51,9 +51,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         public AzurePipelinesPublisher(bool enableTelemetry)
         {
+            var context = new PipelinesExecutionContext();
+
             _telemetryEnabled = enableTelemetry;
-            _executionContext = ExecutionContext;
+            _executionContext = context;
             _clientFactory = new ClientFactory(this.GetVssConnection());
+
+            context.SetTelemetryDataCollector(new PipelinesTelemetry(_clientFactory, _telemetryEnabled));
+
             _featureFlagHelper = new FeatureFlagHelper(_clientFactory);
             _htmlReportPublisher = new HtmlReportPublisher(_executionContext, _clientFactory);
             _logStoreHelper = new LogStoreHelper(_clientFactory);

@@ -15,6 +15,31 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- task: Powershell@2
+  displayName: Copyright notice check
+  inputs:
+    targetType: inline
+    script: |
+      $arr = Get-ChildItem -Recurse .\src\**\*.cs
+      $files = @()
+      foreach ($file in $arr) {
+          if ($file.Name -ne "Resources.Designer.cs" -and $file.FullName -notmatch "\\obj\\") {
+              $content = $(Get-Content $file.FullName -First 2)
+              $first = $content | select -First 1
+              $second = $content | select -First 1 -Skip 1
+              if ($first -ne "// Copyright (c) Microsoft Corporation. All rights reserved." -and $second -ne "// Licensed under the MIT license. See LICENSE file in the project root for full license information.") {
+                  $files += $file.FullName
+              }
+          }
+      }
+      if ($files.Length -gt 0) {
+          write-host "##vso[task.logissue type=error]All code files must contain the following copyright notice."
+          write-host "`n// Copyright (c) Microsoft Corporation. All rights reserved.`n// Licensed under the MIT license. See LICENSE file in the project root for full license information.`n`nThe following files are missing copyright notice."
+          foreach ($filename in $files) {
+              write-host $filename
+          }
+      }
+
 - task: NuGetToolInstaller@0
 
 - task: NuGetCommand@2
