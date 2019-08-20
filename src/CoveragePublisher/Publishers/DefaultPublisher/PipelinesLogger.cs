@@ -22,7 +22,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         public void Error(string message)
         {
-            Console.WriteLine("##vso[task.logissue type=error]" + message);
+            Console.Error.WriteLine("##vso[task.logissue type=error]" + message);
         }
 
         public void Debug(string message)

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="HTMLReportError" xml:space="preserve">
-    <value>Error occured while generating HTML report. Error message: {0}.</value>
+    <value>Error occured while generating HTML report. {0}</value>
   </data>
   <data name="ParsingError" xml:space="preserve">
     <value>Error occured while parsing coverage files.</value>
