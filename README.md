@@ -3,6 +3,7 @@
 # azure-pipelines-coveragepublisher
 
 Library for publishing coverage files in a build pipeline. This library currently integrates with [ReportGenerator.Core](https://www.nuget.org/packages/ReportGenerator.Core/) for parsing supported coverage files and creating HTML reports. This library shall be used for all future coverage publishing needs.
+<br/>
 
 # Usage
 
@@ -27,8 +28,6 @@ dotnet CoveragePublisher.Console.dll /path/to/jacoco.xml /path/to/cobertura.xml
 | --timeout             | (Default: 120) Timeout for CoveragePublisher in seconds.   |
 | --noTelemetry         | (Default: false) Disable telemetry data collection.        |
 | --help                | Display this help screen.                                  |
-
-<br/>
 
 # Build & Test
 
