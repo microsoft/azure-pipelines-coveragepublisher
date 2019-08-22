@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 
@@ -13,16 +16,23 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private string collectionUri = null;
         private string tempPath = null;
 
-
-        public PipelinesExecutionContext(ITelemetryDataCollector telemetry)
+        public PipelinesExecutionContext()
         {
             Logger = new PipelinesLogger();
-            TelemetryDataCollector = telemetry;
         }
 
         public ILogger Logger { get; private set; }
 
         public ITelemetryDataCollector TelemetryDataCollector { get; private set; }
+
+        public void SetTelemetryDataCollector(ITelemetryDataCollector telemetry)
+        {
+            // only keep the first set value
+            if(TelemetryDataCollector == null)
+            {
+                TelemetryDataCollector = telemetry;
+            }
+        }
 
         public int BuildId
         {

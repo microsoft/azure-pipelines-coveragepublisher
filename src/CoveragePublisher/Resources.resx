@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CouldNotConnectToAzurePipelines" xml:space="preserve">
-    <value>Could not connect to azure pipelines. Exception: {0}</value>
+    <value>Could not connect to Azure Pipelines. {0}</value>
   </data>
   <data name="ErrorOccuredWhilePublishing" xml:space="preserve">
     <value>An error occured while publishing coverage files. {0}</value>

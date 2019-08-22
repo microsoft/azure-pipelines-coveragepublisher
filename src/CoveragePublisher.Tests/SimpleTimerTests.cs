@@ -1,4 +1,7 @@
-﻿using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
