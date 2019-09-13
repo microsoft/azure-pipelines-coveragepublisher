@@ -116,6 +116,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)
         {
+            if(coverageInfos.Count == 0)
+            {
+                return;
+            }
+
             TraceLogger.Info(Resources.PublishingFileCoverage);
 
             var maxParallelism = Math.Min(Math.Max(Environment.ProcessorCount / 2, 1), coverageInfos.Count);
