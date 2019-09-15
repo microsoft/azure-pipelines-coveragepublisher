@@ -68,7 +68,6 @@ namespace CoveragePublisher.Tests
                 It.Is<CancellationToken>(b => b == token)));
         }
 
-
         [TestMethod]
         public void WillNotPublishFileCoverageIfCountIsZero()
         {
