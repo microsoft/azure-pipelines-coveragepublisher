@@ -123,4 +123,13 @@
   <data name="ErrorOccuredWhilePublishing" xml:space="preserve">
     <value>An error occured while publishing coverage files. {0}</value>
   </data>
+  <data name="NoCoverageFilesGenerated" xml:space="preserve">
+    <value>No coverage data generated to publish.</value>
+  </data>
+  <data name="NoReportDirectoryGenerated" xml:space="preserve">
+    <value>No HTML report directory was generated to publish.</value>
+  </data>
+  <data name="NoSummaryStatisticsGenerated" xml:space="preserve">
+    <value>No coverage summary was generated to publish.</value>
+  </data>
 </root>

@@ -77,5 +77,32 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher {
                 return ResourceManager.GetString("ErrorOccuredWhilePublishing", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No coverage data generated to publish..
+        /// </summary>
+        internal static string NoCoverageFilesGenerated {
+            get {
+                return ResourceManager.GetString("NoCoverageFilesGenerated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No HTML report directory was generated to publish..
+        /// </summary>
+        internal static string NoReportDirectoryGenerated {
+            get {
+                return ResourceManager.GetString("NoReportDirectoryGenerated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No coverage summary was generated to publish..
+        /// </summary>
+        internal static string NoSummaryStatisticsGenerated {
+            get {
+                return ResourceManager.GetString("NoSummaryStatisticsGenerated", resourceCulture);
+            }
+        }
     }
 }

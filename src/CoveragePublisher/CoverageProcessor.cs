@@ -48,9 +48,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
 
-                        using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                        if (fileCoverage.Count == 0)
                         {
-                            await _publisher.PublishFileCoverage(fileCoverage, token);
+                            TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
+                        }
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                            {
+                                await _publisher.PublishFileCoverage(fileCoverage, token);
+                            }
                         }
                     }
                     else
@@ -58,18 +65,31 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         TraceLogger.Debug("Publishing file json coverage is not supported.");
                         var summary = parser.GetCoverageSummary();
 
-                        using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
+                        if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
                         {
-                            await _publisher.PublishCoverageSummary(summary, token);
+                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
+                        }
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
+                            {
+                                await _publisher.PublishCoverageSummary(summary, token);
+                            }
                         }
                     }
 
-
-                    if (config.GenerateHTMLReport && Directory.Exists(config.ReportDirectory))
+                    if (config.GenerateHTMLReport)
                     {
-                        using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                        if (!Directory.Exists(config.ReportDirectory))
                         {
-                            await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                            TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
+                        }
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                            {
+                                await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                            }
                         }
                     }
                 }
