@@ -31,7 +31,10 @@ namespace CoveragePublisher.Tests
             Assert.AreEqual((int)1234, context.BuildId);
             Assert.AreEqual(guid, context.ProjectId.ToString());
             Assert.AreEqual("uri", context.CollectionUri);
-            Assert.AreEqual("D:\\", context.TempPath);
+            if (Directory.Exists("D:\\"))
+                Assert.AreEqual("D:\\", context.TempPath);
+            else
+                Assert.AreEqual(Path.GetTempPath(), context.TempPath);
         }
 
         [TestMethod]
