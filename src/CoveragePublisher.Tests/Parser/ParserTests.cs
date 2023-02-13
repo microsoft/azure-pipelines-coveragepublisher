@@ -44,7 +44,7 @@ namespace CoveragePublisher.Tests
 
             var config = new PublisherConfiguration()
             {
-                CoverageFiles = new List<string>() { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/Jacoco.xml" },
+                CoverageFiles = new List<string>() { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/JaCoCo.xml" },
                 ReportDirectory = tempDir
             };
 
@@ -67,7 +67,7 @@ namespace CoveragePublisher.Tests
             Assert.IsTrue(_logger.Log.Contains(@"
 debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Clover.xml
 debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Cobertura.xml
-debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
+debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/JaCoCo.xml
 ".Trim()));
 
         }
@@ -84,7 +84,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
 
             var config = new PublisherConfiguration()
             {
-                CoverageFiles = new List<string>() { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/Jacoco.xml" },
+                CoverageFiles = new List<string>() { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/JaCoCo.xml" },
                 ReportDirectory = tempDir
             };
 
@@ -107,7 +107,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/Jacoco.xml
 
             var config = new PublisherConfiguration()
             {
-                CoverageFiles = new List<string>() { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/Jacoco.xml" },
+                CoverageFiles = new List<string>() { "SampleCoverage/Clover.xml", "SampleCoverage/Cobertura.xml", "SampleCoverage/JaCoCo.xml" },
                 ReportDirectory = tempDir
             };
 

@@ -145,13 +145,13 @@ namespace CoveragePublisher.Tests
             _mockClientHelper.Setup(x => x.UploadFileAsync(
                 It.IsAny<long>(),
                 It.IsAny<string>(),
-                It.IsAny<FileStream>(),
+                It.IsAny<Stream>(),
                 It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<int>()
             ))
             .Returns(() => Task.FromResult(response))
-            .Callback<long, string, FileStream, Guid, CancellationToken, int>((a, b, c, d, e, f) => {
+            .Callback<long, string, Stream, Guid, CancellationToken, int>((a, b, c, d, e, f) => {
                 calls++;
                 if(calls == 4)
                 {
@@ -180,7 +180,7 @@ namespace CoveragePublisher.Tests
             _mockClientHelper.Setup(x => x.UploadFileAsync(
                 It.IsAny<long>(),
                 It.IsAny<string>(),
-                It.IsAny<FileStream>(),
+                It.IsAny<Stream>(),
                 It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<int>()
@@ -271,8 +271,8 @@ namespace CoveragePublisher.Tests
 
             service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait();
 
-            Assert.IsTrue(_logger.Log.Contains("Uploading 4 files."));
-            Assert.IsTrue(_logger.Log.Contains(string.Format(@"File: '{0}\file1' took", _uploadDirectory)));
+            Assert.IsTrue(_logger.Log.Contains("Uploading 4 files."), $"Logger output: {_logger.Log}");
+            Assert.IsTrue(_logger.Log.Contains(string.Format(@"File: '{0}{1}file1' took", _uploadDirectory, Path.DirectorySeparatorChar)));
         }
     }
 }
