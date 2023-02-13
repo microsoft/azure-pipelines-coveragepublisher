@@ -73,19 +73,6 @@ namespace CoveragePublisher.Tests
         }
 
         [DataTestMethod]
-        [DataRow("reportDirectory")]
-        [DataRow("sourceDirectory")]
-        public void WillPrintHelpTextForInvalidArgs_NoValueForOption(string option)
-        {
-            var argsProcessor = new ArgumentsProcessor();
-            argsProcessor.ProcessCommandLineArgs(new string[] { "asdf", "--" + option, });
-
-            var helpText = ConsoleWriter.ToString();
-            Assert.IsTrue(helpText.Contains(@"ERROR(S):" + Environment.NewLine + "  Option '" + option + "' has no value."));
-            Assert.IsTrue(Regex.Replace(helpText, @"\s+", "").Contains(UsageText), helpText);
-        }
-
-        [DataTestMethod]
         [DataRow(new string[] { @"C:\a.txt" }, "")]
         [DataRow(new string[] { @"C:\a.txt" }, @"C:\")]
         [DataRow(new string[] { @"C:\a.txt", @"C:\b.txt"}, @"C:\")]

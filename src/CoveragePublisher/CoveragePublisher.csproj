@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.5.0" />
-    <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.153.0-preview" />
-    <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="16.153.0-preview" />
-    <PackageReference Include="ReportGenerator.Core" Version="4.4.6" />
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.199.0-preview" />
+    <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="16.199.0-preview" />
+    <PackageReference Include="ReportGenerator.Core" Version="5.1.17" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
 
