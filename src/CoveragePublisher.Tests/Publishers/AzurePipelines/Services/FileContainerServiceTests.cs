@@ -271,8 +271,8 @@ namespace CoveragePublisher.Tests
 
             service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait();
 
-            Assert.IsTrue(_logger.Log.Contains("Uploading 4 files."));
-            Assert.IsTrue(_logger.Log.Contains(string.Format(@"File: '{0}\file1' took", _uploadDirectory)));
+            Assert.IsTrue(_logger.Log.Contains("Uploading 4 files."), $"Logger output: {_logger.Log}");
+            Assert.IsTrue(_logger.Log.Contains(string.Format(@"File: '{0}{1}file1' took", _uploadDirectory, Path.DirectorySeparatorChar)));
         }
     }
 }
