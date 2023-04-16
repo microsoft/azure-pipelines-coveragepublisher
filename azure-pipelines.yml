@@ -75,7 +75,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net462'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net6.0'
     Contents: |
       CoveragePublisher.Console.exe
       CoveragePublisher.Console.exe.config
