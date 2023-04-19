@@ -4,7 +4,6 @@
     <OutputType>Exe</OutputType>
      <TargetFrameworks>net7.0;net462</TargetFrameworks>
     <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
