@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-     <TargetFrameworks>net7.0;net462</TargetFrameworks>
+     <TargetFrameworks>net6.0;net462</TargetFrameworks>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishTrimmed>true</PublishTrimmed>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
