@@ -67,7 +67,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net6.0'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0'
     Contents: |
       **/*.dll
       CoveragePublisher.Console.runtimeconfig.json
