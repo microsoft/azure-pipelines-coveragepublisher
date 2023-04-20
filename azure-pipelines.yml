@@ -69,7 +69,7 @@ steps:
     command: publish
     publishWebProjects: false
     projects: '**/CoveragePublisher.Console.csproj'
-    arguments: '-c release -f net7.0 -r win-x64'
+    arguments: '-c Release -f net7.0 -r win-x64'
 
 - task: CopyFiles@2
   inputs:
