@@ -69,11 +69,11 @@ steps:
     command: publish
     publishWebProjects: false
     projects: '**/CoveragePublisher.Console.csproj'
-    arguments: '-f net7.0 -r win-x64'
+    arguments: '-c release -f net7.0 -r win-x64'
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0/win-x64/publish'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0/win-x64/publish/'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
