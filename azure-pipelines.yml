@@ -74,9 +74,7 @@ steps:
 - task: CopyFiles@2
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0/win-x64'
-    Contents: |
-      **/*.dll
-      CoveragePublisher.Console.runtimeconfig.json
+    Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
 - task: CopyFiles@2
