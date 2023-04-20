@@ -68,12 +68,12 @@ steps:
   inputs:
     command: publish
     publishWebProjects: false
-    projects: '**/*.csproj'
+    projects: '**/CoveragePublisher.Console.csproj'
     arguments: '-c release -f net7.0 -r win-x64'
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0/publish'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0/win-x64/publish'
     Contents: |
       **/*.dll
       CoveragePublisher.Console.runtimeconfig.json
