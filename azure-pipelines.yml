@@ -66,6 +66,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
+    projects: '**/*.Console.csproj'
     arguments: '-c release -r win-x64'
 
 - task: CopyFiles@2
