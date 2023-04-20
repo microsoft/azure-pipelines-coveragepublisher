@@ -69,7 +69,7 @@ steps:
     command: publish
     publishWebProjects: false
     projects: '**/*.csproj'
-    arguments: '-c release -r win-x64'
+    arguments: '-c release -f net7.0 -r win-x64'
 
 - task: CopyFiles@2
   inputs:
