@@ -53,7 +53,7 @@ steps:
     projects: '**/*.sln'
     feedsToUse: 'select'
     versioningScheme: 'off'
-    arguments: '-c release'
+    arguments: '-c Release'
 
 - task: DotNetCoreCLI@2
   inputs:
@@ -80,7 +80,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net462'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net462'
     Contents: |
       CoveragePublisher.Console.exe
       CoveragePublisher.Console.exe.config
