@@ -63,11 +63,17 @@ steps:
     testRunTitle: 'L0/L1'
     feedsToUse: 'select'
     versioningScheme: 'off'
-
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    projects: '**/*.csproj'
+    feedsToUse: 'select'
+    versioningScheme: 'off'
+    arguments: '-c release -r win-x64'
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net7.0/publish'
     Contents: |
       **/*.dll
       CoveragePublisher.Console.runtimeconfig.json
