@@ -70,11 +70,10 @@ steps:
     publishWebProjects: false
     projects: '**/CoveragePublisher.Console.csproj'
     arguments: '-c Release -f net7.0 -r win-x64'
-- task: PowerShell@2
-  displayName: 'PowerShell Script'
-  inputs:
-    targetType: filePath
-    filePath: './dir D:\a\1\s\src\CoveragePublisher.Console\bin\release\net7.0\win-x64\publish\'
+
+- script: 'dir D:\a\1\s\src\CoveragePublisher.Console\bin\release\net7.0\win-x64\publish'
+  displayName: 'Command Line Script'
+
 
 - task: CopyFiles@2
   inputs:
