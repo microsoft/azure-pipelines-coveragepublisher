@@ -47,10 +47,9 @@ steps:
     restoreSolution: '$(solution)'
 
 - task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 8.0.x'
+  displayName: 'Use .NET Core sdk 7.0.x'
   inputs:
-    version: 8.0.x
-    includePreviewVersions: true
+    version: 7.0.x
 
 
 - task: DotNetCoreCLI@2
@@ -61,6 +60,14 @@ steps:
     versioningScheme: 'off'
     arguments: '-c Release'
 
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: '**/*.Tests.csproj'
+    arguments: '--collect "Code coverage"'
+    testRunTitle: 'L0/L1'
+    feedsToUse: 'select'
+    versioningScheme: 'off'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet publish'
@@ -68,7 +75,9 @@ steps:
     command: publish
     publishWebProjects: false
     projects: '**/CoveragePublisher.Console.csproj'
-    arguments: '-c Release -f net7.0 -r win-x64'
+    arguments: '--no-build -c Release -f net7.0 -r win-x64'
+    zipAfterPublish: false
+    modifyOutputPath: false
 
 
 - task: CopyFiles@2
