@@ -86,7 +86,6 @@ steps:
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-
 - task: CopyFiles@2
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net462'
@@ -95,6 +94,7 @@ steps:
       CoveragePublisher.Console.exe.config
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
     flattenFolders: true
+
 
 
 - task: PowerShell@2
