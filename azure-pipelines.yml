@@ -86,15 +86,14 @@ steps:
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
+
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net462'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/win-x64'
     Contents: |
-      CoveragePublisher.Console.exe
-      CoveragePublisher.Console.exe.config
+      **/*.dll
+      CoveragePublisher.Console.runtimeconfig.json
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    flattenFolders: true
-
 
 
 - task: PowerShell@2
