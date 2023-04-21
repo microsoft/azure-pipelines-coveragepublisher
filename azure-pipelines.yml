@@ -57,6 +57,7 @@ steps:
     projects: '**/*.sln'
     feedsToUse: 'select'
     versioningScheme: 'off'
+    arguments: '-c release'
 
 - task: DotNetCoreCLI@2
   inputs:
@@ -77,7 +78,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/win-x64/publish/'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Debug/net7.0/win-x64/publish/'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
