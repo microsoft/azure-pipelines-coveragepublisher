@@ -71,7 +71,7 @@ steps:
   displayName: 'dotnet publish'
   inputs:
     command: publish
-    publishWebProjects: true
+    publishWebProjects: false
     projects: '**/CoveragePublisher.Console.csproj'
     arguments: '-c Release -f net7.0 -r win-x64'
 
