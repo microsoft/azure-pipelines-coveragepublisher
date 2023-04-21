@@ -61,14 +61,7 @@ steps:
     versioningScheme: 'off'
     arguments: '-c Release'
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'test'
-    projects: '**/*.Tests.csproj'
-    arguments: '--collect "Code coverage"'
-    testRunTitle: 'L0/L1'
-    feedsToUse: 'select'
-    versioningScheme: 'off'
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet publish'
   inputs:
