@@ -85,7 +85,7 @@ steps:
     command: publish
     publishWebProjects: false
     projects: '**/CoveragePublisher.Console.csproj'
-    arguments: '--no-build -c Release -f net7.0 -r linux-x64'
+    arguments: '-c Release -f net7.0 -r linux-x64'
     zipAfterPublish: false
     modifyOutputPath: false
 
