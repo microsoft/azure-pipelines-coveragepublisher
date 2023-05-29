@@ -108,14 +108,6 @@ steps:
       **/*.dll
       CoveragePublisher.Console.runtimeconfig.json
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/linux-x64'
-    Contents: |
-      **/*.dll
-      CoveragePublisher.Console.runtimeconfig.json
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/linux-x64'
 
     
 - task: PowerShell@2
