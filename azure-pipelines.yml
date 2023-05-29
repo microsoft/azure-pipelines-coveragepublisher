@@ -89,11 +89,6 @@ steps:
     zipAfterPublish: false
     modifyOutputPath: false
 
-- task: CmdLine@2
-  displayName: 'Grant execute permission'
-  inputs:
-    script: |
-      icacls '$(Build.SourcesDirectory)\src\CoveragePublisher.Console\bin\Release\net7.0\linux-x64\publish' /grant Everyone:(RX)
 
 - task: CopyFiles@2
   inputs:
