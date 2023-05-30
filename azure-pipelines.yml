@@ -80,7 +80,7 @@ steps:
     modifyOutputPath: false
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet publish'
+  displayName: 'dotnet publish for linux'
   inputs:
     command: publish
     publishWebProjects: false
@@ -89,6 +89,15 @@ steps:
     zipAfterPublish: false
     modifyOutputPath: false
 
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish for macos'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: '**/CoveragePublisher.Console.csproj'
+    arguments: '-c Release -f net7.0 -r osx-x64'
+    zipAfterPublish: false
+    modifyOutputPath: false
 
 - task: CopyFiles@2
   inputs:
@@ -109,6 +118,12 @@ steps:
       **/*.dll
       CoveragePublisher.Console.runtimeconfig.json
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/osx-x64/publish/'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/osx-x64'
 
     
 - task: PowerShell@2
