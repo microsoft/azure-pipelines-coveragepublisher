@@ -132,11 +132,22 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 return ResourceManager.GetString("FailedToUploadFileCoverage", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to copy file to server StatusCode={0}: {1}. Source file path: {2}. Target server path: {3}..
-        /// </summary>
-        internal static string FileContainerUploadFailed {
+
+		/// <summary>
+		///   Looks up a localized string similar to Failed to upload file coverage data. Exception: {1}.
+		/// </summary>
+		internal static string FailedToUploadNativeCoverageFiles
+		{
+			get
+			{
+				return ResourceManager.GetString("FailedToUploadNativeCoverageFiles", resourceCulture);
+			}
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Unable to copy file to server StatusCode={0}: {1}. Source file path: {2}. Target server path: {3}..
+		/// </summary>
+		internal static string FileContainerUploadFailed {
             get {
                 return ResourceManager.GetString("FileContainerUploadFailed", resourceCulture);
             }

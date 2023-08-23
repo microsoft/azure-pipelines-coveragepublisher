@@ -38,7 +38,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         internal static class FeatureFlags
         {
             public const string EnablePublishToTcmServiceDirectlyFromTaskFF = "TestManagement.Server.EnablePublishToTcmServiceDirectlyFromTask";
+            public const string UploadNativeCoverageFilesToLogStore = "TestManagement.Server.UploadNativeCoverageFilesToLogStore";
             public const string TestLogStoreOnTCMService = "TestManagement.Server.TestLogStoreOnTCMService";
         }
-    }
+        internal static class CoverageConstants
+        {
+            public const string CoverageFileExtension = ".coverage";
+            public const string CoverageBufferFileExtension = ".coveragebuffer";
+            public const string CoverageXFileExtension = ".covx";
+            public const string CoverageBFileExtension = ".covb";
+            public const string CoverageJsonFileExtension = ".cjson";
+        }
+	}
 }

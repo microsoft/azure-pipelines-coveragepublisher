@@ -54,6 +54,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                         else
                         {
+                            // Upload native coverage files to TCM
+                            var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
+                            _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
+
+                            if (uploadNativeCoverageFilesToLogStore)
+                            {
+                                TraceLogger.Debug("Publishing native coverage files is supported.");
+
+                                await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
+                            }
+
                             using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
                             {
                                 await _publisher.PublishFileCoverage(fileCoverage, token);

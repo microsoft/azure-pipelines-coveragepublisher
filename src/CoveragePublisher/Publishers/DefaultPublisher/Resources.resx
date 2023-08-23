@@ -130,7 +130,7 @@
     <value>Error occurred while publishing code coverage files. Error: {0}.</value>
   </data>
   <data name="FailedToGetFeatureFlag" xml:space="preserve">
-    <value>Failed to get FF {0} Value. By default, publishing data to TCM.</value>
+    <value>Failed to get FF {0} Value.</value>
   </data>
   <data name="FailedtoUploadCoverageSummary" xml:space="preserve">
     <value>Failed to upload coverage summary. Exception: {0}.</value>
@@ -200,5 +200,8 @@
   </data>
   <data name="PublishingFileCoverage" xml:space="preserve">
     <value>Publishing file coverage data.</value>
+  </data>
+  <data name="FailedToUploadNativeCoverageFiles" xml:space="preserve">
+    <value>Failed to upload native coverage files. Exception: {1}</value>
   </data>
 </root>
