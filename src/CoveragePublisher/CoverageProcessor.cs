@@ -54,9 +54,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                         else
                         {
+                            var summary = parser.GetCoverageSummary();
                             using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
                             {
-                                await _publisher.PublishFileCoverage(fileCoverage, token);
+                                await _publisher.PublishFileCoverage(fileCoverage, token, summary);
                             }
                         }
                     }

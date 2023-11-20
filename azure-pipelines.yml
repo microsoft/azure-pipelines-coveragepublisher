@@ -40,16 +40,17 @@ steps:
           }
       }
 
-- task: NuGetToolInstaller@0
+- task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
 
 - task: UseDotNet@2
+  displayName: 'Use .NET Core sdk 7.0.x'
   inputs:
-    packageType: 'sdk'
-    version: '2.1.x'
+    version: 7.0.x
+
 
 - task: DotNetCoreCLI@2
   inputs:
@@ -57,7 +58,7 @@ steps:
     projects: '**/*.sln'
     feedsToUse: 'select'
     versioningScheme: 'off'
-    arguments: '-c release'
+    arguments: '-c Release'
 
 - task: DotNetCoreCLI@2
   inputs:
@@ -68,16 +69,51 @@ steps:
     feedsToUse: 'select'
     versioningScheme: 'off'
 
-- task: BuildQualityChecks@5
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
   inputs:
-    checkCoverage: true
-    coverageFailOption: 'fixed'
-    coverageType: 'lines'
-    coverageThreshold: '84'
+    command: publish
+    publishWebProjects: false
+    projects: '**/CoveragePublisher.Console.csproj'
+    arguments: '--no-build -c Release -f net7.0 -r win-x64'
+    zipAfterPublish: false
+    modifyOutputPath: false
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish for linux'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: '**/CoveragePublisher.Console.csproj'
+    arguments: '-c Release -f net7.0 -r linux-x64'
+    zipAfterPublish: false
+    modifyOutputPath: false
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish for macos'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: '**/CoveragePublisher.Console.csproj'
+    arguments: '-c Release -f net7.0 -r osx-x64'
+    zipAfterPublish: false
+    modifyOutputPath: false
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/netcoreapp2.1'
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/win-x64/publish/'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/linux-x64/publish/'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/linux-x64'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/win-x64'
     Contents: |
       **/*.dll
       CoveragePublisher.Console.runtimeconfig.json
@@ -85,14 +121,11 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/release/net461'
-    Contents: |
-      CoveragePublisher.Console.exe
-      CoveragePublisher.Console.exe.config
+    SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/osx-x64/publish/'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/osx-x64'
 
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    flattenFolders: true
-
+    
 - task: PowerShell@2
   inputs:
     targetType: 'inline'

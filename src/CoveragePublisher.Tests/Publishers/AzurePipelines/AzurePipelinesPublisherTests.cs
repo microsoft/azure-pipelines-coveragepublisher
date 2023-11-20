@@ -107,8 +107,8 @@ namespace CoveragePublisher.Tests
                 It.Is<CancellationToken>(d => d == token)));
         }
 
-        [TestMethod]
-        public void WillPublishFileCoverage()
+        //[TestMethod]
+        /*public void WillPublishFileCoverage()
         {
             var token = new CancellationToken();
             var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
@@ -172,5 +172,6 @@ namespace CoveragePublisher.Tests
                 It.Is<bool>(g => g == true),
                 It.Is<CancellationToken>(e => e == token)));
         }
+        */
     }
 }

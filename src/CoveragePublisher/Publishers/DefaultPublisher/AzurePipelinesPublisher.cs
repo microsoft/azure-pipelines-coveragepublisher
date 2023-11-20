@@ -114,7 +114,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
         }
 
-        public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)
+        public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken, CoverageSummary coverageSummary)
         {
             if(coverageInfos.Count == 0)
             {
@@ -136,6 +136,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 _executionContext.TelemetryDataCollector.AddOrUpdate("FileCoverageLength", fileContent.Length);
 
                 Dictionary<string, string> metaData = new Dictionary<string, string>();
+
+                var coverageData = coverageSummary.CodeCoverageData;
+                TestResultsHttpClient tcmClient = _clientFactory.GetClient<TestResultsHttpClient>();
+                using (new SimpleTimer("AzurePipelinesPublisher", "UploadSummary", _executionContext.TelemetryDataCollector))
+                {
+                    await tcmClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                }
+
+
                 using (new SimpleTimer("AzurePipelinesPublisher", "UploadFileCoverage", _executionContext.TelemetryDataCollector))
                 {
                     await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, TestLogType.Intermediate, jsonFile, metaData, null, true, cancellationToken);
