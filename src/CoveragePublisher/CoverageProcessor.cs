@@ -48,6 +48,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
 
+                        var summary = parser.GetCoverageSummary();
+
+                        if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
+                        {
+                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
+                        }
+
                         if (fileCoverage.Count == 0)
                         {
                             TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
@@ -56,14 +63,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         {
                             using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
                             {
-                                await _publisher.PublishFileCoverage(fileCoverage, token);
+                                await _publisher.PublishFileCoverage(fileCoverage, token, summary);
                             }
                         }
-                    }
-                    else
-                    {
+                    
+                  
                         TraceLogger.Debug("Publishing file json coverage is not supported.");
-                        var summary = parser.GetCoverageSummary();
+                       
 
                         if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
                         {
@@ -76,7 +82,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                                 await _publisher.PublishCoverageSummary(summary, token);
                             }
                         }
-                    }
+                    
 
                     if (config.GenerateHTMLReport)
                     {
@@ -93,6 +99,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
                 }
+            }
                 // Only catastrophic failures should trickle down to these catch blocks
                 catch(ParsingException ex)
                 {

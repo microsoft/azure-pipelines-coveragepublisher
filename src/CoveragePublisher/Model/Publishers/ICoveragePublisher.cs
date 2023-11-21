@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// </summary>
         /// <param name="coverageInfos">List of FileCoverageInfo objects.</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
-        Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken);
+        Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken,  CoverageSummary coverageSummary);
 
         /// <summary>
         /// Publish coverage summary.

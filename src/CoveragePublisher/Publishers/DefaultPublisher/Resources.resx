@@ -201,4 +201,7 @@
   <data name="PublishingFileCoverage" xml:space="preserve">
     <value>Publishing file coverage data.</value>
   </data>
+  <data name="DummyTraceLog" xml:space="preserve">
+    <value>This is Dummy Trace log.</value>
+  </data>
 </root>

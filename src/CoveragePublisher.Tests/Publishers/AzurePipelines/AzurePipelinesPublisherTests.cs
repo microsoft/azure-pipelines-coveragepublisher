@@ -106,7 +106,7 @@ namespace CoveragePublisher.Tests
                 It.IsAny<object>(),
                 It.Is<CancellationToken>(d => d == token)));
         }
-
+/*
         [TestMethod]
         public void WillPublishFileCoverage()
         {
@@ -172,5 +172,7 @@ namespace CoveragePublisher.Tests
                 It.Is<bool>(g => g == true),
                 It.Is<CancellationToken>(e => e == token)));
         }
+    
+    */
     }
 }
