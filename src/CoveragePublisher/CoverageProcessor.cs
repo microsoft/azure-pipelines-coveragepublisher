@@ -59,13 +59,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         {
                             TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
                         }
-                        else
+                      /*  else
                         {
                             using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
                             {
                                 await _publisher.PublishFileCoverage(fileCoverage, token, summary);
                             }
-                        }
+                        }*/
                     
                   
                         TraceLogger.Debug("Publishing file json coverage is not supported.");
