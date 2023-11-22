@@ -15,7 +15,7 @@ namespace CoveragePublisher.Tests
 {
     [TestClass]
     public class CoverageProcessorTests
-    {   /*
+    {   
         private Mock<ICoveragePublisher> _mockPublisher = new Mock<ICoveragePublisher>();
         private PublisherConfiguration _config = new PublisherConfiguration() { ReportDirectory = "directory" };
         private Mock<Parser> _mockParser;
@@ -31,6 +31,7 @@ namespace CoveragePublisher.Tests
             _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         }
 
+/*
         [TestMethod]
         public void ParseAndPublishCoverageWillPublishSummary()
         {
@@ -40,7 +41,7 @@ namespace CoveragePublisher.Tests
 
             summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
+            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
             
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
@@ -49,7 +50,7 @@ namespace CoveragePublisher.Tests
                 It.Is<CoverageSummary>(a => a == summary),
                 It.Is<CancellationToken>(b => b == token)));
         }
-
+*/
         [TestMethod]
         public void ParseAndPublishCoverageWillPublishFileCoverage()
         {
@@ -110,6 +111,6 @@ namespace CoveragePublisher.Tests
 
             Assert.IsTrue(logger.Log.Contains("error: An error occured while publishing coverage files. System.Exception: error"));
         }
-        */
+        
     }
 }

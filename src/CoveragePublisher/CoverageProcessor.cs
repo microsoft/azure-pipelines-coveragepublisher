@@ -50,26 +50,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         var summary = parser.GetCoverageSummary();
 
-                        if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
-                        {
-                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
-                        }
-
-                        if (fileCoverage.Count == 0)
-                        {
-                            TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
-                        }
-                      /*  else
-                        {
-                            using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
-                            {
-                                await _publisher.PublishFileCoverage(fileCoverage, token, summary);
-                            }
-                        }*/
-                    
-                  
-                        TraceLogger.Debug("Publishing file json coverage is not supported.");
-                       
+                        TraceLogger.Debug("Publishing code coverage summary supported");
 
                         if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
                         {
@@ -82,7 +63,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                                 await _publisher.PublishCoverageSummary(summary, token);
                             }
                         }
-                    
+
+                        if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
+                        {
+                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
+                        }
+
+                        if (fileCoverage.Count == 0)
+                        {
+                            TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
+                        }
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                            {
+                                await _publisher.PublishFileCoverage(fileCoverage, token);
+                            }
+                        }
+                
 
                     if (config.GenerateHTMLReport)
                     {
