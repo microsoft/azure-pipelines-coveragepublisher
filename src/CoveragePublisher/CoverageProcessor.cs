@@ -82,7 +82,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                 
 
-                    if (config.GenerateHTMLReport)
+                  /*  if (config.GenerateHTMLReport)
                     {
                         if (!Directory.Exists(config.ReportDirectory))
                         {
@@ -95,7 +95,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                                 await _publisher.PublishHTMLReport(config.ReportDirectory, token);
                             }
                         }
-                    }
+                    } 
+                    */
                 }
             }
                 // Only catastrophic failures should trickle down to these catch blocks
