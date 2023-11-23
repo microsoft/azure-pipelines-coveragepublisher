@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             {
                 try
                 {
-                    TraceLogger.Debug("Publishing file json coverage supported");
+                    TraceLogger.Debug("Publishing file json coverage supported.");
 
                     _telemetry.AddOrUpdate("PublisherConfig", () =>
                     {
