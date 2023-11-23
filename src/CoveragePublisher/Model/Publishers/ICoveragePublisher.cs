@@ -37,5 +37,19 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// Gets weather publisher supports publishing <see cref="FileCoverageInfo"/> format.
         /// </summary>
         bool IsFileCoverageJsonSupported();
+
+        /// <summary>
+        /// Publish all native coverage files to log store
+        /// </summary>
+        /// <param name="nativeCoverageFiles">List of native coverage files</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        /// <returns></returns>
+        Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets weather we can upload native file to tcm logstore.
+        /// </summary>
+        /// <returns></returns>
+        bool IsUploadNativeFilesToTCMSupported();
     }
 }

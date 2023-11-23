@@ -41,6 +41,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 if (buildId == -1)
                 {
                     int.TryParse(Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.BuildId) ?? "", out buildId);
+                    
                 }
                 return buildId;
             }

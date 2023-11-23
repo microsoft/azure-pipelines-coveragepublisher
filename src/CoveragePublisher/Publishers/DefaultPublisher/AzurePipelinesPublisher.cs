@@ -169,6 +169,66 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             await _htmlReportPublisher.PublishHTMLReportAsync(reportDirectory, token);
         }
 
+          public bool IsUploadNativeFilesToTCMSupported()
+        {
+            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
+        }
+
+        public async Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken)
+        {
+            if (nativeCoverageFiles == null || nativeCoverageFiles.Count == 0)
+            {
+                return;
+            }
+
+            TraceLogger.Info(Resources.PublishingFileCoverage);
+
+            try
+            {
+                _executionContext.TelemetryDataCollector.AddOrUpdate("TotalNativeCoverageFilesCount", nativeCoverageFiles.Count);
+
+                Dictionary<string, string> metaData = new Dictionary<string, string>();
+                using (new SimpleTimer("AzurePipelinesPublisher", "UploadNativeCoverageFiles", _executionContext.TelemetryDataCollector))
+                {
+                    int uploadedFileCount = 0;
+                    foreach (string nativeCoverageFile in nativeCoverageFiles)
+                    {
+                        if (!(nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))
+                        {
+                            continue;
+                        }
+
+                        TestLogType testLogType = GetTestLogType(nativeCoverageFile);
+                        await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, testLogType, nativeCoverageFile, metaData, null, true, cancellationToken);
+                        uploadedFileCount++;
+                    }
+
+                    _executionContext.TelemetryDataCollector.AddOrUpdate("UploadedNativeCoverageFilesCount", uploadedFileCount);
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLogger.Error(string.Format(Resources.FileUploadFinish, ex));
+            }
+        }
+
+         private TestLogType GetTestLogType(string nativeCoverageFile) 
+        { 
+            TestLogType logType = TestLogType.Intermediate;
+        
+            if (nativeCoverageFile != null & 
+                nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension))
+            {
+                logType = TestLogType.CodeCoverage;
+            }
+
+            return logType;
+        }
+
         private VssConnection GetVssConnection()
         {
             var proxy = VssProxyHelper.GetProxy();
