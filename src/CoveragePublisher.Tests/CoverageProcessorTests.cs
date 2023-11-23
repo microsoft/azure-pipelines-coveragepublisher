@@ -123,7 +123,7 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
-        public void WillNotPublishCoverageSummaryIfDataIsNull()
+        public void WillNotPublishCoverageSummaryIfDataIsNotNull()
         {
             var token = new CancellationToken();
             var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
