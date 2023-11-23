@@ -51,24 +51,6 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
-        public void ParseAndPublishCoverageWillPublishFileCoverage()
-        {
-            var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
-            var coverage = new List<FileCoverageInfo>();
-            coverage.Add(new FileCoverageInfo());
-
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
-            _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
-
-            processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
-
-            _mockPublisher.Verify(x => x.PublishFileCoverage(
-                It.Is<List<FileCoverageInfo>>(a => a == coverage),
-                It.Is<CancellationToken>(b => b == token)));
-        }
-
-        [TestMethod]
         public void WillNotPublishFileCoverageIfCountIsZero()
         {
             var token = new CancellationToken();
@@ -138,6 +120,27 @@ namespace CoveragePublisher.Tests
             _mockPublisher.Verify(x => x.PublishFileCoverage(
                 It.Is<List<FileCoverageInfo>>(a => a == coverage),
                 It.Is<CancellationToken>(b => b == token)));
+        }
+
+        [TestMethod]
+        public void WillNotPublishCoverageSummaryIfDataIsNull()
+        {
+            var token = new CancellationToken();
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var summary = new CoverageSummary();
+
+            summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);
+
+            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
+            _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
+            
+            processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
+
+            _mockPublisher.Verify(x => x.PublishCoverageSummary(
+                It.Is<CoverageSummary>(a => a == summary),
+                It.Is<CancellationToken>(b => b == token)));
+
+           Assert.IsNotNull(summary.CodeCoverageData);
         }
     }
 }
