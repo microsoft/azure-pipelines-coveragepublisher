@@ -78,7 +78,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     }
                     else
                     {
-                        TraceLogger.Debug("Publishing file json coverage is not supported.");
+                        TraceLogger.Debug("Publishing file cjson coverage is not supported.");
                         var summary = parser.GetCoverageSummary();
 
                         if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
