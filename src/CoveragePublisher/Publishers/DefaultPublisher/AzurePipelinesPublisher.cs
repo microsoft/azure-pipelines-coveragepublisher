@@ -112,6 +112,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                     TraceLogger.Error(string.Format(Resources.FailedtoUploadCoverageSummary, ex.ToString()));
                 }
             }
+            else{
+                TraceLogger.Warning(Resources.FailedtoUploadCoverageSummary);
+            }
         }
 
         public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)

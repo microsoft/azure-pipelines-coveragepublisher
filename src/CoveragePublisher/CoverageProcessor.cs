@@ -29,6 +29,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             {
                 try
                 {
+                    TraceLogger.Debug("Publishing file json coverage supported.");
+
                     _telemetry.AddOrUpdate("PublisherConfig", () =>
                     {
                         return "{" +
@@ -43,10 +45,29 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                     if (supportsFileCoverageJson)
                     {
-                        TraceLogger.Debug("Publishing file json coverage is supported.");
                         var fileCoverage = parser.GetFileCoverageInfos();
 
+                        var summary = parser.GetCoverageSummary();
+
+                        bool IsCodeCoverageData = (summary.CodeCoverageData != null);
+
+                        bool IsCoverageStats = (summary.CodeCoverageData.CoverageStats != null);
+
                         _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
+
+                        TraceLogger.Debug("Publishing code coverage summary supported");
+
+                        if (summary == null || (IsCodeCoverageData  && IsCoverageStats  && summary.CodeCoverageData.CoverageStats.Count == 0)) 
+                        {
+                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
+                        }
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
+                            {
+                                await _publisher.PublishCoverageSummary(summary, token);
+                            }
+                        }
 
                         if (fileCoverage.Count == 0)
                         {
