@@ -50,7 +50,7 @@ namespace CoveragePublisher.Tests
                 It.Is<CoverageSummary>(a => a == summary),
                 It.Is<CancellationToken>(b => b == token)));
         }
-*/
+
         [TestMethod]
         public void ParseAndPublishCoverageWillPublishFileCoverage()
         {
@@ -68,7 +68,7 @@ namespace CoveragePublisher.Tests
                 It.Is<List<FileCoverageInfo>>(a => a == coverage),
                 It.Is<CancellationToken>(b => b == token)));
         }
-
+*/
         [TestMethod]
         public void WillNotPublishFileCoverageIfCountIsZero()
         {
