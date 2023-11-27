@@ -88,13 +88,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                                 await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
                             }
 
-                            else{
+                    
 
                             using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
                             {
                                 await _publisher.PublishFileCoverage(fileCoverage, token);
                             }
-                            }
+                            
                         }
                 
 
