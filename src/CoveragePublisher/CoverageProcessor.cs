@@ -71,7 +71,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         if (fileCoverage.Count == 0)
                         {
+                            TraceLogger.Debug("Publishing native coverage files is supported.");
+
+                            await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
+                            
                             TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
+
                         }
                         else
                         {
@@ -87,8 +92,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                                 await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
                             }
-
-                    
 
                             using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
                             {
