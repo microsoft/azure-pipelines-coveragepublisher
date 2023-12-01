@@ -45,6 +45,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             if (Configuration.CoverageFiles == null)
             {
+                Console.WriteLine("THIS IS TRUE");
                 return fileCoverages;
             }
 
@@ -70,6 +71,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                     }
                 }
             }
+
+            Console.WriteLine("FILECOVERAGE", fileCoverages.Count);
 
             return fileCoverages;
         }
