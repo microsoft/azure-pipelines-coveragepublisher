@@ -39,7 +39,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
-             Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
+            Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
+
+             foreach(string nativeCoverageFile in Configuration.CoverageFiles){
+              if ((nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))
+                            {
+                               Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
+                            }
+             }
 
              Console.WriteLine("These are the Parser Results", _parserResult);
 
@@ -55,6 +66,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
+                        Console.WriteLine("WE HAVE REACHED THE THRIPLE FOR LOOP");
                         FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
                         int lineNumber = 0;
 
