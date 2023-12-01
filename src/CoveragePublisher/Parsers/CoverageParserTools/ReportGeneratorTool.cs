@@ -39,6 +39,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
+             Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
+
+             Console.WriteLine("These are the Parser Results", _parserResult);
+
             if (Configuration.CoverageFiles == null)
             {
                 return fileCoverages;

@@ -181,12 +181,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 return;
             }
 
+             Console.WriteLine($"Native Coverage Files: {nativeCoverageFiles}");
+
             TraceLogger.Info(Resources.RenameIndexFileCoberturaFailed);
 
             try
             {
                 _executionContext.TelemetryDataCollector.AddOrUpdate("TotalNativeCoverageFilesCount", nativeCoverageFiles.Count);
 
+           
                 Dictionary<string, string> metaData = new Dictionary<string, string>();
                 using (new SimpleTimer("AzurePipelinesPublisher", "UploadNativeCoverageFiles", _executionContext.TelemetryDataCollector))
                 {
