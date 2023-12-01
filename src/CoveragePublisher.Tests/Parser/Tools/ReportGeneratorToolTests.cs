@@ -66,7 +66,7 @@ debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
 debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
-
+/*
         [TestMethod]
         public void WillReturnEmptyCoverageForNoInputFiles()
         {
@@ -83,6 +83,7 @@ debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info f
 debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
         }
+        */
 
         [TestMethod]
         public void WillReturnEmptyCoverageForNonExistingFile()

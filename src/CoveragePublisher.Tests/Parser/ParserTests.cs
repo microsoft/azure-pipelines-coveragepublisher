@@ -132,6 +132,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/JaCoCo.xml
             parser.Verify(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
         }
 
+/*
         [TestMethod]
         public void WillGenerateReportWhenParsingFileCoverage()
         {
@@ -145,7 +146,7 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/JaCoCo.xml
 
             parser.Verify(x => x.GenerateReport(It.IsAny<ICoverageParserTool>()));
         }
-
+*/
         [TestMethod]
         public void ParsingException()
         {

@@ -42,11 +42,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
 
              foreach(string nativeCoverageFile in Configuration.CoverageFiles){
-              if ((nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
-                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||
-                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||
-                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||
-                            nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))
+              if ((nativeCoverageFile.EndsWith(".coverage") ||
+                            nativeCoverageFile.EndsWith(".covx") ||
+                            nativeCoverageFile.EndsWith(".covb") ||
+                            nativeCoverageFile.EndsWith(".coveragebuffer") ||
+                            nativeCoverageFile.EndsWith(".cjson")))
                             {
                                Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
                             }
