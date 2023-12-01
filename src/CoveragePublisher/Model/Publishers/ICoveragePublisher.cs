@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <param name="nativeCoverageFiles">List of native coverage files</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         /// <returns></returns>
-        Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken);
+        Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken, IList<FileCoverageInfo> coverageInfos);
 
         /// <summary>
         /// Gets weather we can upload native file to tcm logstore.

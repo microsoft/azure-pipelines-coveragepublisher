@@ -174,20 +174,36 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, true);
         }
 
-        public async Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken)
+        public async Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken, IList<FileCoverageInfo> coverageInfos)
         {
             if (nativeCoverageFiles == null || nativeCoverageFiles.Count == 0)
             {
                 return;
             }
 
-             Console.WriteLine($"Native Coverage Files: {nativeCoverageFiles}");
+            Console.WriteLine($"Native Coverage Files: {nativeCoverageFiles}");
 
             TraceLogger.Info(Resources.RenameIndexFileCoberturaFailed);
+
+            var maxParallelism = Math.Min(Math.Max(Environment.ProcessorCount / 2, 1), coverageInfos.Count);
+
+            Console.WriteLine("MAXPARALLELISM");
+            Console.WriteLine(maxParallelism);
+            
+            var queue = new ConcurrentQueue<FileCoverageInfo>(coverageInfos);
+            var tasks = new List<Task>();
+            var jsonFile = Path.Combine(_executionContext.TempPath, Guid.NewGuid().ToString() + _executionContext.BuildId.ToString() + ".cjson");
+            
+            Console.WriteLine("JSONFILE");
+            Console.WriteLine(jsonFile);
 
             try
             {
                 _executionContext.TelemetryDataCollector.AddOrUpdate("TotalNativeCoverageFilesCount", nativeCoverageFiles.Count);
+
+                var fileContent = JsonUtility.ToString(coverageInfos);
+
+                File.WriteAllText(jsonFile, fileContent);
 
            
                 Dictionary<string, string> metaData = new Dictionary<string, string>();
@@ -209,6 +225,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, testLogType, nativeCoverageFile, metaData, null, true, cancellationToken);
                         uploadedFileCount++;
                     }
+
+                    Console.WriteLine("UPLOADED FILE COUNT");
+                    Console.WriteLine(uploadedFileCount);
 
                     _executionContext.TelemetryDataCollector.AddOrUpdate("UploadedNativeCoverageFilesCount", uploadedFileCount);
                 }
