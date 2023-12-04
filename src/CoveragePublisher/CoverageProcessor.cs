@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         var fileCoverage = parser.GetFileCoverageInfos();
                         
-                        if(config.CoverageFiles.Contains(".coverage"))
+                        if(config.CoverageFiles.Count>=0)
                         {
                             fileCoverage = parser.GetFileCoverageInfos(token); 
                         }
