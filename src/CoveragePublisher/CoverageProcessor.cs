@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
@@ -46,8 +47,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         TraceLogger.Debug("Publishing file json coverage is supported.");
 
                         var fileCoverage = parser.GetFileCoverageInfos();
-                        
-                        if(config.CoverageFiles.Count>=0)
+
+                        bool hasCoverageFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == ".coverage");
+                        bool hasCovXFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == ".covx");
+                        bool hasCovBFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == ".covb");
+
+
+                        if (hasCoverageFiles || hasCovBFiles || hasCovXFiles)
                         {
                             fileCoverage = parser.GetFileCoverageInfos(token); 
                         }
