@@ -48,6 +48,5 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             GenerateCoverageBufferFiles = true,
             FixCoverageBuffersMismatch = true,
         };
-        
     }
 }
