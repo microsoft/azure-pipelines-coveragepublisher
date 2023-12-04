@@ -44,7 +44,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     if (supportsFileCoverageJson)
                     {
                         TraceLogger.Debug("Publishing file json coverage is supported.");
+
                         var fileCoverage = parser.GetFileCoverageInfos();
+                        
+                        if(config.CoverageFiles.Contains(".coverage"))
+                        {
+                            fileCoverage = parser.GetFileCoverageInfos(token); 
+                        }
+                       
 
                         _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
 
@@ -84,15 +91,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                               // Upload native coverage files to TCM
                             //var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
                            // _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
-                            var x=10;
-                            var y=5;
-
-                            if ((2*y)==x)
-                            {
-                                TraceLogger.Debug("Publishing native coverage files is supported.");
-
-                                await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token, fileCoverage);
-                            }
 
                             using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
                             {

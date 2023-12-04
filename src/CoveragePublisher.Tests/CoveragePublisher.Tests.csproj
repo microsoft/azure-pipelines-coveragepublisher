@@ -10,6 +10,8 @@
     <PackageReference Include="MSTest.TestAdapter" Version="3.0.2" />
     <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
     <PackageReference Include="Moq" Version="4.18.4" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Microsoft.CodeCoverage" Version="17.8.0" />
   </ItemGroup>
 
   <ItemGroup>
