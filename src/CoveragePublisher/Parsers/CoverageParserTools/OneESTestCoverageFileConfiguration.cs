@@ -1,6 +1,8 @@
 // Copyright (C) Microsoft Corporation. All Rights Reserved.
 
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Microsoft.CodeCoverage.Core;
+using Microsoft.CodeCoverage.IO.Coverage;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
@@ -14,7 +16,7 @@ using System.IO;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
-    public class OneESTestCoverageFileConfiguration
+    public class OneESTestCoverageFileConfiguration : ICoverageFileConfiguration
     {
         /// <inheritdoc/>
         public bool ReadModules { get; set; }
@@ -39,12 +41,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         public bool SkipInvalidData { get; set; }
 
+        public CoverageMergeOperation MergeOperation { get; set; }
+
         internal static OneESTestCoverageFileConfiguration Default { get; } = new OneESTestCoverageFileConfiguration
         {
             ReadModules = true,
             ReadSkippedFunctions = true,
             ReadSnapshotsData = true,
             ReadSkippedModules = true,
+            GenerateCoverageBufferFiles = true,
+            FixCoverageBuffersMismatch = true,
+        };
+
+        internal static OneESTestCoverageFileConfiguration NoSkippedData { get; } = new OneESTestCoverageFileConfiguration
+        {
+            ReadModules = true,
+            ReadSkippedFunctions = false,
+            ReadSnapshotsData = true,
+            ReadSkippedModules = false,
             GenerateCoverageBufferFiles = true,
             FixCoverageBuffersMismatch = true,
         };
