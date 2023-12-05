@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
@@ -16,11 +17,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     {
         private ICoveragePublisher _publisher;
         private ITelemetryDataCollector _telemetry;
+        private IFeatureFlagHelper _featureFlagHelper;
 
-        public CoverageProcessor(ICoveragePublisher publisher, ITelemetryDataCollector telemetry)
+        public CoverageProcessor(ICoveragePublisher publisher, ITelemetryDataCollector telemetry, IFeatureFlagHelper featureFlagHelper)
         {
             _publisher = publisher;
             _telemetry = telemetry;
+            _featureFlagHelper = featureFlagHelper;
         }
 
         public async Task ParseAndPublishCoverage(PublisherConfiguration config, CancellationToken token, Parser parser)
@@ -99,7 +102,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
 
-                    if (config.GenerateHTMLReport)
+                    var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.DeprecatePublishHTMLReport, true);
+
+
+                    // Feature Flag for testing and deprecating PublishHTMLReport
+                    if (!IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
                     {
                         if (!Directory.Exists(config.ReportDirectory))
                         {

@@ -14,6 +14,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     {
         private static CancellationTokenSource _cancellationTokenSource;
         private static bool publishSuccess = false;
+        private IFeatureFlagHelper _featureFlagHelper;
+        private IClientFactory _clientFactory;
+        private static FeatureFlagHelper _mockFFHelper = new FeatureFlagHelper(IClientFactory clientFactory) { _clientFactory = clientFactory };
 
         public static void Main(string[] args)
         {
@@ -23,6 +26,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             var config = argsProcessor.ProcessCommandLineArgs(args);
 
             _cancellationTokenSource = new CancellationTokenSource();
+            //_mockFFHelper.Reset();
 
             AppDomain.CurrentDomain.ProcessExit += ProcessExit;
 
@@ -51,7 +55,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
 
 
-            var processor = new CoverageProcessor(publisher, context.TelemetryDataCollector);
+            var processor = new CoverageProcessor(publisher, context.TelemetryDataCollector, _mockFFHelper);
 
             // By default wait for 2 minutes for coverage to publish
             var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context.TelemetryDataCollector))

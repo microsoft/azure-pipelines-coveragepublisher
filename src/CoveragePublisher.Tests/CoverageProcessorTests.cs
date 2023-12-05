@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -20,22 +21,32 @@ namespace CoveragePublisher.Tests
         private PublisherConfiguration _config = new PublisherConfiguration() { ReportDirectory = "directory" };
         private Mock<Parser> _mockParser;
         private Mock<ITelemetryDataCollector> _mockTelemetryDataCollector = new Mock<ITelemetryDataCollector>();
+        private IFeatureFlagHelper _featureFlagHelper;
+        private Mock<IFeatureFlagHelper> _mockFFHelper = new Mock<IFeatureFlagHelper>();
 
         [TestInitialize]
-        public void TestInitialize()
+        public void TestInitialize(IFeatureFlagHelper featureFlagHelper)
         {
             _mockParser = new Mock<Parser>(_config, _mockTelemetryDataCollector.Object);
 
             _mockPublisher.Setup(x => x.PublishCoverageSummary(It.IsAny<CoverageSummary>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            _mockFFHelper.Reset();
+            _featureFlagHelper = featureFlagHelper;
+            var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.DeprecatePublishHTMLReport, true);
+
+            // Feature Flag for testing and deprecating PublishHTMLReport
+            if (!IsPublishHTMLReportDeprecationEnabled)
+            {
+                _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            }
         }
 
         [TestMethod]
         public void ParseAndPublishCoverageWillPublishSummary()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
             var summary = new CoverageSummary();
 
             summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);
@@ -54,7 +65,7 @@ namespace CoveragePublisher.Tests
         public void WillNotPublishFileCoverageIfCountIsZero()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
             var coverage = new List<FileCoverageInfo>();
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
@@ -74,7 +85,7 @@ namespace CoveragePublisher.Tests
             TraceLogger.Initialize(logger);
 
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
             var coverage = new List<FileCoverageInfo>();
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
@@ -97,7 +108,7 @@ namespace CoveragePublisher.Tests
         public void ParseAndPublishCoverageWillPublishFileAndCodeCoverageSummary()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
             var coverage = new List<FileCoverageInfo>();
             coverage.Add(new FileCoverageInfo());
 
@@ -126,7 +137,7 @@ namespace CoveragePublisher.Tests
         public void WillNotPublishCoverageSummaryIfDataIsNotNull()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
             var summary = new CoverageSummary();
 
             summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);
