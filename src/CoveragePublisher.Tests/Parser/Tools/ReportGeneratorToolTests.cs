@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
@@ -82,6 +83,18 @@ debug: ReportGeneratorTool: No input coverage files to parse.
 debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
 debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
+        }
+
+        public void WillReturnEmptyCoverageForNoInputFilesAllFormats()
+        {
+            var parser = new ReportGeneratorTool(new PublisherConfiguration());
+            var token = new CancellationTokenSource();
+            var fileCoverage = parser.GetFileCoverageInfos(token.Token);
+            var summary = parser.GetCoverageSummary();
+
+            Assert.AreEqual(fileCoverage.Count, 0);
+            Assert.AreEqual(summary.CodeCoverageData.CoverageStats.Count, 0);
+
         }
 
         [TestMethod]
