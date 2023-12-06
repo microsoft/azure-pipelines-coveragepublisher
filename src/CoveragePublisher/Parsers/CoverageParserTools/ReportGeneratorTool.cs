@@ -87,20 +87,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
 
-            foreach (string nativeCoverageFile in Configuration.CoverageFiles)
-            {
-                if ((nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageDotFileFormat) ||
-                              nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageXFileExtension) ||
-                              nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageBFileExtension)
-                              ))
-                {
-                    var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
-                    Console.WriteLine("TRANSFORMED COVERAGE TO XML");
 
-                    _parserResult = ParseCoverageFiles(transformedXml.Result);
+            var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
+            Console.WriteLine("TRANSFORMED COVERAGE TO XML");
 
-                }
-            }
+            _parserResult = ParseCoverageFiles(transformedXml.Result);
+
 
             Console.WriteLine("These are the Parser Results", _parserResult);
 
@@ -143,15 +135,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             var utility = new CoverageFileUtilityV2(PublisherCoverageFileConfiguration.Default);
 
             var transformedXmls = new List<string>();
-            foreach (var coverageFile in inputCoverageFiles)
+            foreach (var nativeCoverageFile in inputCoverageFiles)
             {
-                string transformedXml = Path.ChangeExtension(coverageFile, ".xml");
-                await utility.ToXmlFileAsync(
-                    path: coverageFile,
-                    outputPath: transformedXml,
-                    cancellationToken: cancellationToken);
+                if ((nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageDotFileFormat) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageXFileExtension) ||
+                            nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageBFileExtension)
+                            ))
+                {
+                    string transformedXml = Path.ChangeExtension(nativeCoverageFile, ".xml");
+                    await utility.ToXmlFileAsync(
+                        path: nativeCoverageFile,
+                        outputPath: transformedXml,
+                        cancellationToken: cancellationToken);
 
-                transformedXmls.Add(transformedXml);
+                    transformedXmls.Add(transformedXml);
+                }
             }
             return transformedXmls;
         }
