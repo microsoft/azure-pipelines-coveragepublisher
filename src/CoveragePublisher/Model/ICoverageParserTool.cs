@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
 {
@@ -15,7 +16,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// </summary>
         /// <returns>List of <see cref="FileCoverageInfo"/></returns>
         List<FileCoverageInfo> GetFileCoverageInfos();
-        
+
+        /// <summary>
+        /// Get coverage information for individual files. Specifically used for .coverage/.covx scenarios
+        /// </summary>
+        /// <returns>List of <see cref="FileCoverageInfo"/></returns>
+        List<FileCoverageInfo> GetFileCoverageInfos(CancellationToken token);
+
         /// <summary>
         /// Get coverage summary, contains combined coverage summary data.
         /// </summary>

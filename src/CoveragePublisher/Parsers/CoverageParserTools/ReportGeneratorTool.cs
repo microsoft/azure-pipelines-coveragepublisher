@@ -3,6 +3,7 @@
 
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
+using Microsoft.CodeCoverage.Core;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using Palmmedia.ReportGenerator.Core.Parser;
@@ -12,6 +13,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Serilog;
+using Microsoft.CodeCoverage.IO;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.CoverageParserTools;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -50,14 +59,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
+                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, TeamFoundation.TestManagement.WebApi.CoverageStatus>() };
                         int lineNumber = 0;
 
                         foreach (var line in file.LineCoverage)
                         {
                             if (line != -1 && lineNumber != 0)
                             {
-                                resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? CoverageStatus.NotCovered : CoverageStatus.Covered);
+                                resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? TeamFoundation.TestManagement.WebApi.CoverageStatus.NotCovered : TeamFoundation.TestManagement.WebApi.CoverageStatus.Covered);
                             }
                             ++lineNumber;
                         }
@@ -68,6 +77,87 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
 
             return fileCoverages;
+        }
+
+        public List<FileCoverageInfo> GetFileCoverageInfos(CancellationToken token)
+        {
+            TraceLogger.Debug("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.");
+
+            List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
+
+            Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
+
+            foreach (string nativeCoverageFile in Configuration.CoverageFiles)
+            {
+                if ((nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageDotFileFormat) ||
+                              nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageXFileExtension) ||
+                              nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageBFileExtension)
+                              ))
+                {
+                    Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
+                    var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
+                    Console.WriteLine("TRANSFORMED COVERAGE TO XML");
+                    Console.WriteLine(transformedXml.ToString());
+
+                    _parserResult = ParseCoverageFiles(transformedXml.Result);
+
+                }
+            }
+
+            Console.WriteLine("These are the Parser Results", _parserResult);
+
+            if (Configuration.CoverageFiles == null)
+            {
+                Console.WriteLine("THIS IS TRUE");
+                return fileCoverages;
+            }
+
+            foreach (var assembly in _parserResult.Assemblies)
+            {
+                foreach (var @class in assembly.Classes)
+                {
+                    foreach (var file in @class.Files)
+                    {
+                        Console.WriteLine("WE HAVE REACHED THE THRIPLE FOR LOOP");
+                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, TeamFoundation.TestManagement.WebApi.CoverageStatus>() };
+                        int lineNumber = 0;
+
+                        foreach (var line in file.LineCoverage)
+                        {
+                            if (line != -1 && lineNumber != 0)
+                            {
+                                resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? TeamFoundation.TestManagement.WebApi.CoverageStatus.NotCovered : TeamFoundation.TestManagement.WebApi.CoverageStatus.Covered);
+                            }
+                            ++lineNumber;
+                        }
+
+                        fileCoverages.Add(resultFileCoverageInfo);
+                    }
+                }
+            }
+
+            Console.WriteLine("FILECOVERAGE", fileCoverages.Count);
+
+            return fileCoverages;
+        }
+
+        private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
+        {
+            // Customers like intune invoke vstest.console.exe multiple times inside a single job. Transform cov files resulting from each run into a different subdirectory
+            var utility = new CoverageFileUtilityV2(PublisherCoverageFileConfiguration.Default);
+
+            var transformedXmls = new List<string>();
+            foreach (var coverageFile in inputCoverageFiles)
+            {
+                string transformedXml = Path.ChangeExtension(coverageFile, ".xml");
+                await utility.ToXmlFileAsync(
+                    path: coverageFile,
+                    outputPath: transformedXml,
+                    cancellationToken: cancellationToken);
+
+                transformedXmls.Add(transformedXml);
+            }
+            return transformedXmls;
         }
 
         public CoverageSummary GetCoverageSummary()
