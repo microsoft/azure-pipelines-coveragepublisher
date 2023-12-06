@@ -15,8 +15,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
         private static CancellationTokenSource _cancellationTokenSource;
         private static bool publishSuccess = false;
         private IFeatureFlagHelper _featureFlagHelper;
-        private IClientFactory _clientFactory;
-        private static FeatureFlagHelper _mockFFHelper = new FeatureFlagHelper(IClientFactory clientFactory) { _clientFactory = clientFactory };
+        private static IClientFactory _clientFactory;
+        private static FeatureFlagHelper FFhelperobject = new FeatureFlagHelper(_clientFactory);
 
         public static void Main(string[] args)
         {
@@ -26,7 +26,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             var config = argsProcessor.ProcessCommandLineArgs(args);
 
             _cancellationTokenSource = new CancellationTokenSource();
-            //_mockFFHelper.Reset();
 
             AppDomain.CurrentDomain.ProcessExit += ProcessExit;
 
@@ -35,7 +34,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 ProcessCoverage(config, _cancellationTokenSource.Token);
             }
         }
-        
+
         private static void ProcessCoverage(PublisherConfiguration config, CancellationToken cancellationToken)
         {
             // Currently the publisher only works for azure pipelines, so we simply instansiate for Azure Pipelines
@@ -55,13 +54,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
 
 
-            var processor = new CoverageProcessor(publisher, context.TelemetryDataCollector, _mockFFHelper);
+            var processor = new CoverageProcessor(publisher, context.TelemetryDataCollector, FFhelperobject);
 
             // By default wait for 2 minutes for coverage to publish
             var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context.TelemetryDataCollector))
                                            .Wait(config.TimeoutInSeconds * 1000, cancellationToken);
 
-            if(publishTimedout)
+            if (publishTimedout)
             {
                 _cancellationTokenSource.Cancel();
             }
@@ -70,7 +69,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 publishSuccess = true;
             }
         }
-        
+
         private static void DebugBreakIfEnvSet()
         {
             var debugEnvFlag = Environment.GetEnvironmentVariable("PIPELINES_COVERAGEPUBLISHER_DEBUG");
