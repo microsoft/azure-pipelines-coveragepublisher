@@ -31,6 +31,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             {
                 try
                 {
+                    TraceLogger.Debug("Publishing file json coverage supported.");
+
                     _telemetry.AddOrUpdate("PublisherConfig", () =>
                     {
                         return "{" +
@@ -45,15 +47,28 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                     if (supportsFileCoverageJson)
                     {
-                        TraceLogger.Debug("Publishing file json coverage is supported.");
 
-                        bool hasDotCoverageFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == Constants.CoverageFormats.CoverageDotFileFormat);
-                        bool hasCoverageXFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == Constants.CoverageFormats.CoverageXFileExtension);
-                        bool hasCoverageBFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == Constants.CoverageFormats.CoverageBFileExtension);
+                        var summary = parser.GetCoverageSummary();
 
-                        var fileCoverage = (hasDotCoverageFiles || hasCoverageXFiles || hasCoverageBFiles) ? parser.GetFileCoverageInfos(token) : parser.GetFileCoverageInfos();
+                        bool IsCodeCoverageData = (summary.CodeCoverageData != null);
+
+                        bool IsCoverageStats = (summary.CodeCoverageData.CoverageStats != null);
 
                         _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
+
+                        TraceLogger.Debug("Publishing code coverage summary supported");
+
+                        if (summary == null || (IsCodeCoverageData  && IsCoverageStats  && summary.CodeCoverageData.CoverageStats.Count == 0)) 
+                        {
+                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
+                        }
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
+                            {
+                                await _publisher.PublishCoverageSummary(summary, token);
+                            }
+                        }
 
                         if (fileCoverage.Count == 0)
                         {

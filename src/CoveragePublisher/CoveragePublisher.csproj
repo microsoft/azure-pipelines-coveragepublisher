@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net7.0;net462</TargetFrameworks>
     <RootNamespace>Microsoft.Azure.Pipelines.CoveragePublisher</RootNamespace>
     <AssemblyName>Microsoft.Azure.Pipelines.CoveragePublisher</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -14,9 +14,6 @@
     <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="16.199.0-preview" />
     <PackageReference Include="ReportGenerator.Core" Version="5.1.19" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
-    <PackageReference Include="Microsoft.CodeCoverage" Version="17.8.0" />
-    <PackageReference Include="Microsoft.CodeCoverage.IO" Version="17.7.0" />
-    <PackageReference Include="Serilog" />
   </ItemGroup>
 
   <ItemGroup>
