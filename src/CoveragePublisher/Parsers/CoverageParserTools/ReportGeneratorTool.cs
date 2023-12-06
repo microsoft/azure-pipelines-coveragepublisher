@@ -94,10 +94,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                               nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageBFileExtension)
                               ))
                 {
-                    Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
                     var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
                     Console.WriteLine("TRANSFORMED COVERAGE TO XML");
-                    Console.WriteLine(transformedXml.ToString());
 
                     _parserResult = ParseCoverageFiles(transformedXml.Result);
 
@@ -108,7 +106,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             if (Configuration.CoverageFiles == null)
             {
-                Console.WriteLine("THIS IS TRUE");
                 return fileCoverages;
             }
 
@@ -118,7 +115,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                        Console.WriteLine("WE HAVE REACHED THE THRIPLE FOR LOOP");
                         FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, TeamFoundation.TestManagement.WebApi.CoverageStatus>() };
                         int lineNumber = 0;
 
