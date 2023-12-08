@@ -18,10 +18,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Serilog;
-using Microsoft.CodeCoverage.IO;
+using Microsoft.CodeCoverage.Analysis;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.CoverageParserTools;
 using CoverageStatus = Microsoft.TeamFoundation.TestManagement.WebApi.CoverageStatus;
+using Microsoft.CodeCoverage.IO.Coverage;
+using Microsoft.CodeCoverage.IO;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -60,7 +62,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint,CoverageStatus>() };
+                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
                         int lineNumber = 0;
 
                         foreach (var line in file.LineCoverage)
@@ -88,12 +90,22 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
 
+
+
+            string[] input = Configuration.CoverageFiles.ToArray();
+
+            var target = new CoverageFileUtilityV2(new PublisherCoverageFileConfiguration() , null);
+            string output = "";
+            string[] mergedReports =  target.MergeCoverageFilesAsync(output, input, CoverageMergeOperation.MergeToXml, CancellationToken.None).Result;
+
+            var transformedXml= mergedReports.ToList();
+
             Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
-            var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
+            //var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
             Console.WriteLine("TRANSFORMED COVERAGE TO XML");
             Console.WriteLine(transformedXml.ToString());
 
-            _parserResult = ParseCoverageFiles(transformedXml.Result);
+            _parserResult = ParseCoverageFiles(transformedXml);
 
             Console.WriteLine("These are the Parser Results", _parserResult);
 
