@@ -18,7 +18,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Serilog;
-using Microsoft.CodeCoverage.Analysis;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.CoverageParserTools;
 using CoverageStatus = Microsoft.TeamFoundation.TestManagement.WebApi.CoverageStatus;

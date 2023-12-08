@@ -1,7 +1,6 @@
 ﻿﻿using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.CodeCoverage.Core;
 using Microsoft.CodeCoverage.IO.Coverage;
-using Microsoft.CodeCoverage.Analysis;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
