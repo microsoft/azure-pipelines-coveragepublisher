@@ -42,6 +42,10 @@ steps:
 
 - task: NuGetToolInstaller@1
 
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 7.0.x'
   inputs:
