@@ -106,7 +106,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
 
                     // Feature Flag for testing and deprecating PublishHTMLReport
-                    if (!IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
+                    if (IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
                     {
                         if (!Directory.Exists(config.ReportDirectory))
                         {
