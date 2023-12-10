@@ -143,7 +143,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return fileCoverages;
         }
 
-        private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
+      /*  private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
         {
             // Customers like intune invoke vstest.console.exe multiple times inside a single job. Transform cov files resulting from each run into a different subdirectory
             var utility = new CoverageFileUtilityV2(PublisherCoverageFileConfiguration.Default);
@@ -167,7 +167,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
             return transformedXmls;
         }
-
+      */
         public CoverageSummary GetCoverageSummary()
         {
             TraceLogger.Debug("ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.");
