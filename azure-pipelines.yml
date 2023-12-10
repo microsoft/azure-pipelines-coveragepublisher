@@ -51,7 +51,7 @@ steps:
   inputs:
     feedsToUse: config
     nugetConfigPath: nuget.config
-    continueOnError: true
+  continueOnError: true
 
 
 - task: UseDotNet@2
