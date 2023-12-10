@@ -47,6 +47,7 @@ steps:
   inputs:
     feedsToUse: config
     nugetConfigPath: nuget.config
+    restoreSolution: '$(solution)'
 
 
 - task: NuGetCommand@2
