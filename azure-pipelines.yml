@@ -44,6 +44,7 @@ steps:
 
 - task: NuGetCommand@2
   displayName: 'NuGet restore1'
+  continueOnError: true
 
 - task: NuGetCommand@2
   displayName: 'NuGet restore2'
