@@ -43,7 +43,10 @@ steps:
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
-  displayName: 'NuGet restore'
+  displayName: 'NuGet restore1'
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore2'
   inputs:
     feedsToUse: config
     nugetConfigPath: nuget.config
