@@ -51,11 +51,8 @@ steps:
   inputs:
     feedsToUse: config
     nugetConfigPath: nuget.config
+    continueOnError: true
 
-
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 7.0.x'
