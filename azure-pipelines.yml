@@ -42,16 +42,8 @@ steps:
 
 - task: NuGetToolInstaller@1
 
-- task: NuGetCommand@2
-  displayName: 'NuGet restore1'
-  continueOnError: true
-
-- task: NuGetCommand@2
-  displayName: 'NuGet restore2'
-  inputs:
-    feedsToUse: config
-    nugetConfigPath: nuget.config
-  continueOnError: true
+- script: dotnet restore --configfile nuget.config
+  displayName: 'Restore NuGet Packages'
 
 
 - task: UseDotNet@2
