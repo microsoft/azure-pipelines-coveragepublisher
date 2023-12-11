@@ -162,7 +162,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 TraceLogger.Debug(string.Format("Failed to delete temporary file: {0}", jsonFile));
             }
         }
-
         
         public async Task PublishHTMLReport(string reportDirectory, CancellationToken token)
         {

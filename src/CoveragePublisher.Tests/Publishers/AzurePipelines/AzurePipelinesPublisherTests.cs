@@ -45,8 +45,8 @@ namespace CoveragePublisher.Tests
         public void WillPublishHtmlReport()
         {
             var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.DeprecatePublishHTMLReport, true);
-            // Feature Flag for testing and deprecating PublishHTMLReport
-            if (IsPublishHTMLReportDeprecationEnabled) {
+            // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
+            if (!IsPublishHTMLReportDeprecationEnabled) {
                 var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
                 var token = new CancellationToken();
 

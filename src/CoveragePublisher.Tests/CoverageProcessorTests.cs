@@ -35,8 +35,8 @@ namespace CoveragePublisher.Tests
             _featureFlagHelper = featureFlagHelper;
             var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.DeprecatePublishHTMLReport, true);
 
-            // Feature Flag for testing and deprecating PublishHTMLReport
-            if (IsPublishHTMLReportDeprecationEnabled)
+            // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
+            if (!IsPublishHTMLReportDeprecationEnabled)
             {
                 _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             }

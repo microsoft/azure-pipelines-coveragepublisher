@@ -26,11 +26,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         Task PublishCoverageSummary(CoverageSummary coverageSummary, CancellationToken cancellationToken);
 
-        ///// <summary>
-        ///// Publish coverage HTML report.
-        ///// </summary>
-        ///// <param name="reportDirectory">Path to coverage report directory.</param>
-        ///// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        /// <summary>
+        /// Publish coverage HTML report.
+        /// </summary>
+        /// <param name="reportDirectory">Path to coverage report directory.</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         Task PublishHTMLReport(string reportDirectory, CancellationToken cancellationToken);
 
         /// <summary>
