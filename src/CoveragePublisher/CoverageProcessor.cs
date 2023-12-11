@@ -106,20 +106,20 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
 
                     // Feature Flag for testing and deprecating PublishHTMLReport
-                    if (IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
-                    {
-                        if (!Directory.Exists(config.ReportDirectory))
-                        {
-                            TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
-                        }
-                        else
-                        {
-                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
-                            {
-                                await _publisher.PublishHTMLReport(config.ReportDirectory, token);
-                            }
-                        }
-                    }
+                    //if (IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
+                    //{
+                    //    if (!Directory.Exists(config.ReportDirectory))
+                    //    {
+                    //        TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
+                    //    }
+                    //    else
+                    //    {
+                    //        using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                    //        {
+                    //            await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                    //        }
+                    //    }
+                    //}
                 }
                 // Only catastrophic failures should trickle down to these catch blocks
                 catch(ParsingException ex)
