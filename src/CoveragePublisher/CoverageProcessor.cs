@@ -105,21 +105,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.DeprecatePublishHTMLReport, true);
 
 
-                    // Feature Flag for testing and deprecating PublishHTMLReport
-                    //if (IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
-                    //{
-                    //    if (!Directory.Exists(config.ReportDirectory))
-                    //    {
-                    //        TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
-                    //    }
-                    //    else
-                    //    {
-                    //        using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
-                    //        {
-                    //            await _publisher.PublishHTMLReport(config.ReportDirectory, token);
-                    //        }
-                    //    }
-                    //}
+                    //Feature Flag for testing and deprecating PublishHTMLReport
+                    if (IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
+                        {
+                            if (!Directory.Exists(config.ReportDirectory))
+                            {
+                                TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
+                            }
+                            else
+                            {
+                                using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                                {
+                                    await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                }
+                            }
+                        }
                 }
                 // Only catastrophic failures should trickle down to these catch blocks
                 catch(ParsingException ex)

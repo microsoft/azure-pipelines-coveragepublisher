@@ -163,6 +163,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
         }
 
+        
         public async Task PublishHTMLReport(string reportDirectory, CancellationToken token)
         {
             await _htmlReportPublisher.PublishHTMLReportAsync(reportDirectory, token);
