@@ -85,6 +85,7 @@ debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for t
 ".Trim());
         }
 
+        [TestMethod]
         public void WillReturnEmptyCoverageForNoInputFilesAllFormats()
         {
             var parser = new ReportGeneratorTool(new PublisherConfiguration());
@@ -112,6 +113,44 @@ debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
 debug: ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.
 debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.
 ".Trim());
+        }
+
+        [TestMethod]
+        public void WillReturnCoverageStatsForDotCoverageFile()
+        {
+            var parser = new ReportGeneratorTool(new PublisherConfiguration() { CoverageFiles = new string[] { "SampleCoverage/DotCoverage.coverage" } });
+            var token = new CancellationTokenSource();
+            var fileCoverage = parser.GetFileCoverageInfos(token.Token);
+            var summary = parser.GetCoverageSummary();
+
+            Assert.AreEqual(fileCoverage.Count, 10);
+            Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 922);
+            Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Covered, 786);
+
+        }
+
+        [TestMethod]
+        public void WillReturnCoverageStatsForCoverageXFile()
+        {
+            var parser = new ReportGeneratorTool(new PublisherConfiguration() { CoverageFiles = new string[] { "SampleCoverage/CoverageXFile.covx" } });
+            var token = new CancellationTokenSource();
+            var fileCoverage = parser.GetFileCoverageInfos(token.Token);
+            var summary = parser.GetCoverageSummary();
+
+            Assert.AreEqual(fileCoverage.Count, 400);
+            Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Total, 23070);
+            Assert.AreEqual(summary.CodeCoverageData.CoverageStats[0].Covered , 8785);
+        }
+
+        [TestMethod]
+        public void WillReturnCoverageStatsForNotCoverageXFile()
+        {
+            var parser = new ReportGeneratorTool(new PublisherConfiguration() { CoverageFiles = new string[] { "SampleCoverage/sampleCoverage.coverage" } });
+            var token = new CancellationTokenSource();
+            var fileCoverage = parser.GetFileCoverageInfos();
+            var summary = parser.GetCoverageSummary();
+
+            Assert.AreEqual(fileCoverage.Count, 0);
         }
 
         [TestMethod]

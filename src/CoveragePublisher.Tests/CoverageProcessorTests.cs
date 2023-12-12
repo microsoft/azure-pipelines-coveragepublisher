@@ -67,6 +67,22 @@ namespace CoveragePublisher.Tests
                 It.Is<CancellationToken>(b => b == token)), Times.Never);
         }
 
+        [TestMethod]
+        public void WillNotPublishFileCoverageIfCountIsZeroForDotCoverage()
+        {
+            var token = new CancellationToken();
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var coverage = new List<FileCoverageInfo>();
+
+            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
+            _mockParser.Setup(x => x.GetFileCoverageInfos(token)).Returns(coverage);
+
+            processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
+
+            _mockPublisher.Verify(x => x.PublishFileCoverage(
+                It.Is<List<FileCoverageInfo>>(a => a == coverage),
+                It.Is<CancellationToken>(b => b == token)), Times.Never);
+        }
 
         [TestMethod]
         public void WillNotPublishCoverageSummaryIfDataIsNotNull()

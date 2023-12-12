@@ -87,9 +87,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
 
-            Console.WriteLine($"These are the Configuration NAtive Coverage files: {Configuration.CoverageFiles}");
-
-
+            if (Configuration.CoverageFiles == null)
+            {
+                //  Console.WriteLine("THIS IS TRUE");
+                return fileCoverages;
+            }
 
             string[] input = Configuration.CoverageFiles.ToArray();
 
@@ -99,20 +101,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             var transformedXml= mergedReports.ToList();
 
-            Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
+           // Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
             //var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
-            Console.WriteLine("TRANSFORMED COVERAGE TO XML");
-            Console.WriteLine(transformedXml.ToString());
+          //  Console.WriteLine("TRANSFORMED COVERAGE TO XML");
+           // Console.WriteLine(transformedXml.ToString());
 
             _parserResult = ParseCoverageFiles(transformedXml);
 
-            Console.WriteLine("These are the Parser Results", _parserResult);
-
-            if (Configuration.CoverageFiles == null)
-            {
-                Console.WriteLine("THIS IS TRUE");
-                return fileCoverages;
-            }
+          //  Console.WriteLine("These are the Parser Results", _parserResult);
 
             foreach (var assembly in _parserResult.Assemblies)
             {
@@ -120,7 +116,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                        Console.WriteLine("WE HAVE REACHED THE THRIPLE FOR LOOP");
+                       // Console.WriteLine("WE HAVE REACHED THE THRIPLE FOR LOOP");
                         FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, TeamFoundation.TestManagement.WebApi.CoverageStatus>() };
                         int lineNumber = 0;
 
@@ -138,7 +134,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
-            Console.WriteLine("FILECOVERAGE", fileCoverages.Count);
+          //  Console.WriteLine("FILECOVERAGE", fileCoverages.Count);
 
             return fileCoverages;
         }
