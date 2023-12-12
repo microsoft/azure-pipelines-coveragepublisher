@@ -42,9 +42,9 @@ steps:
 
 - task: NuGetToolInstaller@1
 
-- script: dotnet restore --configfile nuget.config
-  displayName: 'Restore NuGet Packages'
-
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 7.0.x'
