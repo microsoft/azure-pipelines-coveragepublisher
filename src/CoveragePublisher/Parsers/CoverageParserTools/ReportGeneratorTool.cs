@@ -89,26 +89,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             if (Configuration.CoverageFiles == null)
             {
-                //  Console.WriteLine("THIS IS TRUE");
                 return fileCoverages;
             }
 
-            string[] input = Configuration.CoverageFiles.ToArray();
+            var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
 
-            var target = new CoverageFileUtilityV2(new PublisherCoverageFileConfiguration() , null);
-            string output = "";
-            string[] mergedReports =  target.MergeCoverageFilesAsync(output, input, CoverageMergeOperation.MergeToXml, CancellationToken.None).Result;
-
-            var transformedXml= mergedReports.ToList();
-
-           // Console.WriteLine("THESE ARE DOTCOVERAGE FILES");
-            //var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
-          //  Console.WriteLine("TRANSFORMED COVERAGE TO XML");
-           // Console.WriteLine(transformedXml.ToString());
-
-            _parserResult = ParseCoverageFiles(transformedXml);
-
-          //  Console.WriteLine("These are the Parser Results", _parserResult);
+            _parserResult = ParseCoverageFiles(transformedXml.Result);
 
             foreach (var assembly in _parserResult.Assemblies)
             {
@@ -116,15 +102,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                       // Console.WriteLine("WE HAVE REACHED THE THRIPLE FOR LOOP");
-                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, TeamFoundation.TestManagement.WebApi.CoverageStatus>() };
+                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
                         int lineNumber = 0;
 
                         foreach (var line in file.LineCoverage)
                         {
                             if (line != -1 && lineNumber != 0)
                             {
-                                resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? TeamFoundation.TestManagement.WebApi.CoverageStatus.NotCovered : TeamFoundation.TestManagement.WebApi.CoverageStatus.Covered);
+                                resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? CoverageStatus.NotCovered : CoverageStatus.Covered);
                             }
                             ++lineNumber;
                         }
@@ -134,12 +119,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 }
             }
 
-          //  Console.WriteLine("FILECOVERAGE", fileCoverages.Count);
-
             return fileCoverages;
         }
 
-      /*  private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
+      private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
         {
             // Customers like intune invoke vstest.console.exe multiple times inside a single job. Transform cov files resulting from each run into a different subdirectory
             var utility = new CoverageFileUtilityV2(PublisherCoverageFileConfiguration.Default);
@@ -163,7 +146,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
             return transformedXmls;
         }
-      */
+      
         public CoverageSummary GetCoverageSummary()
         {
             TraceLogger.Debug("ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.");
