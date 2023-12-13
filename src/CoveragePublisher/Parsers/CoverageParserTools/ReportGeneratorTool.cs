@@ -124,20 +124,19 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
       private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
         {
-            // Customers like intune invoke vstest.console.exe multiple times inside a single job. Transform cov files resulting from each run into a different subdirectory
             var utility = new CoverageFileUtilityV2(PublisherCoverageFileConfiguration.Default);
 
             var transformedXmls = new List<string>();
-            foreach (var nativeCoverageFile in inputCoverageFiles)
+            foreach (var coverageFile in inputCoverageFiles)
             {
-                if ((nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageDotFileFormat) ||
-                            nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageXFileExtension) ||
-                            nativeCoverageFile.EndsWith(Constants.CoverageFormats.CoverageBFileExtension)
+                if ((coverageFile.EndsWith(Constants.CoverageFormats.CoverageDotFileFormat) ||
+                            coverageFile.EndsWith(Constants.CoverageFormats.CoverageXFileExtension) ||
+                            coverageFile.EndsWith(Constants.CoverageFormats.CoverageBFileExtension)
                             ))
                 {
-                    string transformedXml = Path.ChangeExtension(nativeCoverageFile, ".xml");
+                    string transformedXml = Path.ChangeExtension(coverageFile, ".xml");
                     await utility.ToXmlFileAsync(
-                        path: nativeCoverageFile,
+                        path: coverageFile,
                         outputPath: transformedXml,
                         cancellationToken: cancellationToken);
 
