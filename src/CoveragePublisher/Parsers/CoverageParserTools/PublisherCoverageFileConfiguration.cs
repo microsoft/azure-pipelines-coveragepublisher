@@ -3,8 +3,23 @@ using Microsoft.CodeCoverage.IO.Coverage;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.CoverageParserTools
 {
-    public class PublisherCoverageFileConfiguration : ICoverageFileConfiguration
+    internal class PublisherCoverageFileConfiguration : ICoverageFileConfiguration
     {
+        public PublisherCoverageFileConfiguration(
+            bool ReadModules,
+            bool ReadSkippedModules,
+            bool ReadSkippedFunctions,
+            bool ReadSnapshotsData,
+            bool FixCoverageBuffersMismatch,
+            bool GenerateCoverageBufferFiles
+            ) {
+            this.ReadModules = ReadModules;
+            this.ReadSkippedModules = ReadSkippedModules;
+            this.ReadSkippedFunctions = ReadSkippedFunctions;
+            this.ReadSnapshotsData = ReadSnapshotsData;
+            this.FixCoverageBuffersMismatch = FixCoverageBuffersMismatch;
+            this.GenerateCoverageBufferFiles = GenerateCoverageBufferFiles;
+        }
         public bool ReadModules { get; set; }
 
         public bool ReadSkippedModules { get; set; }
@@ -23,24 +38,5 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.CoverageParserTool
 
         public CoverageMergeOperation MergeOperation { get; set; }
 
-        internal static PublisherCoverageFileConfiguration Default { get; } = new PublisherCoverageFileConfiguration
-        {
-            ReadModules = true,
-            ReadSkippedFunctions = true,
-            ReadSnapshotsData = true,
-            ReadSkippedModules = true,
-            GenerateCoverageBufferFiles = true,
-            FixCoverageBuffersMismatch = true,
-        };
-
-        internal static PublisherCoverageFileConfiguration NoSkippedData { get; } = new PublisherCoverageFileConfiguration
-        {
-            ReadModules = true,
-            ReadSkippedFunctions = false,
-            ReadSnapshotsData = true,
-            ReadSkippedModules = false,
-            GenerateCoverageBufferFiles = true,
-            FixCoverageBuffersMismatch = true,
-        };
     }
 }

@@ -23,6 +23,7 @@ using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.CoverageParserTools;
 using CoverageStatus = Microsoft.TeamFoundation.TestManagement.WebApi.CoverageStatus;
 using Microsoft.CodeCoverage.IO.Coverage;
 using Microsoft.CodeCoverage.IO;
+using SixLabors.Fonts.Tables.TrueType;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -122,9 +123,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return fileCoverages;
         }
 
+
       private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
         {
-            var utility = new CoverageFileUtilityV2(PublisherCoverageFileConfiguration.Default);
+            
+            PublisherCoverageFileConfiguration GenericCoverageFileConfiguration = new PublisherCoverageFileConfiguration(true,true,true,true,true,true);
+           
+            var utility = new CoverageFileUtilityV2(GenericCoverageFileConfiguration);
 
             var transformedXmls = new List<string>();
             foreach (var coverageFile in inputCoverageFiles)
