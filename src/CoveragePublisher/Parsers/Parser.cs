@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
 
@@ -33,6 +34,19 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 var tool = _coverageParserTool.Value;
                 GenerateHTMLReport(tool);
                 return tool.GetFileCoverageInfos();
+            }
+            catch (Exception ex)
+            {
+                throw new ParsingException(Resources.ParsingError, ex);
+            }
+        }
+        public virtual List<FileCoverageInfo> GetFileCoverageInfos(CancellationToken token)
+        {
+            try
+            {
+                var tool = _coverageParserTool.Value;
+                GenerateHTMLReport(tool);
+                return tool.GetFileCoverageInfos(token);
             }
             catch (Exception ex)
             {

@@ -42,9 +42,15 @@ steps:
 
 - task: NuGetToolInstaller@1
 
+- task: NuGetAuthenticate@1
+  displayName: 'NuGet Authenticate'
+
+
 - task: NuGetCommand@2
+  displayName: 'NuGet restore'
   inputs:
-    restoreSolution: '$(solution)'
+    feedsToUse: config
+    nugetConfigPath: nuget.config
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 7.0.x'

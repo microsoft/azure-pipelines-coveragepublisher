@@ -16,6 +16,8 @@
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Include="Microsoft.CodeCoverage.Core" version="17.9.4-beta.23608.1" />
+    <PackageReference Include="Serilog" />
   </ItemGroup>
 
   <ItemGroup>
