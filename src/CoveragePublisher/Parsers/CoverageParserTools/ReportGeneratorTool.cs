@@ -126,7 +126,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
       private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
         {
             
-            PublisherCoverageFileConfiguration GenericCoverageFileConfiguration = new PublisherCoverageFileConfiguration(ReadModules: true, ReadSkippedModules: true, ReadSkippedFunctions: true, ReadSnapshotsData:true, FixCoverageBuffersMismatch: true, GenerateCoverageBufferFiles: true);
+            PublisherCoverageFileConfiguration GenericCoverageFileConfiguration = new PublisherCoverageFileConfiguration(ReadModules: true, 
+                                                                                                                         ReadSkippedModules: true, 
+                                                                                                                         ReadSkippedFunctions: true, 
+                                                                                                                         ReadSnapshotsData:true, 
+                                                                                                                         FixCoverageBuffersMismatch: true, 
+                                                                                                                         GenerateCoverageBufferFiles: true);
+
            
             var utility = new CoverageFileUtilityV2(GenericCoverageFileConfiguration);
 
