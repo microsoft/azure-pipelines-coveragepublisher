@@ -3,7 +3,6 @@
 
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
-using Microsoft.CodeCoverage.Core;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using Palmmedia.ReportGenerator.Core.Parser;
@@ -13,16 +12,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Serilog;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers.CoverageParserTools;
-using CoverageStatus = Microsoft.TeamFoundation.TestManagement.WebApi.CoverageStatus;
-using Microsoft.CodeCoverage.IO.Coverage;
-using Microsoft.CodeCoverage.IO;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -81,81 +70,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return fileCoverages;
         }
 
-        public List<FileCoverageInfo> GetFileCoverageInfos(CancellationToken token)
-        {
-            TraceLogger.Debug("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.");
-
-            List<FileCoverageInfo> fileCoverages = new List<FileCoverageInfo>();
-
-            if (Configuration.CoverageFiles == null)
-            {
-                return fileCoverages;
-            }
-
-            var transformedXml = TransformCoverageFilesToXml(Configuration.CoverageFiles, token);
-
-            _parserResult = ParseCoverageFiles(transformedXml.Result);
-
-            foreach (var assembly in _parserResult.Assemblies)
-            {
-                foreach (var @class in assembly.Classes)
-                {
-                    foreach (var file in @class.Files)
-                    {
-                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
-                        int lineNumber = 0;
-
-                        foreach (var line in file.LineCoverage)
-                        {
-                            if (line != -1 && lineNumber != 0)
-                            {
-                                resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? CoverageStatus.NotCovered : CoverageStatus.Covered);
-                            }
-                            ++lineNumber;
-                        }
-
-                        fileCoverages.Add(resultFileCoverageInfo);
-                    }
-                }
-            }
-
-            return fileCoverages;
-        }
-
-
-      private async Task<List<string>> TransformCoverageFilesToXml(IList<string> inputCoverageFiles, CancellationToken cancellationToken)
-        {
-            
-            PublisherCoverageFileConfiguration GenericCoverageFileConfiguration = new PublisherCoverageFileConfiguration(ReadModules: true, 
-                                                                                                                         ReadSkippedModules: true, 
-                                                                                                                         ReadSkippedFunctions: true, 
-                                                                                                                         ReadSnapshotsData:true, 
-                                                                                                                         FixCoverageBuffersMismatch: true, 
-                                                                                                                         GenerateCoverageBufferFiles: true);
-
-           
-            var utility = new CoverageFileUtilityV2(GenericCoverageFileConfiguration);
-
-            var transformedXmls = new List<string>();
-            foreach (var coverageFile in inputCoverageFiles)
-            {
-                if ((coverageFile.EndsWith(Constants.CoverageFormats.CoverageDotFileFormat) ||
-                            coverageFile.EndsWith(Constants.CoverageFormats.CoverageXFileExtension) ||
-                            coverageFile.EndsWith(Constants.CoverageFormats.CoverageBFileExtension)
-                            ))
-                {
-                    string transformedXml = Path.ChangeExtension(coverageFile, ".xml");
-                    await utility.ToXmlFileAsync(
-                        path: coverageFile,
-                        outputPath: transformedXml,
-                        cancellationToken: cancellationToken);
-
-                    transformedXmls.Add(transformedXml);
-                }
-            }
-            return transformedXmls;
-        }
-      
         public CoverageSummary GetCoverageSummary()
         {
             TraceLogger.Debug("ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for the coverage files.");

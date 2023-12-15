@@ -3,12 +3,10 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
-using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
 using Microsoft.VisualStudio.Services.WebApi;
 
@@ -47,11 +45,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                     if (supportsFileCoverageJson)
                     {
-                        bool hasDotCoverageFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == Constants.CoverageFormats.CoverageDotFileFormat);
-                        bool hasCoverageXFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == Constants.CoverageFormats.CoverageXFileExtension);
-                        bool hasCoverageBFiles = config.CoverageFiles.Any(file => Path.GetExtension(file) == Constants.CoverageFormats.CoverageBFileExtension);
-
-                        var fileCoverage = (hasDotCoverageFiles || hasCoverageXFiles || hasCoverageBFiles) ? parser.GetFileCoverageInfos(token) : parser.GetFileCoverageInfos();
+                        var fileCoverage = parser.GetFileCoverageInfos();
 
                         var summary = parser.GetCoverageSummary();
 

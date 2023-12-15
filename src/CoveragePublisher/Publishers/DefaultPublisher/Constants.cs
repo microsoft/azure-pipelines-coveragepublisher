@@ -40,11 +40,5 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             public const string EnablePublishToTcmServiceDirectlyFromTaskFF = "TestManagement.Server.EnablePublishToTcmServiceDirectlyFromTask";
             public const string TestLogStoreOnTCMService = "TestManagement.Server.TestLogStoreOnTCMService";
         }
-        internal static class CoverageFormats
-        {
-            public const string CoverageDotFileFormat = ".coverage";
-            public const string CoverageXFileExtension = ".covx";
-            public const string CoverageBFileExtension = ".covb";
-        }
     }
 }
