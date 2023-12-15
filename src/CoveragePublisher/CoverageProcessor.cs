@@ -102,11 +102,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
 
-                    var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
+                    var AreNativeCoverageFilesUploadedToLogStore = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
 
 
                     //Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-                    if (!IsPublishHTMLReportDeprecationEnabled && config.GenerateHTMLReport)
+                    if (!AreNativeCoverageFilesUploadedToLogStore && config.GenerateHTMLReport)
                         {
                             if (!Directory.Exists(config.ReportDirectory))
                             {

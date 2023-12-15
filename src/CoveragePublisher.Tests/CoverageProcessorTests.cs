@@ -33,10 +33,10 @@ namespace CoveragePublisher.Tests
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockFFHelper.Reset();
             _featureFlagHelper = featureFlagHelper;
-            var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
+            var AreNativeCoverageFilesUploadedToLogStore = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
 
             // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-            if (!IsPublishHTMLReportDeprecationEnabled)
+            if (!AreNativeCoverageFilesUploadedToLogStore)
             {
                 _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             }
