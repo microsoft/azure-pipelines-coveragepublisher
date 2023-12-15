@@ -102,7 +102,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
 
-                    var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.DeprecatePublishHTMLReport, true);
+                    var IsPublishHTMLReportDeprecationEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
 
 
                     //Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
