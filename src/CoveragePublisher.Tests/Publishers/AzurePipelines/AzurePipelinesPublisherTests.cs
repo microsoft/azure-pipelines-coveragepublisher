@@ -44,9 +44,9 @@ namespace CoveragePublisher.Tests
         [TestMethod]
         public void WillPublishHtmlReport()
         {
-            var AreNativeCoverageFilesUploadedToLogStore = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
+            var IsTestLogStoreInTcmActive = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, true);
             // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-            if (!AreNativeCoverageFilesUploadedToLogStore) {
+            if (!IsTestLogStoreInTcmActive) {
                 var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
                 var token = new CancellationToken();
 

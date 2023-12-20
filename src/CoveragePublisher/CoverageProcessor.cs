@@ -102,11 +102,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
 
-                    var AreNativeCoverageFilesUploadedToLogStore = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
+                    var IsTestLogStoreInTcmActive = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, true);
 
 
                     //Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-                    if (!AreNativeCoverageFilesUploadedToLogStore && config.GenerateHTMLReport)
+                    if (!IsTestLogStoreInTcmActive && config.GenerateHTMLReport)
                         {
                             if (!Directory.Exists(config.ReportDirectory))
                             {
