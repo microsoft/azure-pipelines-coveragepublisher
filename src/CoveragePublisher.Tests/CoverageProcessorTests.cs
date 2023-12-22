@@ -101,6 +101,7 @@ namespace CoveragePublisher.Tests
             // Arrange
             var logger = new TestLogger();
             TraceLogger.Initialize(logger);
+            var summary = new CoverageSummary();
 
             var token = new CancellationToken();
             var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
@@ -111,8 +112,9 @@ namespace CoveragePublisher.Tests
             };
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
-            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
+            //_mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
+            _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
 
             _mockPublisher.Verify(x => x.PublishNativeCoverageFiles(
                 It.Is<List<string>>(a => a == nativeCoverageFiles),
