@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -170,7 +171,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         public bool IsUploadNativeFilesToTCMSupported()
         {
-            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
+            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, true);
         }
 
         public async Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken)
