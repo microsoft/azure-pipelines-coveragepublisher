@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
+using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
@@ -42,7 +43,26 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     });
 
                     var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
+                    var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
+                    _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
 
+                    if (uploadNativeCoverageFilesToLogStore)
+                    {
+                        
+                            // Upload native coverage files to TCM
+
+                        TraceLogger.Debug("Feature Flag - IsUploadNativeFilesToTCMSupported is set to ON");
+                        TraceLogger.Debug("Publishing native coverage files is supported.");
+
+                            await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
+                            
+
+                            //using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                            //{
+                            //    await _publisher.PublishFileCoverage(fileCoverage, token);
+                            //}
+                        
+                    }
                     if (supportsFileCoverageJson)
                     {
                         var fileCoverage = parser.GetFileCoverageInfos();
@@ -73,25 +93,25 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         {
                             TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
                         }
-                        else
-                        {
-                            // Upload native coverage files to TCM
-                            var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
-                            _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
+                        //else
+                        //{
+                        //    // Upload native coverage files to TCM
+                        //    var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
+                        //    _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
 
-                            if (uploadNativeCoverageFilesToLogStore)
-                            {
-                                TraceLogger.Debug("Feature Flag - IsUploadNativeFilesToTCMSupported is set to ON");
-                                TraceLogger.Debug("Publishing native coverage files is supported.");
+                        //    if (uploadNativeCoverageFilesToLogStore)
+                        //    {
+                        //        TraceLogger.Debug("Feature Flag - IsUploadNativeFilesToTCMSupported is set to ON");
+                        //        TraceLogger.Debug("Publishing native coverage files is supported.");
 
-                                await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
-                            }
+                        //        await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
+                        //    }
 
-                            using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
-                            {
-                                await _publisher.PublishFileCoverage(fileCoverage, token);
-                            }
-                        }
+                        //    using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                        //    {
+                        //        await _publisher.PublishFileCoverage(fileCoverage, token);
+                        //    }
+                        //}
                     }
                     else
                     {
