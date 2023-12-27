@@ -112,7 +112,7 @@ namespace CoveragePublisher.Tests
             };
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
-            //_mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
+            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
 
