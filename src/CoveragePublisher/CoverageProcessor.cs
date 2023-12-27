@@ -45,6 +45,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     });
 
                     var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
+                    var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
+                    _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
 
                     if (supportsFileCoverageJson)
                     {
@@ -102,11 +104,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
 
-                    var IsTestLogStoreInTcmActive = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, true);
-
-
                     //Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-                    if (!IsTestLogStoreInTcmActive && config.GenerateHTMLReport)
+                    if (!uploadNativeCoverageFilesToLogStore && config.GenerateHTMLReport)
                         {
                             if (!Directory.Exists(config.ReportDirectory))
                             {

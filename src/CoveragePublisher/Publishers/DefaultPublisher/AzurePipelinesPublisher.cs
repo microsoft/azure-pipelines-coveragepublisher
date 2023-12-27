@@ -168,6 +168,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             await _htmlReportPublisher.PublishHTMLReportAsync(reportDirectory, token);
         }
 
+        public bool IsUploadNativeFilesToTCMSupported()
+        {
+            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, false);
+        }
+
         private VssConnection GetVssConnection()
         {
             var proxy = VssProxyHelper.GetProxy();

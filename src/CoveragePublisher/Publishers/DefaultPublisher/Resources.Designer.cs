@@ -111,7 +111,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         /// </summary>
         internal static string FailedToGetFeatureFlag {
             get {
-                return ResourceManager.GetString("New testing logic - FailedToGetFeatureFlag", resourceCulture);
+                return ResourceManager.GetString("FailedToGetFeatureFlag", resourceCulture);
             }
         }
         
