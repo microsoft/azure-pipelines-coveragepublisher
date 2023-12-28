@@ -42,7 +42,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     });
 
                     var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
-                    var fileCoverage = parser.GetFileCoverageInfos();
                     var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
                     _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
 
@@ -52,14 +51,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         TraceLogger.Debug("Publishing native coverage files is supported.");
 
                         await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
-
-                        using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
-                        {
-                            await _publisher.PublishFileCoverage(fileCoverage, token);
-                        }
                     }
                     if (supportsFileCoverageJson)
                     {
+                        var fileCoverage = parser.GetFileCoverageInfos();
+
                         var summary = parser.GetCoverageSummary();
 
                         bool IsCodeCoverageData = (summary.CodeCoverageData != null);
@@ -85,6 +81,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         if (fileCoverage.Count == 0)
                         {
                             TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
+                        }
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                            {
+                                await _publisher.PublishFileCoverage(fileCoverage, token);
+                            }
                         }
                     }
                     else
