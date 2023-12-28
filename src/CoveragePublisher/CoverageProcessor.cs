@@ -40,35 +40,31 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     });
 
                     var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
+                    var fileCoverage = parser.GetFileCoverageInfos();
+                    var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
+                    _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
 
+                    if (uploadNativeCoverageFilesToLogStore)
+                    {
+                        // Upload native coverage files to TCM
+                        TraceLogger.Debug("Publishing native coverage files is supported.");
+
+                        await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
+
+                        using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                        {
+                            await _publisher.PublishFileCoverage(fileCoverage, token);
+                        }
+                    }
                     if (supportsFileCoverageJson)
                     {
                         TraceLogger.Debug("Publishing file json coverage is supported.");
-                        var fileCoverage = parser.GetFileCoverageInfos();
 
                         _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
 
                         if (fileCoverage.Count == 0)
                         {
                             TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
-                        }
-                        else
-                        {
-                            // Upload native coverage files to TCM
-                            var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
-                            _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
-
-                            if (uploadNativeCoverageFilesToLogStore)
-                            {
-                                TraceLogger.Debug("Publishing native coverage files is supported.");
-
-                                await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
-                            }
-
-                            using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
-                            {
-                                await _publisher.PublishFileCoverage(fileCoverage, token);
-                            }
                         }
                     }
                     else
