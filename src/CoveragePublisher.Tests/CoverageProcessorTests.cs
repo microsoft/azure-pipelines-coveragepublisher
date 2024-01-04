@@ -27,6 +27,7 @@ namespace CoveragePublisher.Tests
             _mockParser = new Mock<Parser>(_config, _mockTelemetryDataCollector.Object);
 
             _mockPublisher.Setup(x => x.PublishCoverageSummary(It.IsAny<CoverageSummary>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            _mockPublisher.Setup(x => x.PublishNativeCoverageFiles(It.IsAny<IList<string>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         }
@@ -42,7 +43,7 @@ namespace CoveragePublisher.Tests
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
-            
+
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
 
             _mockPublisher.Verify(x => x.PublishCoverageSummary(
@@ -94,6 +95,36 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
+
+        public void PublishNativeCoverageFiles()
+        {
+            // Arrange
+            var logger = new TestLogger();
+            TraceLogger.Initialize(logger);
+            var summary = new CoverageSummary();
+
+            var token = new CancellationToken();
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
+            var nativeCoverageFiles = new List<string>();
+            var coverage = new List<FileCoverageInfo>
+            {
+                new FileCoverageInfo()
+            };
+
+            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
+            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
+            _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
+
+            _mockPublisher.Verify(x => x.PublishNativeCoverageFiles(
+                It.Is<List<string>>(a => a == nativeCoverageFiles),
+                It.Is<CancellationToken>(b => b == token)), Times.Never);
+
+            // Act
+            processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
+
+            // Assert
+            Assert.IsTrue(logger.Log.Contains("Publishing native coverage files is supported."));
+        }
         public void ParseAndPublishCoverageWillPublishFileAndCodeCoverageSummary()
         {
             var token = new CancellationToken();
@@ -107,10 +138,10 @@ namespace CoveragePublisher.Tests
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
-            
+
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
-            
+
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
 
             _mockPublisher.Verify(x => x.PublishCoverageSummary(
@@ -133,14 +164,14 @@ namespace CoveragePublisher.Tests
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
-            
+
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
 
             _mockPublisher.Verify(x => x.PublishCoverageSummary(
                 It.Is<CoverageSummary>(a => a == summary),
                 It.Is<CancellationToken>(b => b == token)));
 
-           Assert.IsNotNull(summary.CodeCoverageData);
+            Assert.IsNotNull(summary.CodeCoverageData);
         }
     }
 }
