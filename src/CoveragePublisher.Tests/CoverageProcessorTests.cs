@@ -34,14 +34,15 @@ namespace CoveragePublisher.Tests
             _mockPublisher.Setup(x => x.PublishCoverageSummary(It.IsAny<CoverageSummary>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishNativeCoverageFiles(It.IsAny<IList<string>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
+            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(false);
+
             _mockFFHelper.Reset();
             _featureFlagHelper = featureFlagHelper;
-            var IsUploadNativeFilesToTCMSupported = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, true);
+            var IsUploadNativeFilesToTCMSupported = _publisher.IsUploadNativeFilesToTCMSupported;
 
-            // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-            if (!IsUploadNativeFilesToTCMSupported)
+            if (IsUploadNativeFilesToTCMSupported.Equals(false))
             {
+                // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
                 _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             }
         }
@@ -50,7 +51,7 @@ namespace CoveragePublisher.Tests
         public void ParseAndPublishCoverageWillPublishSummary()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var summary = new CoverageSummary();
 
             summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);
@@ -69,7 +70,7 @@ namespace CoveragePublisher.Tests
         public void WillNotPublishFileCoverageIfCountIsZero()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var coverage = new List<FileCoverageInfo>();
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
@@ -89,7 +90,7 @@ namespace CoveragePublisher.Tests
             TraceLogger.Initialize(logger);
 
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var coverage = new List<FileCoverageInfo>();
 
             _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
@@ -142,7 +143,7 @@ namespace CoveragePublisher.Tests
         public void ParseAndPublishCoverageWillPublishFileAndCodeCoverageSummary()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var coverage = new List<FileCoverageInfo>();
             coverage.Add(new FileCoverageInfo());
 
@@ -171,7 +172,7 @@ namespace CoveragePublisher.Tests
         public void WillNotPublishCoverageSummaryIfDataIsNotNull()
         {
             var token = new CancellationToken();
-            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object, _mockFFHelper.Object);
+            var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var summary = new CoverageSummary();
 
             summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);

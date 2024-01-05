@@ -17,13 +17,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     {
         private ICoveragePublisher _publisher;
         private ITelemetryDataCollector _telemetry;
-        private IFeatureFlagHelper _featureFlagHelper;
 
-        public CoverageProcessor(ICoveragePublisher publisher, ITelemetryDataCollector telemetry, IFeatureFlagHelper featureFlagHelper)
+        public CoverageProcessor(ICoveragePublisher publisher, ITelemetryDataCollector telemetry)
         {
             _publisher = publisher;
             _telemetry = telemetry;
-            _featureFlagHelper = featureFlagHelper;
         }
 
         public async Task ParseAndPublishCoverage(PublisherConfiguration config, CancellationToken token, Parser parser)

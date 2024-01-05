@@ -14,9 +14,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
     {
         private static CancellationTokenSource _cancellationTokenSource;
         private static bool publishSuccess = false;
-        private IFeatureFlagHelper _featureFlagHelper;
-        private static IClientFactory _clientFactory;
-        private static FeatureFlagHelper FFhelperobject = new FeatureFlagHelper(_clientFactory);
 
         public static void Main(string[] args)
         {
@@ -54,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             }
 
 
-            var processor = new CoverageProcessor(publisher, context.TelemetryDataCollector, FFhelperobject);
+            var processor = new CoverageProcessor(publisher, context.TelemetryDataCollector);
 
             // By default wait for 2 minutes for coverage to publish
             var publishTimedout = processor.ParseAndPublishCoverage(config, cancellationToken, new Parser(config, context.TelemetryDataCollector))
