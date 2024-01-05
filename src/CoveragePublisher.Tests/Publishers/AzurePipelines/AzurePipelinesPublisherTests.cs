@@ -43,6 +43,63 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
+        public void WillPublishNativeCoverageFilesToLogStore()
+        {
+            // Arrange
+            var token = new CancellationToken();
+            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
+            var mockClient = new Mock<TestResultsHttpClient>(new Uri("http://localhost"), new VssCredentials());
+
+            _mockClientFactory.Setup(x => x.GetClient<TestResultsHttpClient>()).Returns(mockClient.Object);
+            
+            // Feature flags
+            _mockFFHelper.Setup(x => x.GetFeatureFlagState(
+                It.Is<string>(a => a == Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF),
+                It.Is<bool>(b => b == false))).Returns(true);
+            _mockFFHelper.Setup(x => x.GetFeatureFlagState(
+                It.Is<string>(a => a == Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore),
+                It.Is<bool>(b => b == false))).Returns(true);
+            
+            _mockLogStoreHelper.Setup(x => x.UploadTestBuildLogAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<int>(),
+                It.IsAny<TestLogType>(),
+                It.IsAny<string>(),
+                It.IsAny<Dictionary<string, string>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+                .Callback<Guid, int, TestLogType, string, Dictionary<string, string>, string, bool, CancellationToken>(
+                    (a, b, c, d, e, f, g, h) =>
+                    {
+                        
+                    })
+                .Returns(Task.FromResult<TestLogStatus>(null));
+
+            var nativeCoverageFiles = new List<string>()
+            {
+                "C:\\a\\sample.coverage",
+                "C:\\a\\sample.covx",
+                "C:\\a\\sample.covb",
+                "C:\\a\\sample.cjson"
+            };
+
+            // Act
+            publisher.PublishNativeCoverageFiles(nativeCoverageFiles, token).Wait();
+
+            // Assert
+            _mockLogStoreHelper.Verify(x => x.UploadTestBuildLogAsync(
+                It.Is<Guid>(a => a == _context.ProjectId),
+                It.Is<int>(b => b == _context.BuildId),
+                It.Is<TestLogType>(c => c == TestLogType.Intermediate),
+                It.IsAny<string>(),
+                It.IsAny<Dictionary<string, string>>(),
+                It.Is<string>(f => f == null),
+                It.Is<bool>(g => g == true),
+                It.Is<CancellationToken>(e => e == token)));
+        }
+
+		[TestMethod]
         public void WillPublishHtmlReport()
         {
             var uploadNativeCoverageFilesToLogStore = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, true);

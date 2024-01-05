@@ -42,5 +42,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             public const string TestLogStoreOnTCMService = "TestManagement.Server.TestLogStoreOnTCMService";
             //public const string DeprecatePublishHTMLReport = "TestManagement.Server.DeprecatePublishHTMLReport";
         }
-    }
+        internal static class CoverageConstants
+        {
+            public const string CoverageFileExtension = ".coverage";
+            public const string CoverageBufferFileExtension = ".coveragebuffer";
+            public const string CoverageXFileExtension = ".covx";
+            public const string CoverageBFileExtension = ".covb";
+            public const string CoverageJsonFileExtension = ".cjson";
+        }
+	}
 }

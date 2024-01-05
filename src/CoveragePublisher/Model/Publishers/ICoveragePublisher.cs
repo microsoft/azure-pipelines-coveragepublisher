@@ -20,6 +20,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Publish all native coverage files to log store
+        /// </summary>
+        /// <param name="nativeCoverageFiles">List of native coverage files</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        /// <returns></returns>
+        Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Publish coverage summary.
         /// </summary>
         /// <param name="coverageSummary">CoverageSummary object.</param>
