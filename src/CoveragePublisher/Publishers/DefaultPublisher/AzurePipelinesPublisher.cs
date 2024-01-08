@@ -107,13 +107,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         }
                     }
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     TraceLogger.Error(string.Format(Resources.FailedtoUploadCoverageSummary, ex.ToString()));
                 }
             }
-            else
-            {
+            else{
                 TraceLogger.Warning(Resources.FailedtoUploadCoverageSummary);
             }
         }
@@ -215,7 +214,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 TraceLogger.Error(string.Format(Resources.FailedToUploadNativeCoverageFiles, ex));
             }
         }
-
+        
         private TestLogType GetTestLogType(string nativeCoverageFile)
         {
             TestLogType logType = TestLogType.Intermediate;
