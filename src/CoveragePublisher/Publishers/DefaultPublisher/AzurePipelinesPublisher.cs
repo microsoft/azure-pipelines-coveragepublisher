@@ -119,7 +119,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)
         {
-            if (coverageInfos.Count == 0)
+            if(coverageInfos.Count == 0)
             {
                 return;
             }
@@ -214,12 +214,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 TraceLogger.Error(string.Format(Resources.FailedToUploadNativeCoverageFiles, ex));
             }
         }
-        
-        private TestLogType GetTestLogType(string nativeCoverageFile)
-        {
-            TestLogType logType = TestLogType.Intermediate;
 
-            if (nativeCoverageFile != null &
+        private TestLogType GetTestLogType(string nativeCoverageFile) 
+        { 
+            TestLogType logType = TestLogType.Intermediate;
+        
+            if (nativeCoverageFile != null & 
                 nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension))
             {
                 logType = TestLogType.CodeCoverage;
@@ -227,7 +227,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
             return logType;
         }
-
+        
         private VssConnection GetVssConnection()
         {
             var proxy = VssProxyHelper.GetProxy();

@@ -31,6 +31,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 ProcessCoverage(config, _cancellationTokenSource.Token);
             }
         }
+        
         private static void ProcessCoverage(PublisherConfiguration config, CancellationToken cancellationToken)
         {
             // Currently the publisher only works for azure pipelines, so we simply instansiate for Azure Pipelines
@@ -65,6 +66,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 publishSuccess = true;
             }
         }
+        
         private static void DebugBreakIfEnvSet()
         {
             var debugEnvFlag = Environment.GetEnvironmentVariable("PIPELINES_COVERAGEPUBLISHER_DEBUG");
