@@ -35,7 +35,6 @@ namespace CoveragePublisher.Tests
             _mockPublisher.Setup(x => x.PublishNativeCoverageFiles(It.IsAny<IList<string>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(false);
-
             _mockFFHelper.Reset();
             _featureFlagHelper = featureFlagHelper;
             var IsUploadNativeFilesToTCMSupported = _publisher.IsUploadNativeFilesToTCMSupported;

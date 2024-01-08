@@ -107,19 +107,20 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     TraceLogger.Error(string.Format(Resources.FailedtoUploadCoverageSummary, ex.ToString()));
                 }
             }
-            else{
+            else
+            {
                 TraceLogger.Warning(Resources.FailedtoUploadCoverageSummary);
             }
         }
 
         public async Task PublishFileCoverage(IList<FileCoverageInfo> coverageInfos, CancellationToken cancellationToken)
         {
-            if(coverageInfos.Count == 0)
+            if (coverageInfos.Count == 0)
             {
                 return;
             }
@@ -172,6 +173,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, true);
         }
+
         public async Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken)
         {
             if (nativeCoverageFiles == null || nativeCoverageFiles.Count == 0)
@@ -214,11 +216,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
         }
 
-        private TestLogType GetTestLogType(string nativeCoverageFile) 
-        { 
+        private TestLogType GetTestLogType(string nativeCoverageFile)
+        {
             TestLogType logType = TestLogType.Intermediate;
-        
-            if (nativeCoverageFile != null & 
+
+            if (nativeCoverageFile != null &
                 nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension))
             {
                 logType = TestLogType.CodeCoverage;
