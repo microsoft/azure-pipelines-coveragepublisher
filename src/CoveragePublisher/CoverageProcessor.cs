@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher
@@ -108,20 +109,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
 
-                    if (config.GenerateHTMLReport)
-                    {
-                        if (!Directory.Exists(config.ReportDirectory))
+                    //Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
+                    if (!uploadNativeCoverageFilesToLogStore && config.GenerateHTMLReport)
                         {
-                            TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
-                        }
-                        else
-                        {
-                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                            if (!Directory.Exists(config.ReportDirectory))
                             {
-                                await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
+                            }
+                            else
+                            {
+                                using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                                {
+                                    await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                }
                             }
                         }
-                    }
                 }
                 // Only catastrophic failures should trickle down to these catch blocks
                 catch(ParsingException ex)

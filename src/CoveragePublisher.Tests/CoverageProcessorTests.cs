@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
+using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -20,16 +22,28 @@ namespace CoveragePublisher.Tests
         private PublisherConfiguration _config = new PublisherConfiguration() { ReportDirectory = "directory" };
         private Mock<Parser> _mockParser;
         private Mock<ITelemetryDataCollector> _mockTelemetryDataCollector = new Mock<ITelemetryDataCollector>();
+        private IFeatureFlagHelper _featureFlagHelper;
+        private ICoveragePublisher _publisher;
+        private Mock<IFeatureFlagHelper> _mockFFHelper = new Mock<IFeatureFlagHelper>();
 
         [TestInitialize]
-        public void TestInitialize()
+        public void TestInitialize(IFeatureFlagHelper featureFlagHelper)
         {
             _mockParser = new Mock<Parser>(_config, _mockTelemetryDataCollector.Object);
 
             _mockPublisher.Setup(x => x.PublishCoverageSummary(It.IsAny<CoverageSummary>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishNativeCoverageFiles(It.IsAny<IList<string>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(false);
+            _mockFFHelper.Reset();
+            _featureFlagHelper = featureFlagHelper;
+            var IsUploadNativeFilesToTCMSupported = _publisher.IsUploadNativeFilesToTCMSupported;
+
+            if (IsUploadNativeFilesToTCMSupported.Equals(false))
+            {
+                // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
+                _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            }
         }
 
         [TestMethod]
