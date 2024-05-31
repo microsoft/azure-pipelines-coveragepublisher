@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
+                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() , BranchCoverageStatus= new BranchCoverageInfo() };
                         int lineNumber = 0;
 
                         foreach (var line in file.LineCoverage)
@@ -61,7 +62,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             }
                             ++lineNumber;
                         }
+                        ///Populating results for branch coverage
+                        resultFileCoverageInfo.BranchCoverageStatus.TotalBranches = file.TotalBranches ?? 0;
+                        resultFileCoverageInfo.BranchCoverageStatus.CoveredBranches = file.CoveredBranches ?? 0;
 
+                        
                         fileCoverages.Add(resultFileCoverageInfo);
                     }
                 }
@@ -88,11 +93,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             {
                 foreach (var @class in assembly.Classes)
                 {
+                  
                     foreach (var file in @class.Files)
                     {
                         totalLines += file.CoverableLines;
                         coveredLines += file.CoveredLines;
                     }
+
                 }
             }
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
@@ -20,6 +21,27 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// Map of coverage lines to their covered status.
         /// </summary>
         public Dictionary<uint, CoverageStatus> LineCoverageStatus;
+
+        /// </summary>
+        /// Branch coverage status of the file
+        /// </summary>
+
+        public BranchCoverageInfo BranchCoverageStatus { get; set; }
     }
+
+    public class BranchCoverageInfo
+    {
+        /// <summary>
+        /// Number of total branches
+        /// </summary>
+        public int TotalBranches { get; set; }
+
+        /// <summary>
+        /// Number of covered branches
+        /// </summary>
+        public int CoveredBranches { get; set; }
+    }
+
+
 
 }
