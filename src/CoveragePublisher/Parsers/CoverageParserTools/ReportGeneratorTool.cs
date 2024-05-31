@@ -65,6 +65,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                         ///Populating results for branch coverage
                         resultFileCoverageInfo.BranchCoverageStatus.TotalBranches = file.TotalBranches ?? 0;
                         resultFileCoverageInfo.BranchCoverageStatus.CoveredBranches = file.CoveredBranches ?? 0;
+                        // testing
 
                         
                         fileCoverages.Add(resultFileCoverageInfo);
