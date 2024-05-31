@@ -13,6 +13,7 @@ namespace CoveragePublisher.Tests
     [TestClass]
     public class ArgumentsProcessorTests
     {
+        //Adding test
         private static StringWriter ConsoleWriter = new StringWriter();
         private static string UsageText = @"
             --reportDirectory    (Default: ) Path where html report will be generated.
