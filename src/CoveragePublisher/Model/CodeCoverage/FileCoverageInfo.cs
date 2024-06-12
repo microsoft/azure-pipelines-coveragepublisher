@@ -28,11 +28,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         public Dictionary<uint, BranchCoverage> BranchCoverageStatus;
         
     }
-
     public class BranchCoverage
     {
         public int TotalBranches { get; set; }
         public int CoveredBranches { get; set; }
     }
+
 
 }
