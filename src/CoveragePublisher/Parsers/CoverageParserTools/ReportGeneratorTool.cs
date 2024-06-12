@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() , BranchCoverageStatus= new BranchCoverageInfo() };
+                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() , BranchCoverageStatus = new Dictionary<uint, BranchCoverage>() };
                         int lineNumber = 0;
 
                         foreach (var line in file.LineCoverage)
@@ -60,13 +60,22 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             {
                                 resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? CoverageStatus.NotCovered : CoverageStatus.Covered);
                             }
+
+                            /// populating branch coverage status
+
+                            if (file.BranchesByLine != null && file.BranchesByLine.TryGetValue(lineNumber, out var branches))
+                            {
+                                var branchCoverage = new BranchCoverage
+                                {
+                                    TotalBranches = branches.Count,
+                                    CoveredBranches = branches.Count(b => b.BranchVisits > 0)
+                                };
+                                resultFileCoverageInfo.BranchCoverageStatus.Add((uint)lineNumber, branchCoverage);
+                            }
+
                             ++lineNumber;
                         }
-                        ///Populating results for branch coverage
-                        resultFileCoverageInfo.BranchCoverageStatus.TotalBranches = file.TotalBranches ?? 0;
-                        resultFileCoverageInfo.BranchCoverageStatus.CoveredBranches = file.CoveredBranches ?? 0;
-                        // testing
-
+                       
                         
                         fileCoverages.Add(resultFileCoverageInfo);
                     }
