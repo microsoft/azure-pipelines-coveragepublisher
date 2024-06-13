@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     foreach (var file in @class.Files)
                     {
-                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() , BranchCoverageStatus = new Dictionary<uint, BranchCoverage>() };
+                        FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
                         int lineNumber = 0;
 
                         foreach (var line in file.LineCoverage)
@@ -65,6 +65,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                             if (file.BranchesByLine != null && file.BranchesByLine.TryGetValue(lineNumber, out var branches))
                             {
+                                if (resultFileCoverageInfo.BranchCoverageStatus == null)
+                                {
+                                    resultFileCoverageInfo.BranchCoverageStatus = new Dictionary<uint, BranchCoverage>();
+                                }
                                 var branchCoverage = new BranchCoverage
                                 {
                                     TotalBranches = branches.Count,
