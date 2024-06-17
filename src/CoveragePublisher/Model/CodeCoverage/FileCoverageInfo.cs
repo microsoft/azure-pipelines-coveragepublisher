@@ -25,10 +25,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// </summary>
         /// Map of branch coverage status by line number.
         /// </summary>
-        public Dictionary<uint, BranchCoverage> BranchCoverageStatus;
+        public Dictionary<uint, BranchCoverageStatistics> BranchCoverageStatus;
         
     }
-    public class BranchCoverage
+    public class BranchCoverageStatistics
     {
         public int TotalBranches { get; set; }
         public int CoveredBranches { get; set; }

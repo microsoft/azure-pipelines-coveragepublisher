@@ -2,7 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
+using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.WebApi;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using Palmmedia.ReportGenerator.Core.Parser;
@@ -13,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -21,9 +25,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
     {
         protected PublisherConfiguration Configuration { get; private set; }
         private ParserResult _parserResult;
-
-        public ReportGeneratorTool(PublisherConfiguration configuration) {
+      
+        public ReportGeneratorTool(PublisherConfiguration configuration)
+        {
             Configuration = configuration;
+            
 
             if (Configuration.CoverageFiles == null)
             {
@@ -32,6 +38,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
 
             _parserResult = ParseCoverageFiles(new List<string>(Configuration.CoverageFiles));
+         
         }
 
         public List<FileCoverageInfo> GetFileCoverageInfos()
@@ -45,6 +52,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 return fileCoverages;
             }
 
+            //var SupportsBranchCoverage = Configuration.IsBranchCoverageEnabled();
+
             foreach (var assembly in _parserResult.Assemblies)
             {
                 foreach (var @class in assembly.Classes)
@@ -53,28 +62,25 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                     {
                         FileCoverageInfo resultFileCoverageInfo = new FileCoverageInfo { FilePath = file.Path, LineCoverageStatus = new Dictionary<uint, CoverageStatus>() };
                         int lineNumber = 0;
-
                         foreach (var line in file.LineCoverage)
                         {
                             if (line != -1 && lineNumber != 0)
                             {
                                 resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? CoverageStatus.NotCovered : CoverageStatus.Covered);
                             }
-
                             /// populating branch coverage status
-
                             if (file.BranchesByLine != null && file.BranchesByLine.TryGetValue(lineNumber, out var branches))
                             {
                                 if (resultFileCoverageInfo.BranchCoverageStatus == null)
                                 {
-                                    resultFileCoverageInfo.BranchCoverageStatus = new Dictionary<uint, BranchCoverage>();
+                                    resultFileCoverageInfo.BranchCoverageStatus = new Dictionary<uint, BranchCoverageStatistics>();
                                 }
-                                var branchCoverage = new BranchCoverage
+                                var branchcoveragestatistics = new BranchCoverageStatistics
                                 {
                                     TotalBranches = branches.Count,
-                                    CoveredBranches = branches.Count(b => b.BranchVisits > 0)
+                                    CoveredBranches = branches.Count(b => b.BranchVisits >0)
                                 };
-                                resultFileCoverageInfo.BranchCoverageStatus.Add((uint)lineNumber, branchCoverage);
+                                resultFileCoverageInfo.BranchCoverageStatus.Add((uint)lineNumber, branchcoveragestatistics);
                             }
 
                             ++lineNumber;
