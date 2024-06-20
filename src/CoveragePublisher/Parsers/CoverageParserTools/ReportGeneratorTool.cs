@@ -51,9 +51,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             {
                 return fileCoverages;
             }
-
-            //var SupportsBranchCoverage = Configuration.IsBranchCoverageEnabled();
-
             foreach (var assembly in _parserResult.Assemblies)
             {
                 foreach (var @class in assembly.Classes)
@@ -85,8 +82,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                             ++lineNumber;
                         }
-                       
-                        
                         fileCoverages.Add(resultFileCoverageInfo);
                     }
                 }
@@ -113,13 +108,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             {
                 foreach (var @class in assembly.Classes)
                 {
-                  
                     foreach (var file in @class.Files)
                     {
                         totalLines += file.CoverableLines;
                         coveredLines += file.CoveredLines;
                     }
-
                 }
             }
 
