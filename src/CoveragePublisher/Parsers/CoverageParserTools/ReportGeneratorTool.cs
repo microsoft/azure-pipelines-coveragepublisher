@@ -62,8 +62,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             }
                             int coveredBranches = file.CoveredBranches.Value;
                             int totalBranches = file.TotalBranches.Value;
-                            Console.WriteLine("COVERED BRANCHES: " + coveredBranches);
-                            Console.WriteLine("TOTAL BRANCHES: " + totalBranches);
                             if (file.BranchesByLine != null && file.BranchesByLine.TryGetValue(lineNumber, out var branches))
                             {
                                 if (resultFileCoverageInfo.BranchCoverageStatus == null)
@@ -75,7 +73,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                                     TotalBranches = branches.Count,
                                     CoveredBranches = branches.Count(b => b.BranchVisits > 0)
                                 };
-                                Console.WriteLine("BRANCHES: " + branches.Count);
                                 resultFileCoverageInfo.BranchCoverageStatus.Add((uint)lineNumber, branchcoveragestatistics);
                             }
 
@@ -112,7 +109,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                     {
                         totalLines += file.CoverableLines;
                         coveredLines += file.CoveredLines;
-                        
                     }
                 }
             }
