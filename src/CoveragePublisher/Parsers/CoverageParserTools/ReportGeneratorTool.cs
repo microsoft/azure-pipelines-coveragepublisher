@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -59,6 +60,22 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             {
                                 resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? CoverageStatus.NotCovered : CoverageStatus.Covered);
                             }
+                            int coveredBranches = file.CoveredBranches.Value;
+                            int totalBranches = file.TotalBranches.Value;
+                            if (file.BranchesByLine != null && file.BranchesByLine.TryGetValue(lineNumber, out var branches))
+                            {
+                                if (resultFileCoverageInfo.BranchCoverageStatus == null)
+                                {
+                                    resultFileCoverageInfo.BranchCoverageStatus = new Dictionary<uint, BranchCoverageStatistics>();
+                                }
+                                var branchcoveragestatistics = new BranchCoverageStatistics
+                                {
+                                    TotalBranches = branches.Count,
+                                    CoveredBranches = branches.Count(b => b.BranchVisits > 0)
+                                };
+                                resultFileCoverageInfo.BranchCoverageStatus.Add((uint)lineNumber, branchcoveragestatistics);
+                            }
+
                             ++lineNumber;
                         }
 
