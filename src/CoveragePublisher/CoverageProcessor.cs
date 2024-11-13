@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         TraceLogger.Debug("Publishing code coverage summary supported");
 
-                        if (summary == null || (IsCodeCoverageData  && IsCoverageStats  && summary.CodeCoverageData.CoverageStats.Count == 0)) 
+                        if (summary == null || (IsCodeCoverageData && IsCoverageStats && summary.CodeCoverageData.CoverageStats.Count == 0))
                         {
                             TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
                         }
@@ -109,29 +109,30 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         }
                     }
 
-                    //Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-                    if (!uploadNativeCoverageFilesToLogStore && config.GenerateHTMLReport)
+                    //Feature Flag for PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
+                    if (config.GenerateHTMLReport)
+                    {
+                        if (!Directory.Exists(config.ReportDirectory))
                         {
-                            if (!Directory.Exists(config.ReportDirectory))
+                            TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
+                        }
+
+                        else
+                        {
+                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
                             {
-                                TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
-                            }
-                            else
-                            {
-                                using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
-                                {
-                                    await _publisher.PublishHTMLReport(config.ReportDirectory, token);
-                                }
+                                await _publisher.PublishHTMLReport(config.ReportDirectory, token);
                             }
                         }
+                    }
                 }
                 // Only catastrophic failures should trickle down to these catch blocks
-                catch(ParsingException ex)
+                catch (ParsingException ex)
                 {
                     _telemetry.AddFailure(ex);
                     TraceLogger.Error($"{ex.Message} {ex.InnerException}");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _telemetry.AddFailure(ex);
                     TraceLogger.Error(string.Format(Resources.ErrorOccuredWhilePublishing, ex));
