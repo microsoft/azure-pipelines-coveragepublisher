@@ -39,7 +39,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             public const string EnablePublishToTcmServiceDirectlyFromTaskFF = "TestManagement.Server.EnablePublishToTcmServiceDirectlyFromTask";
             public const string UploadNativeCoverageFilesToLogStore = "TestManagement.Server.UploadNativeCoverageFilesToLogStore";
-            public const string TestLogStoreOnTCMService = "TestManagement.Server.TestLogStoreOnTCMService";
         }
         internal static class CoverageConstants
         {

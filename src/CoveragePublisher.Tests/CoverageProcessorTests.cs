@@ -55,7 +55,6 @@ namespace CoveragePublisher.Tests
 
             summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
 
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
@@ -72,7 +71,6 @@ namespace CoveragePublisher.Tests
             var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var coverage = new List<FileCoverageInfo>();
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
 
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
@@ -92,7 +90,6 @@ namespace CoveragePublisher.Tests
             var processor = new CoverageProcessor(_mockPublisher.Object, _mockTelemetryDataCollector.Object);
             var coverage = new List<FileCoverageInfo>();
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Throws(new ParsingException("message", new Exception("error")));
 
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
@@ -125,7 +122,6 @@ namespace CoveragePublisher.Tests
                 new FileCoverageInfo()
             };
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
             _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
 
@@ -150,10 +146,8 @@ namespace CoveragePublisher.Tests
 
             summary.AddCoverageStatistics("", 3, 3, CoverageSummary.Priority.Class);
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
 
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
@@ -176,7 +170,6 @@ namespace CoveragePublisher.Tests
 
             summary.AddCoverageStatistics("", 0, 0, CoverageSummary.Priority.Class);
 
-            _mockPublisher.Setup(x => x.IsFileCoverageJsonSupported()).Returns(false);
             _mockParser.Setup(x => x.GetCoverageSummary()).Returns(summary);
 
             processor.ParseAndPublishCoverage(_config, token, _mockParser.Object).Wait();
