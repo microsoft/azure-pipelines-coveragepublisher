@@ -42,16 +42,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         "}";
                     });
 
-                    var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
-                    _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
+                    // Upload native coverage files to TCM
+                    TraceLogger.Debug("Publishing native coverage files is supported.");
 
-                    if (uploadNativeCoverageFilesToLogStore)
-                    {
-                        // Upload native coverage files to TCM
-                        TraceLogger.Debug("Publishing native coverage files is supported.");
-
-                        await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
-                    }
+                    await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
 
                     var fileCoverage = parser.GetFileCoverageInfos();
 

@@ -54,9 +54,6 @@ namespace CoveragePublisher.Tests
             _mockFFHelper.Setup(x => x.GetFeatureFlagState(
                 It.Is<string>(a => a == Constants.FeatureFlags.EnablePublishToTcmServiceDirectlyFromTaskFF),
                 It.Is<bool>(b => b == false))).Returns(true);
-            _mockFFHelper.Setup(x => x.GetFeatureFlagState(
-                It.Is<string>(a => a == Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore),
-                It.Is<bool>(b => b == false))).Returns(true);
             
             _mockLogStoreHelper.Setup(x => x.UploadTestBuildLogAsync(
                 It.IsAny<Guid>(),
@@ -100,22 +97,16 @@ namespace CoveragePublisher.Tests
 		[TestMethod]
         public void WillPublishHtmlReport()
         {
-            var IsUploadNativeFilesToTCMSupported = _publisher.IsUploadNativeFilesToTCMSupported;
+            var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
+            var token = new CancellationToken();
 
-            // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-            if (IsUploadNativeFilesToTCMSupported.Equals(false)) 
-            { 
-                var publisher = new AzurePipelinesPublisher(_context, _mockClientFactory.Object, _mockFFHelper.Object, _mockHtmlPublisher.Object, _mockLogStoreHelper.Object, true);
-                var token = new CancellationToken();
+            _mockHtmlPublisher.Setup(x => x.PublishHTMLReportAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-                _mockHtmlPublisher.Setup(x => x.PublishHTMLReportAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            publisher.PublishHTMLReport("directory", token).Wait();
 
-                publisher.PublishHTMLReport("directory", token).Wait();
-
-                _mockHtmlPublisher.Verify(x => x.PublishHTMLReportAsync(
-                    It.Is<string>(a => a == "directory"),
-                    It.Is<CancellationToken>(b => b == token)));
-            }
+            _mockHtmlPublisher.Verify(x => x.PublishHTMLReportAsync(
+                It.Is<string>(a => a == "directory"),
+                It.Is<CancellationToken>(b => b == token)));
         }
 
         [TestMethod]

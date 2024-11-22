@@ -38,7 +38,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         internal static class FeatureFlags
         {
             public const string EnablePublishToTcmServiceDirectlyFromTaskFF = "TestManagement.Server.EnablePublishToTcmServiceDirectlyFromTask";
-            public const string UploadNativeCoverageFilesToLogStore = "TestManagement.Server.UploadNativeCoverageFilesToLogStore";
         }
         internal static class CoverageConstants
         {
