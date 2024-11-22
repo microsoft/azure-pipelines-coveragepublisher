@@ -64,11 +64,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _logStoreHelper = new LogStoreHelper(_clientFactory);
         }
 
-        public bool IsFileCoverageJsonSupported()
-        {
-            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.TestLogStoreOnTCMService, true);
-        }
-
         public async Task PublishCoverageSummary(CoverageSummary coverageSummary, CancellationToken cancellationToken)
         {
             var coverageData = coverageSummary.CodeCoverageData;
