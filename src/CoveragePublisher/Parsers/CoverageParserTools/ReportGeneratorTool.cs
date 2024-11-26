@@ -60,8 +60,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             {
                                 resultFileCoverageInfo.LineCoverageStatus.Add((uint)lineNumber, line == 0 ? CoverageStatus.NotCovered : CoverageStatus.Covered);
                             }
-                            int coveredBranches = file.CoveredBranches.Value;
-                            int totalBranches = file.TotalBranches.Value;
+                            int coveredBranches = (file.CoveredBranches != null) ? file.CoveredBranches.Value : 0;
+                            int totalBranches = (file.TotalBranches != null) ? file.TotalBranches.Value : 0;
                             if (file.BranchesByLine != null && file.BranchesByLine.TryGetValue(lineNumber, out var branches))
                             {
                                 if (resultFileCoverageInfo.BranchCoverageStatus == null)

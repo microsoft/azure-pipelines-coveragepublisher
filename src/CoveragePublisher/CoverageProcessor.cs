@@ -42,69 +42,54 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         "}";
                     });
 
-                    var supportsFileCoverageJson = _publisher.IsFileCoverageJsonSupported();
+
+                    var uploadNativeCoverageFilesToLogStore = _publisher.IsUploadNativeFilesToTCMSupported();
+                    _telemetry.AddOrUpdate("uploadNativeCoverageFilesToLogStore", uploadNativeCoverageFilesToLogStore.ToString());
 
                     // Upload native coverage files to TCM
                     TraceLogger.Debug("Publishing native coverage files is supported.");
 
                     await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
                     
-                    if (supportsFileCoverageJson)
+                    await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
+                    
+
+                    var fileCoverage = parser.GetFileCoverageInfos();
+
+                    var summary = parser.GetCoverageSummary();
+
+                    bool IsCodeCoverageData = (summary.CodeCoverageData != null);
+
+                    bool IsCoverageStats = (summary.CodeCoverageData.CoverageStats != null);
+
+                    _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
+
+                    TraceLogger.Debug("Publishing code coverage summary supported");
+
+                    if (summary == null || (IsCodeCoverageData && IsCoverageStats && summary.CodeCoverageData.CoverageStats.Count == 0))
                     {
-                        var fileCoverage = parser.GetFileCoverageInfos();
-
-                        var summary = parser.GetCoverageSummary();
-
-                        bool IsCodeCoverageData = (summary.CodeCoverageData != null);
-
-                        bool IsCoverageStats = (summary.CodeCoverageData.CoverageStats != null);
-
-                        _telemetry.AddOrUpdate("UniqueFilesCovered", fileCoverage.Count);
-
-                        TraceLogger.Debug("Publishing code coverage summary supported");
-
-                        if (summary == null || (IsCodeCoverageData && IsCoverageStats && summary.CodeCoverageData.CoverageStats.Count == 0))
-                        {
-                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
-                        }
-                        else
-                        {
-                            using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
-                            {
-                                await _publisher.PublishCoverageSummary(summary, token);
-                            }
-                        }
-
-                        if (fileCoverage.Count == 0)
-                        {
-                            TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
-                        }
-                        else
-                        {
-                            using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
-                            {
-                                await _publisher.PublishFileCoverage(fileCoverage, token);
-                            }
-                        }
+                        TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
                     }
                     else
                     {
-                        TraceLogger.Debug("Publishing file json coverage is not supported.");
-                        var summary = parser.GetCoverageSummary();
-
-                        if (summary == null || summary.CodeCoverageData.CoverageStats.Count == 0)
+                        using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
                         {
-                            TraceLogger.Warning(Resources.NoSummaryStatisticsGenerated);
-                        }
-                        else
-                        {
-                            using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
-                            {
-                                await _publisher.PublishCoverageSummary(summary, token);
-                            }
+                            await _publisher.PublishCoverageSummary(summary, token);
                         }
                     }
 
+                    if (fileCoverage.Count == 0)
+                    {
+                        TraceLogger.Warning(Resources.NoCoverageFilesGenerated);
+                    }
+                    else
+                    {
+                        using (new SimpleTimer("CoverageProcesser", "PublishFileCoverage", _telemetry))
+                        {
+                            await _publisher.PublishFileCoverage(fileCoverage, token);
+                        }
+                    }
+                    
                     //Feature Flag for PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
                     if (config.GenerateHTMLReport)
                     {

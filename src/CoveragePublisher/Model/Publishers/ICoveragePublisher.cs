@@ -42,11 +42,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         Task PublishHTMLReport(string reportDirectory, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets weather publisher supports publishing <see cref="FileCoverageInfo"/> format.
-        /// </summary>
-        bool IsFileCoverageJsonSupported();
-
-        /// <summary>
         /// Gets weather we can upload native file to tcm logstore.
         /// </summary>
         /// <returns></returns>
