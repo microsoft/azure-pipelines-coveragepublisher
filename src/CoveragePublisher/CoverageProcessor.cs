@@ -115,9 +115,19 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         else
                         {
-                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                            foreach(string nativeCoverageFile in config.CoverageFiles)
                             {
-                                await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                if (!(nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))
+                                {
+                                    using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                                    {
+                                        await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                    }
+                                }
                             }
                         }
                     }
