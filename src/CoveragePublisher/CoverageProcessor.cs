@@ -95,11 +95,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         {
                             foreach (string nativeCoverageFile in config.CoverageFiles)
                             {
-                                if (!(nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))
+                                if (!(nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) || // .coveragebuffer
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||         // .coverage
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||        //.covb 
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||     //.cjson  
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))         // .covx
                                 {
                                     using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
                                     {
