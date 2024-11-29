@@ -93,11 +93,23 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         else
                         {
-                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                            foreach (string nativeCoverageFile in config.CoverageFiles)
                             {
-                                await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                if (!(nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) || // .coveragebuffer
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||         // .coverage
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||        //.covb 
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||     //.cjson  
+                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))         // .covx
+                                {
+                                    using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
+                                    {
+                                        await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                    }
+                                }
+
                             }
                         }
+                              
                     }
                 }
                 // Only catastrophic failures should trickle down to these catch blocks
