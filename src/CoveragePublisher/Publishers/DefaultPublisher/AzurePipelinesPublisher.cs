@@ -163,11 +163,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             await _htmlReportPublisher.PublishHTMLReportAsync(reportDirectory, token);
         }
 
-        public bool IsUploadNativeFilesToTCMSupported()
-        {
-            return _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.UploadNativeCoverageFilesToLogStore, true);
-        }
-
         public async Task PublishNativeCoverageFiles(IList<string> nativeCoverageFiles, CancellationToken cancellationToken)
         {
             if (nativeCoverageFiles == null || nativeCoverageFiles.Count == 0)

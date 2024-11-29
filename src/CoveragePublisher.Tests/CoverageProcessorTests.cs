@@ -34,16 +34,8 @@ namespace CoveragePublisher.Tests
             _mockPublisher.Setup(x => x.PublishCoverageSummary(It.IsAny<CoverageSummary>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishNativeCoverageFiles(It.IsAny<IList<string>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _mockPublisher.Setup(x => x.PublishFileCoverage(It.IsAny<IList<FileCoverageInfo>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(false);
             _mockFFHelper.Reset();
             _featureFlagHelper = featureFlagHelper;
-            var IsUploadNativeFilesToTCMSupported = _publisher.IsUploadNativeFilesToTCMSupported;
-
-            if (IsUploadNativeFilesToTCMSupported.Equals(false))
-            {
-                // Feature Flag for testing and deprecating PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
-                _mockPublisher.Setup(x => x.PublishHTMLReport(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            }
         }
 
         [TestMethod]
@@ -122,7 +114,6 @@ namespace CoveragePublisher.Tests
                 new FileCoverageInfo()
             };
 
-            _mockPublisher.Setup(x => x.IsUploadNativeFilesToTCMSupported()).Returns(true);
             _mockParser.Setup(x => x.GetFileCoverageInfos()).Returns(coverage);
 
             _mockPublisher.Verify(x => x.PublishNativeCoverageFiles(

@@ -40,11 +40,5 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// <param name="reportDirectory">Path to coverage report directory.</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         Task PublishHTMLReport(string reportDirectory, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Gets weather we can upload native file to tcm logstore.
-        /// </summary>
-        /// <returns></returns>
-        bool IsUploadNativeFilesToTCMSupported();
     }
 }
