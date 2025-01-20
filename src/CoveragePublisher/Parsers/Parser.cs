@@ -94,6 +94,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                                         TraceLogger.Debug("Parser.GenerateHTMLReport: Copying summary file " + summaryFile);
                                         File.Copy(summaryFile, destinationSummaryFile, true);
+                                    }
+
+                                    else{
+                                        TraceLogger.Debug("Parser.GenerateHTMLReport: Skipping copying of coverage input file " + summaryFile);
                                     }         
                             }
                         }
