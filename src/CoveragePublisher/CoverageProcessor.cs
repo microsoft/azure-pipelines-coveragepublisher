@@ -26,12 +26,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
         public bool IsContainsNativeCoverage(config)
         {
-            foreach (var file in config.CoverageFiles)
+            foreach (var summaryFile in config.CoverageFiles)
             {
-                if (file.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||
-                    file.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
-                    file.EndsWith(Constants.CoverageConstants.CoverageXFileExtension) ||
-                    file.EndsWith(Constants.CoverageConstants.CoverageBFileExtension))
+                if (!(summaryFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) || // .coveragebuffer
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||         // .coverage
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||        //.covb 
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||     //.cjson  
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))
                 {
                     return true;
                 }
@@ -114,7 +115,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         {
                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
                             {
-                                if(!IsContainsNativeCoverage(config))
+                                if(IsContainsNativeCoverage(config))
                                 {
                                     TraceLogger.Debug("Vinayak - HTML supported");
                                     await _publisher.PublishHTMLReport(config.ReportDirectory, token);
