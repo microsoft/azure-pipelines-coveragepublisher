@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Utils;
+using Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
