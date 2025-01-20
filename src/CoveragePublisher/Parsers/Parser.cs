@@ -83,11 +83,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             // Copy the files
                             foreach (var summaryFile in _configuration.CoverageFiles)
                             {
-                                var summaryFileName = Path.GetFileName(summaryFile);
-                                var destinationSummaryFile = Path.Combine(summaryFilesSubDir, summaryFileName);
+                                if (!(summaryFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) || // .coveragebuffer
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||         // .coverage
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||        //.covb 
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||     //.cjson  
+                                    summaryFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))
+                                    {
+                                        var summaryFileName = Path.GetFileName(summaryFile);
+                                        var destinationSummaryFile = Path.Combine(summaryFilesSubDir, summaryFileName);
 
-                                TraceLogger.Debug("Parser.GenerateHTMLReport: Copying summary file " + summaryFile);
-                                File.Copy(summaryFile, destinationSummaryFile, true);
+                                        TraceLogger.Debug("Parser.GenerateHTMLReport: Copying summary file " + summaryFile);
+                                        File.Copy(summaryFile, destinationSummaryFile, true);
+                                    }         
                             }
                         }
                         else
