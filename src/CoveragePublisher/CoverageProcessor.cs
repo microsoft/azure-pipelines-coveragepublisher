@@ -82,7 +82,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                             await _publisher.PublishFileCoverage(fileCoverage, token);
                         }
                     }
-                    
+                    TraceLogger.Debug("Vinayak - HTML NOT supported");
                     //Feature Flag for PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
                    
                 }
