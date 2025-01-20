@@ -130,7 +130,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             {
                 var fileContent = JsonUtility.ToString(coverageInfos);
                 File.WriteAllText(jsonFile, fileContent);
-
+                 TraceLogger.Debug("Vinayak - PublishFileCoverage");
                 _executionContext.TelemetryDataCollector.AddOrUpdate("FileCoverageLength", fileContent.Length);
 
                 Dictionary<string, string> metaData = new Dictionary<string, string>();
@@ -160,6 +160,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         public async Task PublishHTMLReport(string reportDirectory, CancellationToken token)
         {
+            TraceLogger.Debug("Vinayak - Trying to get PublishHTMLREport");
             await _htmlReportPublisher.PublishHTMLReportAsync(reportDirectory, token);
         }
 
@@ -180,6 +181,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 using (new SimpleTimer("AzurePipelinesPublisher", "UploadNativeCoverageFiles", _executionContext.TelemetryDataCollector))
                 {
                     int uploadedFileCount = 0;
+                    TraceLogger.Debug("Vinayak - Trying to get Debug3");
                     foreach (string nativeCoverageFile in nativeCoverageFiles)
                     {
                         if (!(nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
@@ -190,7 +192,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         {
                             continue;
                         }
-
+                        TraceLogger.Debug("Vinayak - Trying to get Debug4");
                         TestLogType testLogType = GetTestLogType(nativeCoverageFile);
                         await _logStoreHelper.UploadTestBuildLogAsync(_executionContext.ProjectId, _executionContext.BuildId, testLogType, nativeCoverageFile, metaData, null, true, cancellationToken);
                         uploadedFileCount++;

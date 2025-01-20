@@ -45,6 +45,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     // Upload native coverage files to TCM
                     TraceLogger.Debug("Publishing native coverage files is supported.");
 
+                    TraceLogger.Debug("Vinayak - Trying to get Debug1");
+
                     await _publisher.PublishNativeCoverageFiles(config.CoverageFiles, token);
 
                     var fileCoverage = parser.GetFileCoverageInfos();
@@ -67,6 +69,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     {
                         using (new SimpleTimer("CoverageProcesser", "PublishCoverageSummary", _telemetry))
                         {
+                            TraceLogger.Debug("Vinayak - Trying to get Debug2");
                             await _publisher.PublishCoverageSummary(summary, token);
                         }
                     }
