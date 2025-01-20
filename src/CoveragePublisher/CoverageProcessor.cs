@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             _telemetry = telemetry;
         }
 
-        public bool IsContainsNativeCoverage(config)
+        public bool IsContainsNativeCoverage(PublisherConfiguration config)
         {
             foreach (var summaryFile in config.CoverageFiles)
             {
