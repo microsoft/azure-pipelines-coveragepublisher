@@ -88,8 +88,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                     if (config.GenerateHTMLReport)
                     {
+                         TraceLogger.Debug("Vinayak - ConfigHTML");
                         if (!Directory.Exists(config.ReportDirectory))
                         {
+                             TraceLogger.Debug("Vinayak - Warning html supported");
                             TraceLogger.Warning(Resources.NoReportDirectoryGenerated);
                         }
 
@@ -97,11 +99,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         {
                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
                             {
+                                 TraceLogger.Debug("Vinayak - HTML supported");
                                 await _publisher.PublishHTMLReport(config.ReportDirectory, token);
                             }
                         }
                     }
-                    TraceLogger.Debug("Vinayak - HTML supported");
+                    TraceLogger.Debug("Vinayak - HTML END");
                     //Feature Flag for PublishHTMLReport; To be cleaned up post PCCRV2 upgrade
                    
                 }

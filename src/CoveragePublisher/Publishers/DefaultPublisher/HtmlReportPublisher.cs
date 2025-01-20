@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                 RenameIndexHtmExtensionIfRequired(reportDirectory);
                 uploadDirectories.Add(new Tuple<string, string>(reportDirectory, GetCoverageDirectoryName(buildId)));
-
+                 TraceLogger.Debug("Vinayak - HTMLReportAsync");
                 TraceLogger.Info(Resources.PublishingCodeCoverageReport);
 
                 await this.PublishCodeCoverageFilesAsync(uploadDirectories, File.Exists(Path.Combine(reportDirectory, Constants.DefaultIndexFile)), cancellationToken);
@@ -70,13 +70,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 };
 
                 // Upload to file container service
+                 TraceLogger.Debug("Vinayak - Upload to file Container service");
                 var fileContainerHelper = _serviceFactory.GetFileContainerService(_clientFactory, _executionContext);
                 await fileContainerHelper.CopyToContainerAsync(tuple, cancellationToken);
                 string fileContainerFullPath = string.Format($"#/{_executionContext.ContainerId}/{tuple.Item2}");
 
                 // Associate with build artifact
+                 TraceLogger.Debug("Vinayak - Build Artifact");
                 var buildHelper = _serviceFactory.GetBuildService(_clientFactory, _executionContext);
                 await buildHelper.AssociateArtifact(_executionContext.BuildId, tuple.Item2, ArtifactResourceTypes.Container, fileContainerFullPath, artifactProperties, cancellationToken);
+                 TraceLogger.Debug("Vinayak - Associate Artifact");
                 TraceLogger.Info(string.Format(Resources.PublishedCodeCoverageArtifact, tuple.Item1, tuple.Item2));
             });
 
