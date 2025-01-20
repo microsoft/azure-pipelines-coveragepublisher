@@ -24,6 +24,21 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             _telemetry = telemetry;
         }
 
+        public bool IsContainsNativeCoverage(config)
+        {
+            foreach (var file in config.CoverageFiles)
+            {
+                if (file.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||
+                    file.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) ||
+                    file.EndsWith(Constants.CoverageConstants.CoverageXFileExtension) ||
+                    file.EndsWith(Constants.CoverageConstants.CoverageBFileExtension))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public async Task ParseAndPublishCoverage(PublisherConfiguration config, CancellationToken token, Parser parser)
         {
             if (_publisher != null)
@@ -99,8 +114,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                         {
                            using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
                             {
-                                 TraceLogger.Debug("Vinayak - HTML supported");
-                                await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                if(!IsContainsNativeCoverage(config))
+                                {
+                                    TraceLogger.Debug("Vinayak - HTML supported");
+                                    await _publisher.PublishHTMLReport(config.ReportDirectory, token);
+                                }
+                                 else{
+                                    TraceLogger.Debug("Vinayak - HTML not supported");
+                                 }
                             }
                         }
                     }
