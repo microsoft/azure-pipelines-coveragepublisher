@@ -93,23 +93,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
                         else
                         {
-                            foreach (string nativeCoverageFile in config.CoverageFiles)
+                            if(IsContainsNativeCoverage(config))
                             {
-                                if (!(nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) || // .coveragebuffer
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||         // .coverage
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||        //.covb 
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||     //.cjson  
-                                    nativeCoverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))         // .covx
+                                using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
                                 {
-                                    using (new SimpleTimer("CoverageProcesser", "PublishHTMLReport", _telemetry))
-                                    {
-                                        await _publisher.PublishHTMLReport(config.ReportDirectory, token);
-                                    }
+                                    await _publisher.PublishHTMLReport(config.ReportDirectory, token);
                                 }
-
+                            }
+                            else{
+                                TraceLogger.Debug("Native coverage files are not present. Skipping HTML report generation.");
                             }
                         }
-                              
                     }
                 }
                 // Only catastrophic failures should trickle down to these catch blocks
@@ -124,6 +118,22 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                     TraceLogger.Error(string.Format(Resources.ErrorOccuredWhilePublishing, ex));
                 }
             }
+        }
+
+        private bool IsContainsNativeCoverage(PublisherConfiguration config)
+        {
+            foreach (var coverageFile in config.CoverageFiles)
+            {
+                if (!(coverageFile.EndsWith(Constants.CoverageConstants.CoverageBufferFileExtension) || // .coveragebuffer
+                    coverageFile.EndsWith(Constants.CoverageConstants.CoverageFileExtension) ||         // .coverage
+                    coverageFile.EndsWith(Constants.CoverageConstants.CoverageBFileExtension) ||        //.covb 
+                    coverageFile.EndsWith(Constants.CoverageConstants.CoverageJsonFileExtension) ||     //.cjson  
+                    coverageFile.EndsWith(Constants.CoverageConstants.CoverageXFileExtension)))         //.covx
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
