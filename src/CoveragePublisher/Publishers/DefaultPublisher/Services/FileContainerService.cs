@@ -167,7 +167,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
 
             // Stop monitor task;
-            uploadFinished.TrySetResult(0);
+            uploadFinished.SetResult(filesProcessed);
             await uploadMonitor;
 
             return failedFiles;
