@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -151,22 +151,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _fileUploadProgressLog.Clear();
             Task uploadMonitor = ReportingAsync(files.Count(), uploadFinished, cancellationToken);
 
-            // Add a watchdog task to detect stalled progress
-            int lastProcessedCount = 0;
-            Task watchdogTask = Task.Run(async () => 
-            {
-                while (!uploadFinished.Task.IsCompleted && !cancellationToken.IsCancellationRequested)
-                {
-                    await Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);
-                    int currentProcessed = filesProcessed;
-                    if (currentProcessed == lastProcessedCount && currentProcessed < files.Count)
-                    {
-                        TraceLogger.Warning($"Upload appears to be stalled: No progress in the last 5 minutes. Processed {currentProcessed}/{files.Count} files.");
-                    }
-                    lastProcessedCount = currentProcessed;
-                }
-            }, cancellationToken);
-
             // Start parallel upload tasks.
             List<Task<List<string>>> parallelUploadingTasks = new List<Task<List<string>>>();
             for (int uploader = 0; uploader < concurrentUploads; uploader++)
@@ -183,7 +167,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
 
             // Stop monitor task;
-            uploadFinished.SetResult(filesProcessed);
+            uploadFinished.TrySetResult(0);
             await uploadMonitor;
 
             return failedFiles;
@@ -210,21 +194,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         HttpResponseMessage response = null;
                         try
                         {
-                            // Add a timeout to each upload operation
-                            var uploadTask = _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 4 * 1024 * 1024);
-                            
-                            // Wait for the upload task to complete with a timeout (e.g., 2 minutes per file)
-                            if (await Task.WhenAny(uploadTask, Task.Delay(TimeSpan.FromMinutes(2), cancellationToken)) == uploadTask)
-                            {
-                                // Task completed within timeout
-                                response = await uploadTask;
-                            }
-                            else
-                            {
-                                // Task timed out
-                                TraceLogger.Error(string.Format("Upload timed out after 2 minutes for file: {0}", fileToUpload));
-                                coughtExceptionDuringUpload = true;
-                            }
+                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 4 * 1024 * 1024);
                         }
                         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                         {
