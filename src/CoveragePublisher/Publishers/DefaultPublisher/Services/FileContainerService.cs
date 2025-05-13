@@ -1,4 +1,4 @@
-﻿﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -194,7 +194,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         HttpResponseMessage response = null;
                         try
                         {
-                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 4 * 1024 * 1024);
+                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 512 * 1024);
                         }
                         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                         {
