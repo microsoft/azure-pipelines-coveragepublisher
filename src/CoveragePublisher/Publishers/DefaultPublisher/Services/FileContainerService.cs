@@ -170,6 +170,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             uploadFinished.TrySetResult(0);
             await uploadMonitor;
 
+            // CRITICAL: Verify all files were processed
+            if (filesProcessed < files.Count && _fileUploadQueue.IsEmpty)
+            {
+                int missingFiles = files.Count - filesProcessed;
+                TraceLogger.Error($"Upload incomplete - processed {filesProcessed}/{files.Count} files but queue is empty. Missing {missingFiles} files.");
+                
+                // Try to identify which files are missing by comparing with failed files
+                var allProcessedFiles = new HashSet<string>(failedFiles);
+                foreach (var file in files)
+                {
+                    if (!allProcessedFiles.Contains(file))
+                    {
+                        TraceLogger.Error($"File may have been skipped: {file}");
+                        failedFiles.Add(file); // Add to failed files to ensure retry
+                    }
+                }
+            }
+
             return failedFiles;
         }
 
@@ -194,7 +212,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         HttpResponseMessage response = null;
                         try
                         {
-                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 512 * 1024);
+                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 64 * 1024);
                         }
                         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                         {
@@ -265,8 +283,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 catch (Exception ex)
                 {
                     TraceLogger.Error(string.Format(Resources.FileUploadFileOpenFailed, ex.Message, fileToUpload));
-                    // Don't re-throw the exception which would kill this upload thread
-                    // Instead record the file as failed and continue processing the queue
                     failedFiles.Add(fileToUpload);
                     Interlocked.Increment(ref filesProcessed);
                 }
