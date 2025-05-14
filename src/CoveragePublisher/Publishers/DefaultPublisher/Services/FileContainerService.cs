@@ -194,7 +194,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         HttpResponseMessage response = null;
                         try
                         {
-                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 4 * 1024 * 1024);
+                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 512 * 1024);
                         }
                         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                         {
