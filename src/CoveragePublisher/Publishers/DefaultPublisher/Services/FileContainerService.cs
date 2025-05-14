@@ -265,7 +265,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 catch (Exception ex)
                 {
                     TraceLogger.Error(string.Format(Resources.FileUploadFileOpenFailed, ex.Message, fileToUpload));
-                    throw ex;
+                    // Don't re-throw the exception which would kill this upload thread
+                    // Instead record the file as failed and continue processing the queue
+                    failedFiles.Add(fileToUpload);
+                    Interlocked.Increment(ref filesProcessed);
                 }
             }
 
