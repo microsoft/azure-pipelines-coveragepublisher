@@ -105,7 +105,7 @@ namespace CoveragePublisher.Tests
                 It.IsAny<FileStream>(),
                 It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
-                It.Is<int>(x => x == 512 * 1024)), Times.Exactly(32));
+                It.Is<int>(x => x == 512 * 1024)), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -132,7 +132,7 @@ namespace CoveragePublisher.Tests
                 It.IsAny<FileStream>(),
                 It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
-                It.Is<int>(x => x == 512 * 1024)), Times.Exactly(64));
+                It.Is<int>(x => x == 512 * 1024)), Times.Exactly(8));
         }
 
         [TestMethod]
@@ -169,7 +169,7 @@ namespace CoveragePublisher.Tests
                 It.IsAny<FileStream>(),
                 It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
-                It.Is<int>(x => x == 512 * 1024)), Times.Exactly(64));
+                It.Is<int>(x => x == 512 * 1024)), Times.Exactly(8));
         }
 
         [TestMethod]
