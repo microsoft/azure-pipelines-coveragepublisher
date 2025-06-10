@@ -151,10 +151,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
             if (UseOptimizedUploads)
             {
+                TraceLogger.Info("Using OPTIMIZED upload path with enhanced concurrency and retry logic");
                 return await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
             }
 
             // Original logic
+            TraceLogger.Info("Using ORIGINAL upload path");
             // ensure the file upload queue is empty.
             if (!_fileUploadQueue.IsEmpty)
             {
@@ -198,6 +200,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         private async Task<List<string>> ParallelUploadOptimizedAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
+            TraceLogger.Info($"Optimized upload: Processing {files.Count} files with max concurrency of {_uploadSemaphore?.CurrentCount ?? 0}");
+
             List<string> failedFiles = new List<string>();
 
             // ensure the file upload queue is empty.
@@ -246,9 +250,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             var failedFiles = new List<string>();
             var containerId = _context.ContainerId;
             var projectId = _context.ProjectId;
+            int fileCount = 0;
 
             while (_fileUploadQueue.TryDequeue(out string fileToUpload))
             {
+                fileCount++;
+                TraceLogger.Debug($"Optimized worker: Processing file #{fileCount}: {Path.GetFileName(fileToUpload)}");
+                
                 cancellationToken.ThrowIfCancellationRequested();
                 
                 await _uploadSemaphore.WaitAsync(cancellationToken);
@@ -267,6 +275,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 }
             }
 
+            TraceLogger.Debug($"Optimized worker completed: Processed {fileCount} files, {failedFiles.Count} failed");
             return failedFiles;
         }
 
