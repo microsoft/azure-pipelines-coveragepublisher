@@ -22,6 +22,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> _fileUploadProgressLog = new ConcurrentDictionary<string, ConcurrentQueue<string>>();
         private readonly IFileContainerClientHelper _fileContainerHelper;
         private readonly IPipelinesExecutionContext _context;
+        private readonly SemaphoreSlim _uploadSemaphore;
+        private const int DefaultChunkSize = 8 * 1024 * 1024; // 8MB chunks
+        private const int MaxConcurrentUploads = 16;
+        private const int MinConcurrentUploads = 2;
+        private const bool UseOptimizedUploads = true; // Feature flag for new optimizations
 
         private int filesProcessed = 0;
 
@@ -29,12 +34,24 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             _fileContainerHelper = new FileContainerClientHelper(clientFactory);
             _context = context;
+            
+            if (UseOptimizedUploads)
+            {
+                int maxConcurrency = Math.Min(Math.Max(Environment.ProcessorCount, MinConcurrentUploads), MaxConcurrentUploads);
+                _uploadSemaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+            }
         }
 
         public FileContainerService(IFileContainerClientHelper fileContainerHelper, IPipelinesExecutionContext context)
         {
             _fileContainerHelper = fileContainerHelper;
             _context = context;
+            
+            if (UseOptimizedUploads)
+            {
+                int maxConcurrency = Math.Min(Math.Max(Environment.ProcessorCount, MinConcurrentUploads), MaxConcurrentUploads);
+                _uploadSemaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+            }
         }
 
         /// <summary>
@@ -132,6 +149,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 return failedFiles;
             }
 
+            if (UseOptimizedUploads)
+            {
+                return await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
+            }
+
+            // Original logic
             // ensure the file upload queue is empty.
             if (!_fileUploadQueue.IsEmpty)
             {
@@ -173,99 +196,173 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return failedFiles;
         }
 
-        private async Task<List<string>> UploadAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        private async Task<List<string>> ParallelUploadOptimizedAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
             List<string> failedFiles = new List<string>();
-            string fileToUpload;
-            Stopwatch uploadTimer = new Stopwatch();
+
+            // ensure the file upload queue is empty.
+            if (!_fileUploadQueue.IsEmpty)
+            {
+                throw new ArgumentOutOfRangeException(nameof(_fileUploadQueue));
+            }
+
+            // Enqueue all files
+            foreach (var file in files)
+            {
+                _fileUploadQueue.Enqueue(file);
+            }
+
+            filesProcessed = 0;
+            var uploadFinished = new TaskCompletionSource<int>();
+            _fileUploadTraceLog.Clear();
+            _fileUploadProgressLog.Clear();
+
+            Task uploadMonitor = ReportingAsync(files.Count, uploadFinished, cancellationToken);
+
+            // Create upload tasks with optimized approach
+            var uploadTasks = new List<Task<List<string>>>();
+            int actualConcurrency = Math.Min(concurrentUploads, files.Count);
+
+            for (int i = 0; i < actualConcurrency; i++)
+            {
+                uploadTasks.Add(UploadWorkerOptimizedAsync(sourceParentDirectory, containerPath, cancellationToken));
+            }
+
+            await Task.WhenAll(uploadTasks);
+
+            foreach (var task in uploadTasks)
+            {
+                failedFiles.AddRange(await task);
+            }
+
+            uploadFinished.TrySetResult(0);
+            await uploadMonitor;
+
+            return failedFiles;
+        }
+
+        private async Task<List<string>> UploadWorkerOptimizedAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        {
+            var failedFiles = new List<string>();
             var containerId = _context.ContainerId;
             var projectId = _context.ProjectId;
 
-            while (_fileUploadQueue.TryDequeue(out fileToUpload))
+            while (_fileUploadQueue.TryDequeue(out string fileToUpload))
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                
+                await _uploadSemaphore.WaitAsync(cancellationToken);
                 try
                 {
-                    using (FileStream fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    var success = await UploadFileWithRetryAsync(fileToUpload, sourceParentDirectory, containerPath, containerId, projectId, cancellationToken);
+                    if (!success)
                     {
-                        string itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
-                        uploadTimer.Restart();
-                        bool coughtExceptionDuringUpload = false;
-                        HttpResponseMessage response = null;
-                        try
+                        failedFiles.Add(fileToUpload);
+                    }
+                    Interlocked.Increment(ref filesProcessed);
+                }
+                finally
+                {
+                    _uploadSemaphore.Release();
+                }
+            }
+
+            return failedFiles;
+        }
+
+        private async Task<bool> UploadFileWithRetryAsync(string fileToUpload, string sourceParentDirectory, string containerPath, long containerId, Guid projectId, CancellationToken cancellationToken)
+        {
+            const int maxRetries = 3;
+            var delay = TimeSpan.FromSeconds(1);
+
+            for (int attempt = 0; attempt < maxRetries; attempt++)
+            {
+                try
+                {
+                    if (attempt > 0)
+                    {
+                        await Task.Delay(delay, cancellationToken);
+                        delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2); // Exponential backoff
+                    }
+
+                    var itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
+
+                    using (var fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: DefaultChunkSize);
+
+                        if (response.StatusCode == HttpStatusCode.Created)
                         {
-                            response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: 4 * 1024 * 1024);
-                        }
-                        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-                        {
-                            TraceLogger.Error(string.Format(Resources.FileUploadCancelled, fileToUpload));
-                            if (response != null)
+                            TraceLogger.Debug($"Successfully uploaded {fileToUpload}");
+
+                            // Log trace information
+                            if (_fileUploadTraceLog.TryGetValue(itemPath, out var logQueue))
                             {
-                                response.Dispose();
-                                response = null;
-                            }
-
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            coughtExceptionDuringUpload = true;
-                            TraceLogger.Error(string.Format(Resources.FileUploadFailed, fileToUpload, ex));
-                        }
-
-                        uploadTimer.Stop();
-                        if (coughtExceptionDuringUpload || (response != null && response.StatusCode != HttpStatusCode.Created))
-                        {
-                            if (response != null)
-                            {
-                                TraceLogger.Info(string.Format(Resources.FileContainerUploadFailed, response.StatusCode, response.ReasonPhrase, fileToUpload, itemPath));
-                            }
-
-                            // output detail upload trace for the file.
-                            ConcurrentQueue<string> logQueue;
-                            if (_fileUploadTraceLog.TryGetValue(itemPath, out logQueue))
-                            {
-                                TraceLogger.Info(string.Format(Resources.FileUploadDetailTrace, itemPath));
-                                string message;
-                                while (logQueue.TryDequeue(out message))
-                                {
-                                    TraceLogger.Info(message);
-                                }
-                            }
-
-                            // tracking file that failed to upload.
-                            failedFiles.Add(fileToUpload);
-                        }
-                        else
-                        {
-                            TraceLogger.Debug(string.Format(Resources.FileUploadFinish, fileToUpload, uploadTimer.ElapsedMilliseconds));
-
-                            // debug detail upload trace for the file.
-                            ConcurrentQueue<string> logQueue;
-                            if (_fileUploadTraceLog.TryGetValue(itemPath, out logQueue))
-                            {
-                                TraceLogger.Debug($"Detail upload trace for file: {itemPath}");
-                                string message;
-                                while (logQueue.TryDequeue(out message))
+                                while (logQueue.TryDequeue(out var message))
                                 {
                                     TraceLogger.Debug(message);
                                 }
                             }
-                        }
 
-                        if (response != null)
+                            return true;
+                        }
+                        else
                         {
-                            response.Dispose();
-                            response = null;
+                            TraceLogger.Warning($"Upload returned {response.StatusCode} for {fileToUpload}");
                         }
                     }
-
-                    Interlocked.Increment(ref filesProcessed);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
-                    TraceLogger.Error(string.Format(Resources.FileUploadFileOpenFailed, ex.Message, fileToUpload));
-                    throw ex;
+                    TraceLogger.Warning($"Upload attempt {attempt + 1} failed for {fileToUpload}: {ex.Message}");
+                    if (attempt == maxRetries - 1)
+                    {
+                        TraceLogger.Error($"Upload failed after {maxRetries} attempts for {fileToUpload}: {ex}");
+                        return false;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private async Task<List<string>> UploadAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        {
+            var failedFiles = new List<string>();
+            var containerId = _context.ContainerId;
+            var projectId = _context.ProjectId;
+
+            while (_fileUploadQueue.TryDequeue(out string fileToUpload))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                using (var fs = File.OpenRead(fileToUpload))
+                {
+                    var itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
+
+                    try
+                    {
+                        var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: DefaultChunkSize);
+
+                        if (response.StatusCode == HttpStatusCode.Created)
+                        {
+                            TraceLogger.Debug($"Successfully uploaded {fileToUpload}");
+                        }
+                        else
+                        {
+                            TraceLogger.Warning($"Upload returned {response.StatusCode} for {fileToUpload}");
+                            failedFiles.Add(fileToUpload);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        TraceLogger.Warning($"Upload failed for {fileToUpload}: {ex.Message}");
+                        failedFiles.Add(fileToUpload);
+                    }
                 }
             }
 
@@ -309,5 +406,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             ConcurrentQueue<string> progressQueue = _fileUploadProgressLog.GetOrAdd(e.File, new ConcurrentQueue<string>());
             progressQueue.Enqueue(string.Format(string.Format(Resources.FileUploadProgressDetail, e.File, (e.CurrentChunk * 100) / e.TotalChunks)));
         }
+    }
+
+    // Add this class to support upload sessions
+    public class UploadSession
+    {
+        public Guid SessionId { get; set; }
+        public string ItemPath { get; set; }
+        public long ContainerId { get; set; }
+        public Guid ProjectId { get; set; }
+        public long FileSize { get; set; }
+        public int ChunkSize { get; set; }
     }
 }
