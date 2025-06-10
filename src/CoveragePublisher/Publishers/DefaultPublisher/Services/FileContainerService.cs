@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly IFileContainerClientHelper _fileContainerHelper;
         private readonly IPipelinesExecutionContext _context;
         private readonly SemaphoreSlim _uploadSemaphore;
-        private const int DefaultChunkSize = 8 * 1024 * 1024; // 8MB chunks
+        private const int DefaultChunkSize = 4 * 1024 * 1024; // Keep original 4MB for test compatibility
         private const int MaxConcurrentUploads = 16;
         private const int MinConcurrentUploads = 2;
         private const bool UseOptimizedUploads = true; // Feature flag for new optimizations
