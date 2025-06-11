@@ -24,8 +24,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly IPipelinesExecutionContext _context;
         private readonly SemaphoreSlim _uploadSemaphore;
         private const int DefaultChunkSize = 4 * 1024 * 1024; // Keep original 4MB for test compatibility
-        private const int MaxConcurrentUploads = 16;
-        private const int MinConcurrentUploads = 2;
+        private const int MaxConcurrentUploads = 8; // Pipeline artifact uses 8, not 16
+        private const int MinConcurrentUploads = 1; // Pipeline artifact starts with 1
+        private const int BatchSize = 50; // Pipeline artifact processes files in batches
         private const bool UseOptimizedUploads = true; // Feature flag for new optimizations
 
         private int filesProcessed = 0;
@@ -35,10 +36,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _fileContainerHelper = new FileContainerClientHelper(clientFactory);
             _context = context;
             
+            TraceLogger.Info($"FileContainerService initialized with UseOptimizedUploads={UseOptimizedUploads}");
+            
             if (UseOptimizedUploads)
             {
                 int maxConcurrency = Math.Min(Math.Max(Environment.ProcessorCount, MinConcurrentUploads), MaxConcurrentUploads);
                 _uploadSemaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+                TraceLogger.Info($"Optimized uploads enabled with max concurrency: {maxConcurrency}");
             }
         }
 
@@ -47,10 +51,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _fileContainerHelper = fileContainerHelper;
             _context = context;
             
+            TraceLogger.Info($"FileContainerService initialized with UseOptimizedUploads={UseOptimizedUploads}");
+            
             if (UseOptimizedUploads)
             {
                 int maxConcurrency = Math.Min(Math.Max(Environment.ProcessorCount, MinConcurrentUploads), MaxConcurrentUploads);
                 _uploadSemaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+                TraceLogger.Info($"Optimized uploads enabled with max concurrency: {maxConcurrency}");
             }
         }
 
@@ -200,22 +207,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         private async Task<List<string>> ParallelUploadOptimizedAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
-            TraceLogger.Info($"Optimized upload: Processing {files.Count} files with max concurrency of {_uploadSemaphore?.CurrentCount ?? 0}");
+            TraceLogger.Info($"Pipeline Artifact style upload: Processing {files.Count} files in batches of {BatchSize}");
 
             List<string> failedFiles = new List<string>();
-
-            // ensure the file upload queue is empty.
-            if (!_fileUploadQueue.IsEmpty)
-            {
-                throw new ArgumentOutOfRangeException(nameof(_fileUploadQueue));
-            }
-
-            // Enqueue all files
-            foreach (var file in files)
-            {
-                _fileUploadQueue.Enqueue(file);
-            }
-
             filesProcessed = 0;
             var uploadFinished = new TaskCompletionSource<int>();
             _fileUploadTraceLog.Clear();
@@ -223,75 +217,123 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
             Task uploadMonitor = ReportingAsync(files.Count, uploadFinished, cancellationToken);
 
-            // Create upload tasks with optimized approach
-            var uploadTasks = new List<Task<List<string>>>();
-            int actualConcurrency = Math.Min(concurrentUploads, files.Count);
-
-            for (int i = 0; i < actualConcurrency; i++)
+            try
             {
-                uploadTasks.Add(UploadWorkerOptimizedAsync(sourceParentDirectory, containerPath, cancellationToken));
+                // Process files in batches like Pipeline Artifact does
+                for (int batchStart = 0; batchStart < files.Count; batchStart += BatchSize)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
+                    var batchEnd = Math.Min(batchStart + BatchSize, files.Count);
+                    var batch = files.GetRange(batchStart, batchEnd - batchStart);
+                    
+                    TraceLogger.Info($"Processing batch {(batchStart / BatchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                    
+                    var batchFailures = await ProcessBatchAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
+                    failedFiles.AddRange(batchFailures);
+                    
+                    // Adaptive throttling - if many failures, reduce concurrency for next batch
+                    if (batchFailures.Count > batch.Count / 2)
+                    {
+                        concurrentUploads = Math.Max(concurrentUploads / 2, 1);
+                        TraceLogger.Warning($"High failure rate detected. Reducing concurrency to {concurrentUploads}");
+                    }
+                    else if (batchFailures.Count == 0 && concurrentUploads < MaxConcurrentUploads)
+                    {
+                        concurrentUploads = Math.Min(concurrentUploads + 1, MaxConcurrentUploads);
+                        TraceLogger.Info($"Good performance. Increasing concurrency to {concurrentUploads}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLogger.Error($"Error in pipeline artifact style upload: {ex}");
+                throw;
+            }
+            finally
+            {
+                uploadFinished.TrySetResult(0);
+                await uploadMonitor;
+            }
+
+            TraceLogger.Info($"Pipeline artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
+            return failedFiles;
+        }
+
+        private async Task<List<string>> ProcessBatchAsync(List<string> batchFiles, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
+        {
+            // Clear and populate queue for this batch
+            while (_fileUploadQueue.TryDequeue(out _)) { }
+            foreach (var file in batchFiles)
+            {
+                _fileUploadQueue.Enqueue(file);
+            }
+
+            // Create workers for this batch - Pipeline Artifact approach
+            var uploadTasks = new List<Task<List<string>>>();
+            int actualWorkers = Math.Min(concurrentUploads, batchFiles.Count);
+
+            for (int i = 0; i < actualWorkers; i++)
+            {
+                uploadTasks.Add(UploadWorkerPipelineStyleAsync(sourceParentDirectory, containerPath, cancellationToken));
             }
 
             await Task.WhenAll(uploadTasks);
 
+            var failedFiles = new List<string>();
             foreach (var task in uploadTasks)
             {
                 failedFiles.AddRange(await task);
             }
 
-            uploadFinished.TrySetResult(0);
-            await uploadMonitor;
-
             return failedFiles;
         }
 
-        private async Task<List<string>> UploadWorkerOptimizedAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        private async Task<List<string>> UploadWorkerPipelineStyleAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
         {
             var failedFiles = new List<string>();
             var containerId = _context.ContainerId;
             var projectId = _context.ProjectId;
             int fileCount = 0;
 
+            // Pipeline Artifact uses simple dequeue without complex semaphore logic
             while (_fileUploadQueue.TryDequeue(out string fileToUpload))
             {
                 fileCount++;
-                TraceLogger.Debug($"Optimized worker: Processing file #{fileCount}: {Path.GetFileName(fileToUpload)}");
-                
                 cancellationToken.ThrowIfCancellationRequested();
-                
-                await _uploadSemaphore.WaitAsync(cancellationToken);
+
                 try
                 {
-                    var success = await UploadFileWithRetryAsync(fileToUpload, sourceParentDirectory, containerPath, containerId, projectId, cancellationToken);
+                    // Pipeline Artifact approach: simple retry with backoff, no complex semaphore
+                    var success = await UploadSingleFileWithBackoffAsync(fileToUpload, sourceParentDirectory, containerPath, containerId, projectId, cancellationToken);
                     if (!success)
                     {
                         failedFiles.Add(fileToUpload);
                     }
                     Interlocked.Increment(ref filesProcessed);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    _uploadSemaphore.Release();
+                    TraceLogger.Warning($"Worker exception uploading {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                    failedFiles.Add(fileToUpload);
                 }
             }
 
-            TraceLogger.Debug($"Optimized worker completed: Processed {fileCount} files, {failedFiles.Count} failed");
             return failedFiles;
         }
 
-        private async Task<bool> UploadFileWithRetryAsync(string fileToUpload, string sourceParentDirectory, string containerPath, long containerId, Guid projectId, CancellationToken cancellationToken)
+        private async Task<bool> UploadSingleFileWithBackoffAsync(string fileToUpload, string sourceParentDirectory, string containerPath, long containerId, Guid projectId, CancellationToken cancellationToken)
         {
-            const int maxRetries = 3;
-            var delay = TimeSpan.FromSeconds(1);
-
-            for (int attempt = 0; attempt < maxRetries; attempt++)
+            // Pipeline Artifact retry pattern: 3 attempts with exponential backoff
+            var delays = new[] { TimeSpan.Zero, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3) };
+            
+            for (int attempt = 0; attempt < delays.Length; attempt++)
             {
                 try
                 {
-                    if (attempt > 0)
+                    if (delays[attempt] > TimeSpan.Zero)
                     {
-                        await Task.Delay(delay, cancellationToken);
-                        delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2); // Exponential backoff
+                        await Task.Delay(delays[attempt], cancellationToken);
                     }
 
                     var itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
@@ -302,22 +344,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                         if (response.StatusCode == HttpStatusCode.Created)
                         {
-                            TraceLogger.Debug($"Successfully uploaded {fileToUpload}");
-
-                            // Log trace information
-                            if (_fileUploadTraceLog.TryGetValue(itemPath, out var logQueue))
-                            {
-                                while (logQueue.TryDequeue(out var message))
-                                {
-                                    TraceLogger.Debug(message);
-                                }
-                            }
-
                             return true;
                         }
-                        else
+                        else if (attempt == delays.Length - 1)
                         {
-                            TraceLogger.Warning($"Upload returned {response.StatusCode} for {fileToUpload}");
+                            TraceLogger.Warning($"Upload failed with {response.StatusCode} for {Path.GetFileName(fileToUpload)}");
                         }
                     }
                 }
@@ -325,14 +356,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 {
                     throw;
                 }
+                catch (Exception ex) when (attempt < delays.Length - 1)
+                {
+                    TraceLogger.Debug($"Upload attempt {attempt + 1} failed for {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                }
                 catch (Exception ex)
                 {
-                    TraceLogger.Warning($"Upload attempt {attempt + 1} failed for {fileToUpload}: {ex.Message}");
-                    if (attempt == maxRetries - 1)
-                    {
-                        TraceLogger.Error($"Upload failed after {maxRetries} attempts for {fileToUpload}: {ex}");
-                        return false;
-                    }
+                    TraceLogger.Warning($"Upload failed for {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                    break;
                 }
             }
 
