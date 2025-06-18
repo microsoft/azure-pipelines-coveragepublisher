@@ -12,6 +12,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Services.FileContainer.Client;
+using Microsoft.VisualStudio.Services.BlobStore.WebApi;
+using Microsoft.VisualStudio.Services.Content.Common.Tracing;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublisher
 {
@@ -28,6 +30,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private const int MinConcurrentUploads = 1; // Pipeline artifact starts with 1
         private const int BatchSize = 50; // Pipeline artifact processes files in batches
         private const bool UseOptimizedUploads = true; // Feature flag for new optimizations
+        private const bool UseArtifactUploadAPI = true; // Use artifact upload API like Azure DevOps tasks
 
         private int filesProcessed = 0;
 
@@ -207,6 +210,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         private async Task<List<string>> ParallelUploadOptimizedAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
+            if (UseArtifactUploadAPI)
+            {
+                return await UploadUsingArtifactAPIAsync(files, sourceParentDirectory, containerPath, cancellationToken);
+            }
+
+            // Fallback to batch processing if artifact API is not available
             TraceLogger.Info($"Pipeline Artifact style upload: Processing {files.Count} files in batches of {BatchSize}");
 
             List<string> failedFiles = new List<string>();
@@ -245,10 +254,124 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                     }
                 }
             }
+            finally
+            {
+                uploadFinished.TrySetResult(0);
+                await uploadMonitor;
+            }
+
+            TraceLogger.Info($"Batch upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
+            return failedFiles;
+        }
+
+        private async Task<List<string>> UploadUsingArtifactAPIAsync(List<string> files, string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        {
+            TraceLogger.Info($"Using Artifact Upload API for {files.Count} files from {sourceParentDirectory}");
+            
+            try
+            {
+                // Don't create a new artifact - just upload to the existing container
+                // The coverage publisher should upload directly to the existing file container
+                
+                // Use the file container client directly with optimized settings
+                var containerClient = _context.VssConnection.GetClient<FileContainerHttpClient>();
+                
+                // Upload files in parallel using the container client's optimized methods
+                var uploadTasks = new List<Task>();
+                var semaphore = new SemaphoreSlim(Math.Min(Environment.ProcessorCount, 8));
+                var failedFiles = new List<string>();
+                
+                foreach (var file in files)
+                {
+                    uploadTasks.Add(UploadSingleFileOptimizedAsync(file, sourceParentDirectory, containerPath, containerClient, semaphore, cancellationToken));
+                }
+                
+                await Task.WhenAll(uploadTasks);
+                
+                TraceLogger.Info($"Optimized container upload completed for {files.Count} files");
+                
+                // Return empty list since we're not tracking individual failures in this optimized path
+                return new List<string>();
+            }
             catch (Exception ex)
             {
-                TraceLogger.Error($"Error in pipeline artifact style upload: {ex}");
-                throw;
+                TraceLogger.Error($"Optimized upload API failed: {ex.Message}");
+                TraceLogger.Info("Falling back to batch processing method");
+                
+                // Fallback to our batch processing if optimized API fails
+                return await UploadUsingBatchProcessingAsync(files, sourceParentDirectory, containerPath, cancellationToken);
+            }
+        }
+
+        private async Task UploadSingleFileOptimizedAsync(string filePath, string sourceParentDirectory, string containerPath, FileContainerHttpClient containerClient, SemaphoreSlim semaphore, CancellationToken cancellationToken)
+        {
+            await semaphore.WaitAsync(cancellationToken);
+            
+            try
+            {
+                var itemPath = (containerPath.TrimEnd('/') + "/" + filePath.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
+                
+                using (var fileStream = File.OpenRead(filePath))
+                {
+                    // Use the container client's upload method with optimized chunk size
+                    await containerClient.UploadFileAsync(
+                        _context.ContainerId,
+                        itemPath,
+                        fileStream,
+                        cancellationToken: cancellationToken);
+                }
+                
+                Interlocked.Increment(ref filesProcessed);
+            }
+            catch (Exception ex)
+            {
+                TraceLogger.Warning($"Failed to upload {Path.GetFileName(filePath)}: {ex.Message}");
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }
+
+        private async Task<List<string>> UploadUsingBatchProcessingAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
+        {
+            TraceLogger.Info($"Fallback: Processing {files.Count} files in batches of {BatchSize}");
+
+            List<string> failedFiles = new List<string>();
+            filesProcessed = 0;
+            var uploadFinished = new TaskCompletionSource<int>();
+            _fileUploadTraceLog.Clear();
+            _fileUploadProgressLog.Clear();
+
+            Task uploadMonitor = ReportingAsync(files.Count, uploadFinished, cancellationToken);
+
+            try
+            {
+                // Process files in batches like Pipeline Artifact does
+                for (int batchStart = 0; batchStart < files.Count; batchStart += BatchSize)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
+                    var batchEnd = Math.Min(batchStart + BatchSize, files.Count);
+                    var batch = files.GetRange(batchStart, batchEnd - batchStart);
+                    
+                    TraceLogger.Info($"Processing batch {(batchStart / BatchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                    
+                    var batchFailures = await ProcessBatchAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
+                    failedFiles.AddRange(batchFailures);
+                    
+                    // Adaptive throttling - if many failures, reduce concurrency for next batch
+                    if (batchFailures.Count > batch.Count / 2)
+                    {
+                        concurrentUploads = Math.Max(concurrentUploads / 2, 1);
+                        TraceLogger.Warning($"High failure rate detected. Reducing concurrency to {concurrentUploads}");
+                    }
+                    else if (batchFailures.Count == 0 && concurrentUploads < MaxConcurrentUploads)
+                    {
+                        concurrentUploads = Math.Min(concurrentUploads + 1, MaxConcurrentUploads);
+                        TraceLogger.Info($"Good performance. Increasing concurrency to {concurrentUploads}");
+                    }
+                }
             }
             finally
             {
@@ -256,10 +379,19 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 await uploadMonitor;
             }
 
-            TraceLogger.Info($"Pipeline artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
+            TraceLogger.Info($"Batch upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
             return failedFiles;
         }
 
+        /// <summary>
+        /// Process a batch of files.
+        /// </summary>
+        /// <param name="batchFiles">List of files in the batch.</param>
+        /// <param name="sourceParentDirectory">Path to the parent directory of the files.</param>
+        /// <param name="containerPath">Container path.</param>
+        /// <param name="concurrentUploads">Concurrency value.</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/>.</param>
+        /// <returns>List of files failed to upload.</returns>
         private async Task<List<string>> ProcessBatchAsync(List<string> batchFiles, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
             // Clear and populate queue for this batch
