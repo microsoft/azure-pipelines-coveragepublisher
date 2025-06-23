@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -109,7 +109,6 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
-        [Ignore("Temporarily disabled - optimized upload path changes retry behavior")]
         public void WillRetryAndThrowIfFilesFailToUpload()
         {
             _mockClientHelper.Setup(x => x.UploadFileAsync(
@@ -197,7 +196,6 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
-        [Ignore("Temporarily disabled - optimized upload path changes cancellation behavior")]
         public void WillThrowIfCancelRequestedDuringUpload()
         {
             var cancellationToken = new CancellationTokenSource();
@@ -223,7 +221,6 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
-        [Ignore("Temporarily disabled - optimized upload path changes logging behavior")]
         public void WillLogIfExceptionOccuredWhileUpload()
         {
             var cancellationToken = new CancellationTokenSource();
@@ -249,7 +246,6 @@ namespace CoveragePublisher.Tests
         }
         
         [TestMethod]
-        [Ignore("Temporarily disabled - optimized upload path changes logging behavior")]
         public void WillLogFileProgress()
         {
             var cancellationToken = new CancellationTokenSource();
@@ -280,4 +276,4 @@ namespace CoveragePublisher.Tests
         }
     }
 }
-
+   
