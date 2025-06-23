@@ -188,7 +188,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             List<Task<List<string>>> parallelUploadingTasks = new List<Task<List<string>>>();
             for (int uploader = 0; uploader < concurrentUploads; uploader++)
             {
-                parallelUploadingTasks.Add(UploadAsync(sourceParentDirectory, containerPath, cancellationToken));
+                parallelUploadingTasks.Add(isBatchingEnabled ? UploadAsyncOptimized(sourceParentDirectory, containerPath, cancellationToken) : UploadAsync(sourceParentDirectory, containerPath, cancellationToken));
             }
 
             // Wait for parallel upload finish.
@@ -204,6 +204,53 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             await uploadMonitor;
 
             return failedFiles;
+        }
+
+        private async Task<List<string>> UploadAsyncOptimized(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        {
+            var failedFiles = new List<string>();
+            var containerId = _context.ContainerId;
+            var projectId = _context.ProjectId;
+            
+            while (_fileUploadQueue.TryDequeue(out string fileToUpload))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    var success = await UploadSingleFile(fileToUpload, sourceParentDirectory, containerPath, containerId, projectId, cancellationToken);
+                    if (!success)
+                    {
+                        failedFiles.Add(fileToUpload);
+                    }
+                    Interlocked.Increment(ref filesProcessed);
+                }
+                catch (Exception ex)
+                {
+                    TraceLogger.Warning($"Worker exception uploading {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                    failedFiles.Add(fileToUpload);
+                }
+            }
+
+            return failedFiles;
+        }
+
+        private async Task<bool> UploadSingleFile(string fileToUpload, string sourceParentDirectory, string containerPath, long containerId, Guid projectId, CancellationToken cancellationToken)
+        {
+            using (var fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: DefaultChunkSize);
+
+                if (response.StatusCode == HttpStatusCode.Created)
+                {
+                    return true;
+                }
+                else if (attempt == delays.Length - 1)
+                {
+                    TraceLogger.Warning($"Upload failed with {response.StatusCode} for {Path.GetFileName(fileToUpload)}");
+                }
+            }
+            return false;
         }
 
         private async Task<List<string>> UploadAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
