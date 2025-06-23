@@ -144,14 +144,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             try
             {
                 // Process files in batches like Pipeline Artifact does
-                for (int batchStart = 0; batchStart < files.Count; batchStart += BatchSize)
+                for (int batchStart = 0; batchStart < files.Count; batchStart += batchSize)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     
-                    var batchEnd = Math.Min(batchStart + BatchSize, files.Count);
+                    var batchEnd = Math.Min(batchStart + batchSize, files.Count);
                     var batch = files.GetRange(batchStart, batchEnd - batchStart);
                     
-                    TraceLogger.Info($"Processing batch {(batchStart / BatchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                    TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
                     
                     var batchFailures = await ProcessBatchAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
                     failedFiles.AddRange(batchFailures);
@@ -160,9 +160,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                     {
                         concurrentUploads = Math.Max(concurrentUploads / 2, 1);
                     }
-                    else if (batchFailures.Count == 0 && concurrentUploads < MaxConcurrentUploads)
+                    else if (batchFailures.Count == 0 && concurrentUploads < maxConcurrentUploads)
                     {
-                        concurrentUploads = Math.Min(concurrentUploads + 1, MaxConcurrentUploads);
+                        concurrentUploads = Math.Min(concurrentUploads + 1, maxConcurrentUploads);
                     }
                 }
             }
