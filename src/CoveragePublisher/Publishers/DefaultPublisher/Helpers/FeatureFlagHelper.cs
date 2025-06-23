@@ -36,6 +36,23 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return true;
         }
 
+        public bool GetFeatureFlagStateForTcm(string featureFlagName)
+        {
+            try
+            {
+                var featureFlag = GetClient(true).GetFeatureFlagByNameAsync(featureFlagName).Result;
+                if (featureFlag != null && featureFlag.EffectiveState.Equals("On", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return false;
+        }
+
         private FeatureAvailabilityHttpClient GetClient(bool isTcmFeature)
         {
             if(isTcmFeature)

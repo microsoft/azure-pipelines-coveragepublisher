@@ -38,6 +38,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         internal static class FeatureFlags
         {
             public const string EnablePublishToTcmServiceDirectlyFromTaskFF = "TestManagement.Server.EnablePublishToTcmServiceDirectlyFromTask";
+            public const string EnableBatchingInFileUploadFF = "TestManagement.Server.EnableBatchingInFileUploadFromCodeCoverageTask";
         }
         internal static class CoverageConstants
         {

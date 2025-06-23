@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -22,6 +22,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> _fileUploadProgressLog = new ConcurrentDictionary<string, ConcurrentQueue<string>>();
         private readonly IFileContainerClientHelper _fileContainerHelper;
         private readonly IPipelinesExecutionContext _context;
+        private readonly IFeatureFlagHelper _featureFlagHelper;
+        
+        private const int defaultChunkSize = 4 * 1024 * 1024;
+        private const int concurrentUploadsMax = 8;
+        private const int batchSize = 50;
+        private bool isBatchingEnabled = false;
 
         private int filesProcessed = 0;
 
@@ -29,6 +35,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             _fileContainerHelper = new FileContainerClientHelper(clientFactory);
             _context = context;
+            _featureFlagHelper = new FeatureFlagHelper(clientFactory);
+            isBatchingEnabled = _featureFlagHelper.GetFeatureFlagStateForTcm(Constants.FeatureFlags.EnableBatchingInFileUploadFF);
         }
 
         public FileContainerService(IFileContainerClientHelper fileContainerHelper, IPipelinesExecutionContext context)
@@ -66,7 +74,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 try
                 {
                     // try upload all files for the first time.
-                    List<string> failedFiles = await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    List<string> failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken) : await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
@@ -91,7 +99,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                     // Retry upload all failed files.
                     TraceLogger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
-                    failedFiles = await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken) : await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
@@ -171,6 +179,162 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             await uploadMonitor;
 
             return failedFiles;
+        }
+
+        private async Task<List<string>> ParallelUploadOptimizedAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
+        {
+            List<string> failedFiles = new List<string>();
+            filesProcessed = 0;
+            var uploadFinished = new TaskCompletionSource<int>();
+            _fileUploadTraceLog.Clear();
+            _fileUploadProgressLog.Clear();
+
+            Task uploadMonitor = ReportingAsync(files.Count, uploadFinished, cancellationToken);
+
+            try
+            {
+                for (int batchStart = 0; batchStart < files.Count; batchStart += batchSize)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
+                    var batchEnd = Math.Min(batchStart + batchSize, files.Count);
+                    var batch = files.GetRange(batchStart, batchEnd - batchStart);
+                    
+                    TraceLogger.Info(string.Format(Resources.ProcessingBatch, (batchStart / batchSize) + 1, batchStart + 1, batchEnd, files.Count));
+                    
+                    var batchFailures = await ProcessBatchAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
+                    failedFiles.AddRange(batchFailures);
+                    
+                    if (batchFailures.Count > batch.Count / 2)
+                    {
+                        concurrentUploads = Math.Max(concurrentUploads / 2, 1);
+                        TraceLogger.Debug($"Reducing concurrency to {concurrentUploads}");
+                    }
+                    else if (batchFailures.Count == 0 && concurrentUploads < concurrentUploadsMax)
+                    {
+                        concurrentUploads = Math.Min(concurrentUploads + 1, concurrentUploadsMax);
+                        TraceLogger.Debug($"Increasing concurrency to {concurrentUploads}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLogger.Error(string.Format(Resources.ErrorInUpload, ex));
+                throw;
+            }
+            finally
+            {
+                uploadFinished.TrySetResult(0);
+                await uploadMonitor;
+            }
+
+            TraceLogger.Info(string.Format(Resources.ArtifactUploadCompleted, files.Count - failedFiles.Count, failedFiles.Count));
+            return failedFiles;
+        }
+
+        private async Task<List<string>> ProcessBatchAsync(List<string> batchFiles, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
+        {
+            while (_fileUploadQueue.TryDequeue(out _)) { }
+            foreach (var file in batchFiles)
+            {
+                _fileUploadQueue.Enqueue(file);
+            }
+
+            var uploadTasks = new List<Task<List<string>>>();
+            int actualWorkers = Math.Min(concurrentUploads, batchFiles.Count);
+
+            for (int i = 0; i < actualWorkers; i++)
+            {
+                uploadTasks.Add(UploadWorkerPipelineStyleAsync(sourceParentDirectory, containerPath, cancellationToken));
+            }
+
+            await Task.WhenAll(uploadTasks);
+
+            var failedFiles = new List<string>();
+            foreach (var task in uploadTasks)
+            {
+                failedFiles.AddRange(await task);
+            }
+
+            return failedFiles;
+        }
+
+        private async Task<List<string>> UploadWorkerPipelineStyleAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        {
+            var failedFiles = new List<string>();
+            var containerId = _context.ContainerId;
+            var projectId = _context.ProjectId;
+            int fileCount = 0;
+
+            while (_fileUploadQueue.TryDequeue(out string fileToUpload))
+            {
+                fileCount++;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    var success = await UploadSingleFileWithBackoffAsync(fileToUpload, sourceParentDirectory, containerPath, containerId, projectId, cancellationToken);
+                    if (!success)
+                    {
+                        failedFiles.Add(fileToUpload);
+                    }
+                    Interlocked.Increment(ref filesProcessed);
+                }
+                catch (Exception ex)
+                {
+                    TraceLogger.Debug($"Worker exception uploading {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                    failedFiles.Add(fileToUpload);
+                }
+            }
+
+            return failedFiles;
+        }
+
+        private async Task<bool> UploadSingleFileWithBackoffAsync(string fileToUpload, string sourceParentDirectory, string containerPath, long containerId, Guid projectId, CancellationToken cancellationToken)
+        {
+            var delays = new[] { TimeSpan.Zero, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3) };
+            
+            for (int attempt = 0; attempt < delays.Length; attempt++)
+            {
+                try
+                {
+                    if (delays[attempt] > TimeSpan.Zero)
+                    {
+                        await Task.Delay(delays[attempt], cancellationToken);
+                    }
+
+                    var itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
+
+                    using (var fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: defaultChunkSize);
+
+                        if (response.StatusCode == HttpStatusCode.Created)
+                        {
+                            return true;
+                        }
+                        else if (attempt == delays.Length - 1)
+                        {
+                            TraceLogger.Debug($"Upload failed with {response.StatusCode} for {Path.GetFileName(fileToUpload)}");
+                        }
+                    }
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex) when (attempt < delays.Length - 1)
+                {
+                    TraceLogger.Debug($"Upload attempt {attempt + 1} failed for {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    TraceLogger.Debug($"Upload failed for {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                    break;
+                }
+            }
+
+            return false;
         }
 
         private async Task<List<string>> UploadAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
