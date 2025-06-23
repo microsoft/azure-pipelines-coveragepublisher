@@ -139,14 +139,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private async Task<List<string>> BatchedParallelUploadAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
             List<string> failedFiles = new List<string>();
-            int concurrent = 1;
             for (int batchStart = 0; batchStart < files.Count; batchStart += batchSize)
             {
                 var batchEnd = Math.Min(batchStart + batchSize, files.Count);
                 var batch = files.GetRange(batchStart, batchEnd - batchStart);
                 TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
-                failedFiles.AddRange(await ParallelUploadAsync(batch, sourceParentDirectory, containerPath, concurrent, cancellationToken));
-                concurrent = Math.Min(concurrent + 1, concurrentUploads);
+                failedFiles.AddRange(await ParallelUploadAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken));
             }
             TraceLogger.Info($"Artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
             return failedFiles;

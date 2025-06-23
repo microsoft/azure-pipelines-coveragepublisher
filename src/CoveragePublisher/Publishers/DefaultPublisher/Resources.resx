@@ -163,7 +163,7 @@
     <value>File: '{0}' took {1} milliseconds to finish upload.</value>
   </data>
   <data name="FileUploadProgress" xml:space="preserve">
-    <value>Total file: {0} ---- Processed file: {1} ({2}%). [to be continued]</value>
+    <value>Total file: {0} ---- Processed file: {1} ({2}%).</value>
   </data>
   <data name="FileUploadProgressDetail" xml:space="preserve">
     <value>Uploading '{0}' ({1}%).</value>
