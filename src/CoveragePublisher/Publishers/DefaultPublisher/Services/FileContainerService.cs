@@ -239,6 +239,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             using (var fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
+                var itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
                 var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: DefaultChunkSize);
 
                 if (response.StatusCode == HttpStatusCode.Created)
