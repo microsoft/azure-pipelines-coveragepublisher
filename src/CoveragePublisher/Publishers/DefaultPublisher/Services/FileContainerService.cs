@@ -200,7 +200,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                     var batchEnd = Math.Min(batchStart + batchSize, files.Count);
                     var batch = files.GetRange(batchStart, batchEnd - batchStart);
                     
-                    TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                    TraceLogger.Info(string.Format(Resources.ProcessingBatch, (batchStart / batchSize) + 1, batchStart + 1, batchEnd, files.Count));
                     
                     var batchFailures = await ProcessBatchAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
                     failedFiles.AddRange(batchFailures);
@@ -219,7 +219,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
             catch (Exception ex)
             {
-                TraceLogger.Error($"Error in upload: {ex}");
+                TraceLogger.Error(string.Format(Resources.ErrorInUpload, ex));
                 throw;
             }
             finally
@@ -228,20 +228,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 await uploadMonitor;
             }
 
-            TraceLogger.Info($"Artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
+            TraceLogger.Info(string.Format(Resources.ArtifactUploadCompleted, files.Count - failedFiles.Count, failedFiles.Count));
             return failedFiles;
         }
 
         private async Task<List<string>> ProcessBatchAsync(List<string> batchFiles, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
-            // Clear and populate queue for this batch
             while (_fileUploadQueue.TryDequeue(out _)) { }
             foreach (var file in batchFiles)
             {
                 _fileUploadQueue.Enqueue(file);
             }
 
-            // Create workers for this batch - Pipeline Artifact approach
             var uploadTasks = new List<Task<List<string>>>();
             int actualWorkers = Math.Min(concurrentUploads, batchFiles.Count);
 
@@ -268,7 +266,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             var projectId = _context.ProjectId;
             int fileCount = 0;
 
-            // Pipeline Artifact uses simple dequeue without complex semaphore logic
             while (_fileUploadQueue.TryDequeue(out string fileToUpload))
             {
                 fileCount++;
@@ -276,7 +273,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                 try
                 {
-                    // Pipeline Artifact approach: simple retry with backoff, no complex semaphore
                     var success = await UploadSingleFileWithBackoffAsync(fileToUpload, sourceParentDirectory, containerPath, containerId, projectId, cancellationToken);
                     if (!success)
                     {
@@ -286,7 +282,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 }
                 catch (Exception ex)
                 {
-                    TraceLogger.Warning($"Worker exception uploading {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                    TraceLogger.Debug($"Worker exception uploading {Path.GetFileName(fileToUpload)}: {ex.Message}");
                     failedFiles.Add(fileToUpload);
                 }
             }
@@ -296,7 +292,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         private async Task<bool> UploadSingleFileWithBackoffAsync(string fileToUpload, string sourceParentDirectory, string containerPath, long containerId, Guid projectId, CancellationToken cancellationToken)
         {
-            // Pipeline Artifact retry pattern: 3 attempts with exponential backoff
             var delays = new[] { TimeSpan.Zero, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3) };
             
             for (int attempt = 0; attempt < delays.Length; attempt++)
@@ -320,7 +315,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         }
                         else if (attempt == delays.Length - 1)
                         {
-                            TraceLogger.Warning($"Upload failed with {response.StatusCode} for {Path.GetFileName(fileToUpload)}");
+                            TraceLogger.Debug($"Upload failed with {response.StatusCode} for {Path.GetFileName(fileToUpload)}");
                         }
                     }
                 }
@@ -334,7 +329,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 }
                 catch (Exception ex)
                 {
-                    TraceLogger.Warning($"Upload failed for {Path.GetFileName(fileToUpload)}: {ex.Message}");
+                    TraceLogger.Debug($"Upload failed for {Path.GetFileName(fileToUpload)}: {ex.Message}");
                     break;
                 }
             }

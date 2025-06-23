@@ -204,4 +204,13 @@
   <data name="FailedToUploadNativeCoverageFiles" xml:space="preserve">
     <value>Failed to upload native coverage files. Exception: {1}</value>
   </data>
+  <data name="ArtifactUploadCompleted" xml:space="preserve">
+    <value>Artifact upload completed: {0} succeeded, {1} failed</value>
+  </data>
+  <data name="ProcessingBatch" xml:space="preserve">
+    <value>Processing batch {0}: files {1}-{2} of {3}</value>
+  </data>
+  <data name="ErrorInUpload" xml:space="preserve">
+    <value>Error in upload: {0}</value>
+  </data>
 </root>
