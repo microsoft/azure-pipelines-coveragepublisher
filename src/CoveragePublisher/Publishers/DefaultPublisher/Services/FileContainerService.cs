@@ -22,12 +22,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> _fileUploadProgressLog = new ConcurrentDictionary<string, ConcurrentQueue<string>>();
         private readonly IFileContainerClientHelper _fileContainerHelper;
         private readonly IPipelinesExecutionContext _context;
-        private readonly SemaphoreSlim _uploadSemaphore;
-        private const int DefaultChunkSize = 4 * 1024 * 1024; // Keep original 4MB for test compatibility
-        private const int MaxConcurrentUploads = 8; // Pipeline artifact uses 8, not 16
-        private const int MinConcurrentUploads = 1; // Pipeline artifact starts with 1
-        private const int BatchSize = 50; // Pipeline artifact processes files in batches
-        private const bool UseOptimizedUploads = true; // Feature flag for new optimizations
+        
+        private const int defaultChunkSize = 4 * 1024 * 1024;
+        private const int concurrentUploadsMax = 8;
+        private const int batchSize = 50;
+        private bool isBatchingEnabled = false;
 
         private int filesProcessed = 0;
 
@@ -35,30 +34,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             _fileContainerHelper = new FileContainerClientHelper(clientFactory);
             _context = context;
-            
-            TraceLogger.Info($"FileContainerService initialized with UseOptimizedUploads={UseOptimizedUploads}");
-            
-            if (UseOptimizedUploads)
-            {
-                int maxConcurrency = Math.Min(Math.Max(Environment.ProcessorCount, MinConcurrentUploads), MaxConcurrentUploads);
-                _uploadSemaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
-                TraceLogger.Info($"Optimized uploads enabled with max concurrency: {maxConcurrency}");
-            }
+            _featureFlagHelper = new FeatureFlagHelper(clientFactory);
+            isBatchingEnabled = true; //_featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnableBatchingInFileUploadFF, true);
         }
 
         public FileContainerService(IFileContainerClientHelper fileContainerHelper, IPipelinesExecutionContext context)
         {
             _fileContainerHelper = fileContainerHelper;
             _context = context;
-            
-            TraceLogger.Info($"FileContainerService initialized with UseOptimizedUploads={UseOptimizedUploads}");
-            
-            if (UseOptimizedUploads)
-            {
-                int maxConcurrency = Math.Min(Math.Max(Environment.ProcessorCount, MinConcurrentUploads), MaxConcurrentUploads);
-                _uploadSemaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
-                TraceLogger.Info($"Optimized uploads enabled with max concurrency: {maxConcurrency}");
-            }
         }
 
         /// <summary>
@@ -90,7 +73,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 try
                 {
                     // try upload all files for the first time.
-                    List<string> failedFiles = await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    List<string> failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken) : await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
@@ -115,7 +98,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                     // Retry upload all failed files.
                     TraceLogger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
-                    failedFiles = await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(failedFiles, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken) : await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
@@ -154,12 +137,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             if (files.Count == 0)
             {
                 return failedFiles;
-            }
-
-            if (UseOptimizedUploads)
-            {
-                TraceLogger.Info("Using OPTIMIZED upload path with enhanced concurrency and retry logic");
-                return await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
             }
 
             // Original logic
@@ -207,7 +184,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
         private async Task<List<string>> ParallelUploadOptimizedAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
-            TraceLogger.Info($"Pipeline Artifact style upload: Processing {files.Count} files in batches of {BatchSize}");
+            TraceLogger.Info($"Pipeline Artifact style upload: Processing {files.Count} files in batches of {batchSize}");
 
             List<string> failedFiles = new List<string>();
             filesProcessed = 0;
@@ -220,14 +197,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             try
             {
                 // Process files in batches like Pipeline Artifact does
-                for (int batchStart = 0; batchStart < files.Count; batchStart += BatchSize)
+                for (int batchStart = 0; batchStart < files.Count; batchStart += batchSize)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     
-                    var batchEnd = Math.Min(batchStart + BatchSize, files.Count);
+                    var batchEnd = Math.Min(batchStart + batchSize, files.Count);
                     var batch = files.GetRange(batchStart, batchEnd - batchStart);
                     
-                    TraceLogger.Info($"Processing batch {(batchStart / BatchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                    TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
                     
                     var batchFailures = await ProcessBatchAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
                     failedFiles.AddRange(batchFailures);
@@ -238,9 +215,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         concurrentUploads = Math.Max(concurrentUploads / 2, 1);
                         TraceLogger.Warning($"High failure rate detected. Reducing concurrency to {concurrentUploads}");
                     }
-                    else if (batchFailures.Count == 0 && concurrentUploads < MaxConcurrentUploads)
+                    else if (batchFailures.Count == 0 && concurrentUploads < concurrentUploadsMax)
                     {
-                        concurrentUploads = Math.Min(concurrentUploads + 1, MaxConcurrentUploads);
+                        concurrentUploads = Math.Min(concurrentUploads + 1, concurrentUploadsMax);
                         TraceLogger.Info($"Good performance. Increasing concurrency to {concurrentUploads}");
                     }
                 }
@@ -340,7 +317,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                     using (var fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
-                        var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: DefaultChunkSize);
+                        var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: defaultChunkSize);
 
                         if (response.StatusCode == HttpStatusCode.Created)
                         {
@@ -386,7 +363,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                     try
                     {
-                        var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: DefaultChunkSize);
+                        var response = await _fileContainerHelper.UploadFileAsync(containerId, itemPath, fs, projectId, cancellationToken, chunkSize: defaultChunkSize);
 
                         if (response.StatusCode == HttpStatusCode.Created)
                         {
