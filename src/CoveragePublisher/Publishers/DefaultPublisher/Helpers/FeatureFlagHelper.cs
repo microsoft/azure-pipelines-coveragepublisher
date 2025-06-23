@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 }
                 else
                 {
-                    TraceLogger.Warning(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
+                    TraceLogger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
                 }
                 return false;
             }
