@@ -22,6 +22,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> _fileUploadProgressLog = new ConcurrentDictionary<string, ConcurrentQueue<string>>();
         private readonly IFileContainerClientHelper _fileContainerHelper;
         private readonly IPipelinesExecutionContext _context;
+        private readonly IFeatureFlagHelper _featureFlagHelper;
         
         private const int defaultChunkSize = 4 * 1024 * 1024;
         private const int concurrentUploadsMax = 8;
