@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _clientFactory = clientFactory;
         }
 
-        public bool GetFeatureFlagState(string featureFlagName, bool isTcmFeature)
+        public bool GetFeatureFlagState(string featureFlagName, bool isTcmFeature, bool errorIfNotFound = true)
         {
             try
             {
@@ -30,7 +30,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
             catch
             {
-                TraceLogger.Error(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
+                if(errorIfNotFound)
+                {
+                    TraceLogger.Error(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
+                }
+                else
+                {
+                    TraceLogger.Warning(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
+                }
                 return false;
             }
             return true;
