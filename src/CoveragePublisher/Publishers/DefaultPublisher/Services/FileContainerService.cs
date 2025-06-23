@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 try
                 {
                     // try upload all files for the first time.
-                    List<string> failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken) : await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    List<string> failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken) : await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
@@ -99,7 +99,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                     // Retry upload all failed files.
                     TraceLogger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
-                    failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(failedFiles, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken) : await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    failedFiles = isBatchingEnabled ? await ParallelUploadOptimizedAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken) : await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
