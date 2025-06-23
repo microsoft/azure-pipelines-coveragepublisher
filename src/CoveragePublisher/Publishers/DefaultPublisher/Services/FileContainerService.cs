@@ -245,12 +245,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 {
                     return true;
                 }
-                else if (attempt == delays.Length - 1)
+                else
                 {
-                    TraceLogger.Warning($"Upload failed with {response.StatusCode} for {Path.GetFileName(fileToUpload)}");
+                    return false;
                 }
             }
-            return false;
         }
 
         private async Task<List<string>> UploadAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
