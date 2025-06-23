@@ -22,15 +22,18 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> _fileUploadProgressLog = new ConcurrentDictionary<string, ConcurrentQueue<string>>();
         private readonly IFileContainerClientHelper _fileContainerHelper;
         private readonly IPipelinesExecutionContext _context;
+        private readonly IFeatureFlagHelper _featureFlagHelper;
 
         private int filesProcessed = 0;
         
-        private const int batchSize = 50;
-        private const bool isBatchingEnabled = false;
+        private int batchSize = 50;
+        private bool isBatchingEnabled = false;
 
         public FileContainerService(IClientFactory clientFactory, IPipelinesExecutionContext context)
         {
             _fileContainerHelper = new FileContainerClientHelper(clientFactory);
+            _featureFlagHelper = new FeatureFlagHelper(clientFactory);
+            isBatchingEnabled = _featureFlagHelper.GetFeatureFlagState(Constants.FeatureFlags.EnableBatchingInFileUploadFF, true);
             _context = context;
         }
 
