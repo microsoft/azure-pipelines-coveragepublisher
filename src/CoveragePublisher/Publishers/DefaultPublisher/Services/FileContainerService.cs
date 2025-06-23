@@ -139,7 +139,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 var batchEnd = Math.Min(batchStart + batchSize, files.Count);
                 var batch = files.GetRange(batchStart, batchEnd - batchStart);
                 TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
-                while (_fileUploadQueue.TryDequeue(out _));
                 failedFiles.AddRange(await ParallelUploadAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken));
             }
             TraceLogger.Info($"Artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
