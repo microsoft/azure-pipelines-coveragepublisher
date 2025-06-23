@@ -28,7 +28,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         
         private int batchSize = 50;
         private bool isBatchingEnabled = false;
-        private int maxConcurrentUploadsLimit = 8;
 
         public FileContainerService(IClientFactory clientFactory, IPipelinesExecutionContext context)
         {
@@ -53,11 +52,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         /// <returns></returns>
         public virtual async Task CopyToContainerAsync(Tuple<string, string> directoryAndcontainerPath, CancellationToken cancellationToken, bool retryDelay = true)
         {
-            int maxConcurrentUploads = Math.Max(Environment.ProcessorCount/2, 1);
-            if (isBatchingEnabled)
-            {
-                maxConcurrentUploads = Math.Min(maxConcurrentUploads, maxConcurrentUploadsLimit);
-            }
+            int maxConcurrentUploads = Math.Max(Environment.ProcessorCount / 2, 1);
             string sourceParentDirectory;
             var uploadDirectory = directoryAndcontainerPath.Item1;
             var containerPath = directoryAndcontainerPath.Item2;
@@ -144,6 +139,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 var batchEnd = Math.Min(batchStart + batchSize, files.Count);
                 var batch = files.GetRange(batchStart, batchEnd - batchStart);
                 TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                while (_fileUploadQueue.TryDequeue(out _));
                 failedFiles.AddRange(await ParallelUploadAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken));
             }
             TraceLogger.Info($"Artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
@@ -191,10 +187,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
             // Start parallel upload tasks.
             List<Task<List<string>>> parallelUploadingTasks = new List<Task<List<string>>>();
-            if(isBatchingEnabled)
-            {
-                concurrentUploads = Math.Min(concurrentUploads, files.Count);
-            }
             for (int uploader = 0; uploader < concurrentUploads; uploader++)
             {
                 parallelUploadingTasks.Add(UploadAsync(sourceParentDirectory, containerPath, cancellationToken));
