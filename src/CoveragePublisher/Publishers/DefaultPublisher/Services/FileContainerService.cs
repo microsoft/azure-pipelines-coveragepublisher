@@ -134,12 +134,47 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private async Task<List<string>> BatchedParallelUploadAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
             List<string> failedFiles = new List<string>();
-            for (int batchStart = 0; batchStart < files.Count; batchStart += batchSize)
+            filesProcessed = 0;
+            var uploadFinished = new TaskCompletionSource<int>();
+            _fileUploadTraceLog.Clear();
+            _fileUploadProgressLog.Clear();
+
+            Task uploadMonitor = ReportingAsync(files.Count, uploadFinished, cancellationToken);
+
+            try
             {
-                var batchEnd = Math.Min(batchStart + batchSize, files.Count);
-                var batch = files.GetRange(batchStart, batchEnd - batchStart);
-                TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
-                failedFiles.AddRange(await ParallelUploadAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken));
+                // Process files in batches like Pipeline Artifact does
+                for (int batchStart = 0; batchStart < files.Count; batchStart += BatchSize)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
+                    var batchEnd = Math.Min(batchStart + BatchSize, files.Count);
+                    var batch = files.GetRange(batchStart, batchEnd - batchStart);
+                    
+                    TraceLogger.Info($"Processing batch {(batchStart / BatchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                    
+                    var batchFailures = await ProcessBatchAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken);
+                    failedFiles.AddRange(batchFailures);
+                    
+                    if (batchFailures.Count > batch.Count / 2)
+                    {
+                        concurrentUploads = Math.Max(concurrentUploads / 2, 1);
+                    }
+                    else if (batchFailures.Count == 0 && concurrentUploads < MaxConcurrentUploads)
+                    {
+                        concurrentUploads = Math.Min(concurrentUploads + 1, MaxConcurrentUploads);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLogger.Error($"Error in pipeline artifact style upload: {ex}");
+                throw;
+            }
+            finally
+            {
+                uploadFinished.TrySetResult(0);
+                await uploadMonitor;
             }
             TraceLogger.Info($"Artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
             return failedFiles;
@@ -188,7 +223,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             List<Task<List<string>>> parallelUploadingTasks = new List<Task<List<string>>>();
             for (int uploader = 0; uploader < concurrentUploads; uploader++)
             {
-                parallelUploadingTasks.Add(isBatchingEnabled ? UploadAsyncOptimized(sourceParentDirectory, containerPath, cancellationToken) : UploadAsync(sourceParentDirectory, containerPath, cancellationToken));
+                parallelUploadingTasks.Add(UploadAsync(sourceParentDirectory, containerPath, cancellationToken));
             }
 
             // Wait for parallel upload finish.
@@ -202,6 +237,34 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             // Stop monitor task;
             uploadFinished.TrySetResult(0);
             await uploadMonitor;
+
+            return failedFiles;
+        }
+
+        private async Task<List<string>> ProcessBatchAsync(List<string> batchFiles, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
+        {
+            // Clear and populate queue for this batch
+            while (_fileUploadQueue.TryDequeue(out _)) { }
+            foreach (var file in batchFiles)
+            {
+                _fileUploadQueue.Enqueue(file);
+            }
+
+            var uploadTasks = new List<Task<List<string>>>();
+            int actualWorkers = Math.Min(concurrentUploads, batchFiles.Count);
+
+            for (int i = 0; i < actualWorkers; i++)
+            {
+                uploadTasks.Add(UploadAsyncOptimized(sourceParentDirectory, containerPath, cancellationToken));
+            }
+
+            await Task.WhenAll(uploadTasks);
+
+            var failedFiles = new List<string>();
+            foreach (var task in uploadTasks)
+            {
+                failedFiles.AddRange(await task);
+            }
 
             return failedFiles;
         }
