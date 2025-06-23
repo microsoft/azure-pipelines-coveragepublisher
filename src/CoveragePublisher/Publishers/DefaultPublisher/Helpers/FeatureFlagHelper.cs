@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _clientFactory = clientFactory;
         }
 
-        public bool GetFeatureFlagState(string featureFlagName, bool isTcmFeature, bool errorIfNotFound = true)
+        public bool GetFeatureFlagState(string featureFlagName, bool isTcmFeature)
         {
             try
             {
@@ -30,17 +30,27 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
             catch
             {
-                if(errorIfNotFound)
-                {
-                    TraceLogger.Error(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
-                }
-                else
-                {
-                    TraceLogger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
-                }
+                TraceLogger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
                 return false;
             }
             return true;
+        }
+
+        public bool GetFeatureFlagStateForTcm(string featureFlagName)
+        {
+            try
+            {
+                var featureFlag = GetClient(true).GetFeatureFlagByNameAsync(featureFlagName).Result;
+                if (featureFlag != null && featureFlag.EffectiveState.Equals("On", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return false;
         }
 
         private FeatureAvailabilityHttpClient GetClient(bool isTcmFeature)
