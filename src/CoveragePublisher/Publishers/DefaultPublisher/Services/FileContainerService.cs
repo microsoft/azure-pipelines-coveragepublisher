@@ -24,6 +24,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly IPipelinesExecutionContext _context;
 
         private int filesProcessed = 0;
+        
+        private const int batchSize = 50;
+        private const bool isBatchingEnabled = false;
 
         public FileContainerService(IClientFactory clientFactory, IPipelinesExecutionContext context)
         {
@@ -66,7 +69,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 try
                 {
                     // try upload all files for the first time.
-                    List<string> failedFiles = await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    List<string> failedFiles = isBatchingEnabled
+                                                ? await BatchedParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token)
+                                                : await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
@@ -91,7 +96,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
                     // Retry upload all failed files.
                     TraceLogger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
-                    failedFiles = await ParallelUploadAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
+                    failedFiles = isBatchingEnabled
+                                    ? await BatchedParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token)
+                                    : await ParallelUploadAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, uploadCancellationTokenSource.Token);
 
                     if (failedFiles.Count == 0)
                     {
@@ -110,6 +117,29 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                     _fileContainerHelper.UploadFileReportProgress -= UploadFileProgressReportReceived;
                 }
             }
+        }
+
+        /// <summary>
+        /// Execute ParallelUploadAsync in batches
+        /// </summary>
+        /// <param name="files">List of files to be uploaded.</param>
+        /// <param name="sourceParentDirectory">Path to the parent directory of the files.</param>
+        /// <param name="containerPath">Container path.</param>
+        /// <param name="concurrentUploads">Concurrency value.</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/>.</param>
+        /// <returns>List of files failed to upload.</returns>
+        private async Task<List<string>> BatchedParallelUploadAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
+        {
+            List<string> failedFiles = new List<string>();
+            for (int batchStart = 0; batchStart < files.Count; batchStart += batchSize)
+            {
+                var batchEnd = Math.Min(batchStart + batchSize, files.Count);
+                var batch = files.GetRange(batchStart, batchEnd - batchStart);
+                TraceLogger.Info($"Processing batch {(batchStart / batchSize) + 1}: files {batchStart + 1}-{batchEnd} of {files.Count}");
+                failedFiles.AddRange(await ParallelUploadAsync(batch, sourceParentDirectory, containerPath, concurrentUploads, cancellationToken));
+            }
+            TraceLogger.Info($"Artifact upload completed: {files.Count - failedFiles.Count} succeeded, {failedFiles.Count} failed");
+            return failedFiles;
         }
 
         /// <summary>
