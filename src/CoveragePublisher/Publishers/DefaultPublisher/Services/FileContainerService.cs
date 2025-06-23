@@ -309,14 +309,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 catch (Exception ex)
                 {
                     TraceLogger.Error(string.Format(Resources.FileUploadFileOpenFailed, ex.Message, fileToUpload));
-                    if (isBatchingEnabled)
-                    {
-                        failedFiles.Add(fileToUpload);
-                    }
-                    else
-                    {
-                        throw ex;
-                    }
+                    throw ex;
                 }
             }
 
