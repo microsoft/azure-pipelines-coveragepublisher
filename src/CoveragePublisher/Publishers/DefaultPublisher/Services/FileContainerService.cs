@@ -245,7 +245,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
             for (int i = 0; i < actualWorkers; i++)
             {
-                uploadTasks.Add(UploadWorkerPipelineStyleAsync(sourceParentDirectory, containerPath, cancellationToken));
+                uploadTasks.Add(UploadOptimizedAsync(sourceParentDirectory, containerPath, cancellationToken));
             }
 
             await Task.WhenAll(uploadTasks);
@@ -259,7 +259,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return failedFiles;
         }
 
-        private async Task<List<string>> UploadWorkerPipelineStyleAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
+        private async Task<List<string>> UploadOptimizedAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
         {
             var failedFiles = new List<string>();
             var containerId = _context.ContainerId;
