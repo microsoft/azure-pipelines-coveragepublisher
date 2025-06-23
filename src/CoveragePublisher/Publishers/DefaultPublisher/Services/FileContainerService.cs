@@ -28,6 +28,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         
         private int batchSize = 50;
         private bool isBatchingEnabled = false;
+        private int maxConcurrentUploadsLimit = 8;
         private int maxConcurrentUploads;
 
         public FileContainerService(IClientFactory clientFactory, IPipelinesExecutionContext context)
@@ -54,6 +55,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         public virtual async Task CopyToContainerAsync(Tuple<string, string> directoryAndcontainerPath, CancellationToken cancellationToken, bool retryDelay = true)
         {
             maxConcurrentUploads = Math.Max(Environment.ProcessorCount / 2, 1);
+            if (isBatchingEnabled)
+            {
+                maxConcurrentUploads = Math.Min(maxConcurrentUploads, maxConcurrentUploadsLimit);
+                TraceLogger.Info($"Batching enabled. Max concurrent uploads set to {maxConcurrentUploads}");
+            }
             string sourceParentDirectory;
             var uploadDirectory = directoryAndcontainerPath.Item1;
             var containerPath = directoryAndcontainerPath.Item2;
