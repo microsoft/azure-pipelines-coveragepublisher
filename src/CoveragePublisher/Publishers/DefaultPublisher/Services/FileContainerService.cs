@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             _fileContainerHelper = new FileContainerClientHelper(clientFactory);
             _context = context;
             _featureFlagHelper = new FeatureFlagHelper(clientFactory);
-            isBatchingEnabled = true; //_featureFlagHelper.GetFeatureFlagStateForTcm(Constants.FeatureFlags.EnableBatchingInFileUploadFF);
+            isBatchingEnabled = _featureFlagHelper.GetFeatureFlagStateForTcm(Constants.FeatureFlags.EnableBatchingInFileUploadFF);
         }
 
         public FileContainerService(IFileContainerClientHelper fileContainerHelper, IPipelinesExecutionContext context)
