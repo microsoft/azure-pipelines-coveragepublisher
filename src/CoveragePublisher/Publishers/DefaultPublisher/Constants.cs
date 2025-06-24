@@ -48,5 +48,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             public const string CoverageBFileExtension = ".covb";
             public const string CoverageJsonFileExtension = ".cjson";
         }
+        internal static class BatchUploadConfig
+        {
+            public const int DefaultChunkSize = 4 * 1024 * 1024;
+            public const int ConcurrentUploadsMax = 8;
+            public const int BatchSize = 50;
+        }
 	}
 }

@@ -24,9 +24,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private readonly IPipelinesExecutionContext _context;
         private readonly FeatureFlagHelper _featureFlagHelper;
         
-        private const int defaultChunkSize = 4 * 1024 * 1024;
-        private const int concurrentUploadsMax = 8;
-        private const int batchSize = 50;
+        private const int defaultChunkSize = Constants.BatchUploadConfig.DefaultChunkSize;
+        private const int concurrentUploadsMax = Constants.BatchUploadConfig.ConcurrentUploadsMax;
+        private const int batchSize = Constants.BatchUploadConfig.BatchSize;
         private bool isBatchingEnabled = false;
 
         private int filesProcessed = 0;
