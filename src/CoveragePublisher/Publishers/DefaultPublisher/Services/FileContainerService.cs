@@ -27,6 +27,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         private const int defaultChunkSize = Constants.BatchUploadConfig.DefaultChunkSize;
         private const int concurrentUploadsMax = Constants.BatchUploadConfig.ConcurrentUploadsMax;
         private const int batchSize = Constants.BatchUploadConfig.BatchSize;
+        
         private bool isBatchingEnabled = false;
 
         private int filesProcessed = 0;
