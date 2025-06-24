@@ -289,7 +289,8 @@ namespace CoveragePublisher.Tests
 
             var service = new FileContainerService(_mockClientHelper.Object, _context);
 
-            var files = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
+            var filesArray = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
+            var files = new List<string>(filesArray);
             var result = await InvokePrivateAsync<List<string>>(service, "ParallelUploadOptimizedAsync", files, _uploadDirectory, _containerPath, 2, CancellationToken.None);
 
             Assert.AreEqual(0, result.Count);
