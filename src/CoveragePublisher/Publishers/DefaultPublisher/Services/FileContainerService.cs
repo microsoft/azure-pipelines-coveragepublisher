@@ -43,7 +43,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             _fileContainerHelper = fileContainerHelper;
             _context = context;
-            _featureFlagHelper = new FeatureFlagHelper(new TestClientFactory()); // <-- Add this line
         }
 
         /// <summary>
@@ -59,8 +58,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             string sourceParentDirectory;
             var uploadDirectory = directoryAndcontainerPath.Item1;
             var containerPath = directoryAndcontainerPath.Item2;
-            isBatchingEnabled = await _featureFlagHelper.GetFeatureFlagStateForTcm(Constants.FeatureFlags.EnableBatchingInFileUploadFF);
-
+            if (_featureFlagHelper != null)
+            {
+                isBatchingEnabled = await _featureFlagHelper.GetFeatureFlagStateForTcm(Constants.FeatureFlags.EnableBatchingInFileUploadFF);
+            }
             List<string> files;
             files = Directory.EnumerateFiles(uploadDirectory, "*", SearchOption.AllDirectories).ToList();
             sourceParentDirectory = uploadDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
