@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.TeamFoundation.TestClient.PublishTestResults;
 using Microsoft.VisualStudio.Services.FeatureAvailability.WebApi;
 
@@ -36,11 +37,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return true;
         }
 
-        public bool GetFeatureFlagStateForTcm(string featureFlagName)
+        public async Task<bool> GetFeatureFlagStateForTcm(string featureFlagName)
         {
             try
             {
-                var featureFlag = GetClient(true).GetFeatureFlagByNameAsync(featureFlagName).Result;
+                var featureFlag = await GetClient(true).GetFeatureFlagByNameAsync(featureFlagName);
                 if (featureFlag != null && featureFlag.EffectiveState.Equals("On", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
