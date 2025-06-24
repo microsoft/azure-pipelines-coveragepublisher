@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             var containerPath = directoryAndcontainerPath.Item2;
             if (_featureFlagHelper != null)
             {
-                isBatchingEnabled = await _featureFlagHelper.GetFeatureFlagStateForTcm(Constants.FeatureFlags.EnableBatchingInFileUploadFF);
+                isBatchingEnabled = true; //await _featureFlagHelper.GetFeatureFlagStateForTcm(Constants.FeatureFlags.EnableBatchingInFileUploadFF);
             }
             List<string> files;
             files = Directory.EnumerateFiles(uploadDirectory, "*", SearchOption.AllDirectories).ToList();
