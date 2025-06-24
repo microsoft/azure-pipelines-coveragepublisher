@@ -339,9 +339,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         await Task.Delay(delays[attempt], cancellationToken);
                     }
 
-                    // Updated itemPath logic as requested
-                    var relativePath = Path.GetRelativePath(sourceParentDirectory, fileToUpload);
-                    var itemPath = Path.Combine(containerPath.TrimEnd('/'), relativePath).Replace('\\', '/');
+                    var itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
 
                     using (var fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
