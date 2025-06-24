@@ -43,6 +43,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
         {
             _fileContainerHelper = fileContainerHelper;
             _context = context;
+            _featureFlagHelper = new FeatureFlagHelper(new TestClientFactory()); // <-- Add this line
         }
 
         /// <summary>
