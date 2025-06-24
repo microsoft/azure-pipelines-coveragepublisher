@@ -48,6 +48,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             }
             catch
             {
+                TraceLogger.Debug(string.Format(Resources.FailedToGetFeatureFlag, featureFlagName));
                 return false;
             }
             return false;

@@ -181,6 +181,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return failedFiles;
         }
 
+        /// <summary>
+        /// Uploads files in parallel using batching and concurrency optimization.
+        /// </summary>
+        /// <param name="files">List of files to upload.</param>
+        /// <param name="sourceParentDirectory">Source parent directory.</param>
+        /// <param name="containerPath">Destination container path.</param>
+        /// <param name="concurrentUploads">Number of concurrent uploads.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>List of files that failed to upload.</returns>
         private async Task<List<string>> ParallelUploadOptimizedAsync(List<string> files, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
             List<string> failedFiles = new List<string>();
@@ -232,6 +241,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return failedFiles;
         }
 
+        /// <summary>
+        /// Processes a batch of files for upload with the specified concurrency.
+        /// </summary>
+        /// <param name="batchFiles">Batch of files to upload.</param>
+        /// <param name="sourceParentDirectory">Source parent directory.</param>
+        /// <param name="containerPath">Destination container path.</param>
+        /// <param name="concurrentUploads">Number of concurrent uploads.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>List of files that failed to upload.</returns>
         private async Task<List<string>> ProcessBatchAsync(List<string> batchFiles, string sourceParentDirectory, string containerPath, int concurrentUploads, CancellationToken cancellationToken)
         {
             while (_fileUploadQueue.TryDequeue(out _)) { }
@@ -259,6 +277,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return failedFiles;
         }
 
+        /// <summary>
+        /// Worker method for uploading files from the queue in optimized mode.
+        /// </summary>
+        /// <param name="sourceParentDirectory">Source parent directory.</param>
+        /// <param name="containerPath">Destination container path.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>List of files that failed to upload.</returns>
         private async Task<List<string>> UploadOptimizedAsync(string sourceParentDirectory, string containerPath, CancellationToken cancellationToken)
         {
             var failedFiles = new List<string>();
@@ -290,6 +315,16 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
             return failedFiles;
         }
 
+        /// <summary>
+        /// Uploads a single file with retry and backoff logic.
+        /// </summary>
+        /// <param name="fileToUpload">File to upload.</param>
+        /// <param name="sourceParentDirectory">Source parent directory.</param>
+        /// <param name="containerPath">Destination container path.</param>
+        /// <param name="containerId">Container ID.</param>
+        /// <param name="projectId">Project ID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>True if upload succeeded, false otherwise.</returns>
         private async Task<bool> UploadSingleFileWithBackoffAsync(string fileToUpload, string sourceParentDirectory, string containerPath, long containerId, Guid projectId, CancellationToken cancellationToken)
         {
             var delays = new[] { TimeSpan.Zero, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3) };
@@ -303,7 +338,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                         await Task.Delay(delays[attempt], cancellationToken);
                     }
 
-                    var itemPath = (containerPath.TrimEnd('/') + "/" + fileToUpload.Remove(0, sourceParentDirectory.Length + 1)).Replace('\\', '/');
+                    // Updated itemPath logic as requested
+                    var relativePath = Path.GetRelativePath(sourceParentDirectory, fileToUpload);
+                    var itemPath = Path.Combine(containerPath.TrimEnd('/'), relativePath).Replace('\\', '/');
 
                     using (var fs = File.Open(fileToUpload, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
@@ -321,6 +358,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
+                    TraceLogger.Error(string.Format(Resources.FileUploadCancelled, fileToUpload));
                     throw;
                 }
                 catch (Exception ex) when (attempt < delays.Length - 1)
