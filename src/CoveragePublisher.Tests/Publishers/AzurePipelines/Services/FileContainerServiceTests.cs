@@ -274,6 +274,129 @@ namespace CoveragePublisher.Tests
             Assert.IsTrue(_logger.Log.Contains("Uploading 4 files."), $"Logger output: {_logger.Log}");
             Assert.IsTrue(_logger.Log.Contains(string.Format(@"File: '{0}{1}file1' took", _uploadDirectory, Path.DirectorySeparatorChar)));
         }
+
+        [TestMethod]
+        public async Task ParallelUploadOptimizedAsync_UploadsAllFiles()
+        {
+            _mockClientHelper.Setup(x => x.UploadFileAsync(
+                It.IsAny<long>(),
+                It.IsAny<string>(),
+                It.IsAny<FileStream>(),
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<int>()
+            )).ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Created));
+
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
+
+            var filesArray = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
+            var files = new List<string>(filesArray);
+            var result = await InvokePrivateAsync<List<string>>(service, "ParallelUploadOptimizedAsync", files, _uploadDirectory, _containerPath, 2, CancellationToken.None);
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task ProcessBatchAsync_UploadsBatchFiles()
+        {
+            _mockClientHelper.Setup(x => x.UploadFileAsync(
+                It.IsAny<long>(),
+                It.IsAny<string>(),
+                It.IsAny<FileStream>(),
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<int>()
+            )).ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Created));
+
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
+
+            var files = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
+            var batch = new List<string> { files[0], files[1] };
+            var result = await InvokePrivateAsync<List<string>>(service, "ProcessBatchAsync", batch, _uploadDirectory, _containerPath, 2, CancellationToken.None);
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task UploadOptimizedAsync_UploadsFilesFromQueue()
+        {
+            _mockClientHelper.Setup(x => x.UploadFileAsync(
+                It.IsAny<long>(),
+                It.IsAny<string>(),
+                It.IsAny<FileStream>(),
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<int>()
+            )).ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Created));
+
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
+
+            // Enqueue files manually
+            var files = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
+            var queueField = typeof(FileContainerService).GetField("_fileUploadQueue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var queue = (System.Collections.Concurrent.ConcurrentQueue<string>)queueField.GetValue(service);
+            foreach (var file in files)
+                queue.Enqueue(file);
+
+            var result = await InvokePrivateAsync<List<string>>(service, "UploadOptimizedAsync", _uploadDirectory, _containerPath, CancellationToken.None);
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task UploadSingleFileWithBackoffAsync_SucceedsOnFirstTry()
+        {
+            _mockClientHelper.Setup(x => x.UploadFileAsync(
+                It.IsAny<long>(),
+                It.IsAny<string>(),
+                It.IsAny<FileStream>(),
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<int>()
+            )).ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Created));
+
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
+
+            var files = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
+            var result = await InvokePrivateAsync<bool>(service, "UploadSingleFileWithBackoffAsync", files[0], _uploadDirectory, _containerPath, _context.ContainerId, _context.ProjectId, CancellationToken.None);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task UploadAsync_UploadsFilesFromQueue()
+        {
+            _mockClientHelper.Setup(x => x.UploadFileAsync(
+                It.IsAny<long>(),
+                It.IsAny<string>(),
+                It.IsAny<FileStream>(),
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<int>()
+            )).ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Created));
+
+            var service = new FileContainerService(_mockClientHelper.Object, _context);
+
+            // Enqueue files manually
+            var files = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
+            var queueField = typeof(FileContainerService).GetField("_fileUploadQueue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var queue = (System.Collections.Concurrent.ConcurrentQueue<string>)queueField.GetValue(service);
+            foreach (var file in files)
+                queue.Enqueue(file);
+
+            var result = await InvokePrivateAsync<List<string>>(service, "UploadAsync", _uploadDirectory, _containerPath, CancellationToken.None);
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        private static async Task<T> InvokePrivateAsync<T>(object obj, string methodName, params object[] args)
+        {
+            var method = obj.GetType().GetMethod(methodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var task = (Task)method.Invoke(obj, args);
+            await task.ConfigureAwait(false);
+            var resultProperty = task.GetType().GetProperty("Result");
+            return (T)resultProperty.GetValue(task);
+        }
     }
 }
-   
+

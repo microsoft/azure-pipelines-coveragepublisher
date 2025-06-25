@@ -323,5 +323,32 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                 return ResourceManager.GetString("TotalUploadFiles", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Artifact upload completed: {0} succeeded, {1} failed.
+        /// </summary>
+        internal static string ArtifactUploadCompleted {
+            get {
+                return ResourceManager.GetString("ArtifactUploadCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Processing batch {0}: files {1}-{2} of {3}.
+        /// </summary>
+        internal static string ProcessingBatch {
+            get {
+                return ResourceManager.GetString("ProcessingBatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error in upload: {0}.
+        /// </summary>
+        internal static string ErrorInUpload {
+            get {
+                return ResourceManager.GetString("ErrorInUpload", resourceCulture);
+            }
+        }
     }
 }
