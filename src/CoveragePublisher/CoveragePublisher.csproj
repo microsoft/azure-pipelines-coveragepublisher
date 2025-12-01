@@ -16,6 +16,8 @@
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="Microsoft.Azure.Storage.DataMovement" Version="2.0.5" />
   </ItemGroup>
 
   <ItemGroup>
