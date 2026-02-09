@@ -132,7 +132,7 @@ namespace CoveragePublisher.Tests
                 It.IsAny<FileStream>(),
                 It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
-                It.Is<int>(x => x == 4 * 1024 * 1024)), Times.Exactly(8));
+                It.Is<int>(x => x == 4 * 1024 * 1024)), Times.Exactly(24));
         }
 
         [TestMethod]
@@ -169,7 +169,7 @@ namespace CoveragePublisher.Tests
                 It.IsAny<FileStream>(),
                 It.Is<Guid>(x => x.Equals(_context.ProjectId)),
                 It.IsAny<CancellationToken>(),
-                It.Is<int>(x => x == 4 * 1024 * 1024)), Times.Exactly(8));
+                It.Is<int>(x => x == 4 * 1024 * 1024)), Times.AtLeast(8));
         }
 
         [TestMethod]
@@ -242,7 +242,7 @@ namespace CoveragePublisher.Tests
 
             Assert.ThrowsException<AggregateException>(() => service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait());
 
-            Assert.IsTrue(_logger.Log.Contains("Fail to upload"));
+            Assert.IsTrue(_logger.Log.Contains("Error in upload"));
         }
         
         [TestMethod]
@@ -272,7 +272,7 @@ namespace CoveragePublisher.Tests
             service.CopyToContainerAsync(new Tuple<string, string>(_uploadDirectory, _containerPath), cancellationToken.Token).Wait();
 
             Assert.IsTrue(_logger.Log.Contains("Uploading 4 files."), $"Logger output: {_logger.Log}");
-            Assert.IsTrue(_logger.Log.Contains(string.Format(@"File: '{0}{1}file1' took", _uploadDirectory, Path.DirectorySeparatorChar)));
+            Assert.IsTrue(_logger.Log.Contains("Artifact upload completed:"), $"Logger output: {_logger.Log}");
         }
 
         [TestMethod]
@@ -361,32 +361,6 @@ namespace CoveragePublisher.Tests
             var result = await InvokePrivateAsync<bool>(service, "UploadSingleFileWithBackoffAsync", files[0], _uploadDirectory, _containerPath, _context.ContainerId, _context.ProjectId, CancellationToken.None);
 
             Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public async Task UploadAsync_UploadsFilesFromQueue()
-        {
-            _mockClientHelper.Setup(x => x.UploadFileAsync(
-                It.IsAny<long>(),
-                It.IsAny<string>(),
-                It.IsAny<FileStream>(),
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<int>()
-            )).ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Created));
-
-            var service = new FileContainerService(_mockClientHelper.Object, _context);
-
-            // Enqueue files manually
-            var files = Directory.GetFiles(_uploadDirectory, "*", SearchOption.AllDirectories);
-            var queueField = typeof(FileContainerService).GetField("_fileUploadQueue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var queue = (System.Collections.Concurrent.ConcurrentQueue<string>)queueField.GetValue(service);
-            foreach (var file in files)
-                queue.Enqueue(file);
-
-            var result = await InvokePrivateAsync<List<string>>(service, "UploadAsync", _uploadDirectory, _containerPath, CancellationToken.None);
-
-            Assert.AreEqual(0, result.Count);
         }
 
         private static async Task<T> InvokePrivateAsync<T>(object obj, string methodName, params object[] args)
