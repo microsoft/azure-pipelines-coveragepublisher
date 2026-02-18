@@ -143,7 +143,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
         {
             TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
 
-            CoverageReportParser parser = new CoverageReportParser(1, 1, new string[] { }, new DefaultFilter(new string[] { }),
+            var sourceDirectories = string.IsNullOrWhiteSpace(Configuration.SourceDirectory)
+                ? new string[] { }
+                : Configuration.SourceDirectory.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            CoverageReportParser parser = new CoverageReportParser(1, 1, sourceDirectories, new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }));
 
