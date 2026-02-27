@@ -60,55 +60,58 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
 
             TraceLogger.Info(string.Format(Resources.TotalUploadFiles, files.Count()));
 
-            // hook up reporting event from file container client.
-            _fileContainerHelper.UploadFileReportTrace += UploadFileTraceReportReceived;
-            _fileContainerHelper.UploadFileReportProgress += UploadFileProgressReportReceived;
-
-            try
+            using (var uploadCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
             {
-                // try upload all files for the first time.
-                List<string> failedFiles = await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken);
+                // hook up reporting event from file container client.
+                _fileContainerHelper.UploadFileReportTrace += UploadFileTraceReportReceived;
+                _fileContainerHelper.UploadFileReportProgress += UploadFileProgressReportReceived;
 
-                if (failedFiles.Count == 0)
+                try
                 {
-                    // all files have been upload succeed.
-                    TraceLogger.Info(Resources.FileUploadSucceed);
-                    return;
-                }
-                else
-                {
-                    TraceLogger.Info(string.Format(Resources.FileUploadFailedRetryLater, failedFiles.Count));
-                }
+                    // try upload all files for the first time.
+                    List<string> failedFiles = await ParallelUploadOptimizedAsync(files, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken);
 
-                if (retryDelay)
-                {
-                    // Delay 1 min then retry failed files.
-                    for (int timer = 60; timer > 0; timer -= 5)
+                    if (failedFiles.Count == 0)
                     {
-                        TraceLogger.Info(string.Format(Resources.FileUploadRetryInSecond, timer));
-                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                        // all files have been upload succeed.
+                        TraceLogger.Info(Resources.FileUploadSucceed);
+                        return;
+                    }
+                    else
+                    {
+                        TraceLogger.Info(string.Format(Resources.FileUploadFailedRetryLater, failedFiles.Count));
+                    }
+
+                    if (retryDelay)
+                    {
+                        // Delay 1 min then retry failed files.
+                        for (int timer = 60; timer > 0; timer -= 5)
+                        {
+                            TraceLogger.Info(string.Format(Resources.FileUploadRetryInSecond, timer));
+                            await Task.Delay(TimeSpan.FromSeconds(5), uploadCancellationTokenSource.Token);
+                        }
+                    }
+
+                    // Retry upload all failed files.
+                    TraceLogger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
+                    failedFiles = await ParallelUploadOptimizedAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken);
+
+                    if (failedFiles.Count == 0)
+                    {
+                        // all files have been upload succeed after retry.
+                        TraceLogger.Info(Resources.FileUploadRetrySucceed);
+                        return;
+                    }
+                    else
+                    {
+                        throw new Exception(Resources.FileUploadFailedAfterRetry);
                     }
                 }
-
-                // Retry upload all failed files.
-                TraceLogger.Info(string.Format(Resources.FileUploadRetry, failedFiles.Count));
-                failedFiles = await ParallelUploadOptimizedAsync(failedFiles, sourceParentDirectory, containerPath, maxConcurrentUploads, cancellationToken);
-
-                if (failedFiles.Count == 0)
+                finally
                 {
-                    // all files have been upload succeed after retry.
-                    TraceLogger.Info(Resources.FileUploadRetrySucceed);
-                    return;
+                    _fileContainerHelper.UploadFileReportTrace -= UploadFileTraceReportReceived;
+                    _fileContainerHelper.UploadFileReportProgress -= UploadFileProgressReportReceived;
                 }
-                else
-                {
-                    throw new Exception(Resources.FileUploadFailedAfterRetry);
-                }
-            }
-            finally
-            {
-                _fileContainerHelper.UploadFileReportTrace -= UploadFileTraceReportReceived;
-                _fileContainerHelper.UploadFileReportProgress -= UploadFileProgressReportReceived;
             }
         }
 
