@@ -147,6 +147,35 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/JaCoCo.xml
         }
 
         [TestMethod]
+        public void WillOnlyGenerateHTMLReportOnceAcrossMultipleParserCalls()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+
+            var mockTool = new Mock<ICoverageParserTool>();
+            mockTool.Setup(x => x.GenerateHTMLReport());
+            mockTool.Setup(x => x.GetFileCoverageInfos()).Returns(new List<FileCoverageInfo>());
+            mockTool.Setup(x => x.GetCoverageSummary()).Returns(new CoverageSummary());
+
+            var config = new PublisherConfiguration()
+            {
+                CoverageFiles = new List<string>() { "SampleCoverage/Cobertura.xml" },
+                ReportDirectory = tempDir
+            };
+
+            var parser = new TestParser(config, _mockTelemetry.Object, mockTool.Object);
+
+            parser.GetFileCoverageInfos();
+            parser.GetCoverageSummary();
+
+            mockTool.Verify(x => x.GenerateHTMLReport(), Times.Once);
+            Assert.AreEqual(1, Directory.EnumerateDirectories(tempDir, "Summary_*").Count());
+
+            //cleanup
+            Directory.Delete(tempDir, true);
+        }
+
+        [TestMethod]
         public void ParsingException()
         {
             var mockTool = new Mock<ICoverageParserTool>();
