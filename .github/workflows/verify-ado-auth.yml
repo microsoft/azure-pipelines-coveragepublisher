@@ -1,0 +1,44 @@
+name: verify-ado-auth
+on:
+  push:
+    branches: [ kathans/gh-tcm-oidc-poc ]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      CLIENT_ID: 5c299c5c-74de-4ce9-b943-98e12d31f858
+      TENANT_ID: 72f988bf-86f1-41af-91ab-2d7cd011db47
+      ADO_RESOURCE: 499b84ac-1321-427f-aa17-267ca6975798
+      ADO_ORG_URL: https://dev.azure.com/tfspfcusctest
+    steps:
+      - name: OIDC -> Entra -> ADO (no secrets, no third-party actions)
+        run: |
+          set -euo pipefail
+
+          echo "==== 1) Request GitHub OIDC token ===="
+          GH_OIDC=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | python3 -c "import sys,json;print(json.load(sys.stdin)['value'])")
+          echo "GitHub OIDC token length: ${#GH_OIDC}"
+          GH_OIDC="$GH_OIDC" python3 -c 'import os,base64,json; p=os.environ["GH_OIDC"].split(".")[1]; p+="="*(-len(p)%4); d=json.loads(base64.urlsafe_b64decode(p)); [print(f"  {k} = {d.get(k)}") for k in ("iss","sub","aud","enterprise","repository","ref")]'
+
+          echo "==== 2) Exchange at Entra for an ADO-scoped token ===="
+          RESP=$(curl -s -X POST "https://login.microsoftonline.com/$TENANT_ID/oauth2/v2.0/token" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=$CLIENT_ID" \
+            -d "scope=$ADO_RESOURCE/.default" \
+            -d "client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer" \
+            --data-urlencode "client_assertion=$GH_OIDC")
+          ADO_TOKEN=$(echo "$RESP" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("access_token",""))')
+          if [ -z "$ADO_TOKEN" ]; then echo "TOKEN EXCHANGE FAILED:"; echo "$RESP" | head -c 1500; echo; exit 1; fi
+          echo "::add-mask::$ADO_TOKEN"
+          echo "ADO access token length: ${#ADO_TOKEN}"
+          ADO_TOKEN="$ADO_TOKEN" python3 -c 'import os,base64,json; p=os.environ["ADO_TOKEN"].split(".")[1]; p+="="*(-len(p)%4); d=json.loads(base64.urlsafe_b64decode(p)); [print(f"  {k} = {d.get(k)}") for k in ("aud","iss","appid","oid","tid","idtyp")]'
+
+          echo "==== 3) Call ADO: does it recognize the identity? ===="
+          CODE=$(curl -s -o conn.json -w "%{http_code}" -H "Authorization: Bearer $ADO_TOKEN" "$ADO_ORG_URL/_apis/connectionData?api-version=7.1-preview")
+          echo "HTTP $CODE"
+          echo "---- response (first 1500 chars) ----"
+          head -c 1500 conn.json || true
+          echo ""
