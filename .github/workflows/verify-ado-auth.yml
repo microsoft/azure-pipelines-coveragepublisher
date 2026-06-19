@@ -13,32 +13,26 @@ jobs:
       TENANT_ID: 72f988bf-86f1-41af-91ab-2d7cd011db47
       ADO_RESOURCE: 499b84ac-1321-427f-aa17-267ca6975798
       ADO_ORG_URL: https://dev.azure.com/tfspfcusctest
+      ADO_PROJECT: TestAI
+      PUBLISH_PY_B64: aW1wb3J0IG9zLCBzeXMsIGpzb24sIGRhdGV0aW1lLCB1cmxsaWIucmVxdWVzdCwgdXJsbGliLmVycm9yDQppbXBvcnQgeG1sLmV0cmVlLkVsZW1lbnRUcmVlIGFzIEVUDQoNCm9yZyA9IG9zLmVudmlyb25bIkFET19PUkdfVVJMIl0ucnN0cmlwKCIvIikNCnByb2plY3QgPSBvcy5lbnZpcm9uWyJBRE9fUFJPSkVDVCJdDQp0b2tlbiA9IG9zLmVudmlyb25bIkFET19UT0tFTiJdDQp0cnggPSBvcy5lbnZpcm9uLmdldCgiVFJYX1BBVEgiLCAic2FtcGxlLnRyeCIpDQphcGkgPSAiYXBpLXZlcnNpb249Ny4wIg0KDQpkZWYgY2FsbChtZXRob2QsIHVybCwgYm9keT1Ob25lKToNCiAgICBkYXRhID0ganNvbi5kdW1wcyhib2R5KS5lbmNvZGUoKSBpZiBib2R5IGlzIG5vdCBOb25lIGVsc2UgTm9uZQ0KICAgIHJlcSA9IHVybGxpYi5yZXF1ZXN0LlJlcXVlc3QodXJsLCBkYXRhPWRhdGEsIG1ldGhvZD1tZXRob2QpDQogICAgcmVxLmFkZF9oZWFkZXIoIkF1dGhvcml6YXRpb24iLCAiQmVhcmVyICIgKyB0b2tlbikNCiAgICByZXEuYWRkX2hlYWRlcigiQ29udGVudC1UeXBlIiwgImFwcGxpY2F0aW9uL2pzb24iKQ0KICAgIHRyeToNCiAgICAgICAgd2l0aCB1cmxsaWIucmVxdWVzdC51cmxvcGVuKHJlcSkgYXMgcjoNCiAgICAgICAgICAgIHR4dCA9IHIucmVhZCgpLmRlY29kZSgpDQogICAgICAgICAgICByZXR1cm4gci5zdGF0dXMsIChqc29uLmxvYWRzKHR4dCkgaWYgdHh0IGVsc2Uge30pDQogICAgZXhjZXB0IHVybGxpYi5lcnJvci5IVFRQRXJyb3IgYXMgZToNCiAgICAgICAgcmV0dXJuIGUuY29kZSwgZS5yZWFkKCkuZGVjb2RlKCkNCg0KbnMgPSB7InQiOiAiaHR0cDovL21pY3Jvc29mdC5jb20vc2NoZW1hcy9WaXN1YWxTdHVkaW8vVGVhbVRlc3QvMjAxMCJ9DQpyb290ID0gRVQucGFyc2UodHJ4KS5nZXRyb290KCkNCg0KZGVmIGR1cl9tcyhzKToNCiAgICBpZiBub3QgczoNCiAgICAgICAgcmV0dXJuIDANCiAgICB0cnk6DQogICAgICAgIGgsIG0sIHJlc3QgPSBzLnNwbGl0KCI6IikNCiAgICAgICAgcmV0dXJuIGludCgoaW50KGgpICogMzYwMCArIGludChtKSAqIDYwICsgZmxvYXQocmVzdCkpICogMTAwMCkNCiAgICBleGNlcHQgRXhjZXB0aW9uOg0KICAgICAgICByZXR1cm4gMA0KDQpyZXN1bHRzID0gW10NCmZvciB1dHIgaW4gcm9vdC5maW5kYWxsKCIuLy90OlVuaXRUZXN0UmVzdWx0IiwgbnMpOg0KICAgIG5hbWUgPSB1dHIuZ2V0KCJ0ZXN0TmFtZSIpDQogICAgb3V0Y29tZSA9IHV0ci5nZXQoIm91dGNvbWUiKQ0KICAgIG8gPSAiUGFzc2VkIiBpZiBvdXRjb21lID09ICJQYXNzZWQiIGVsc2UgKCJGYWlsZWQiIGlmIG91dGNvbWUgPT0gIkZhaWxlZCIgZWxzZSAiTm90RXhlY3V0ZWQiKQ0KICAgIHIgPSB7DQogICAgICAgICJ0ZXN0Q2FzZVRpdGxlIjogbmFtZSwNCiAgICAgICAgImF1dG9tYXRlZFRlc3ROYW1lIjogbmFtZSwNCiAgICAgICAgImF1dG9tYXRlZFRlc3RTdG9yYWdlIjogb3MucGF0aC5iYXNlbmFtZSh0cngpLA0KICAgICAgICAib3V0Y29tZSI6IG8sDQogICAgICAgICJzdGF0ZSI6ICJDb21wbGV0ZWQiLA0KICAgICAgICAiZHVyYXRpb25Jbk1zIjogZHVyX21zKHV0ci5nZXQoImR1cmF0aW9uIikpLA0KICAgIH0NCiAgICBpZiBvID09ICJGYWlsZWQiOg0KICAgICAgICBtc2cgPSB1dHIuZmluZCgiLi8vdDpNZXNzYWdlIiwgbnMpDQogICAgICAgIHJbImVycm9yTWVzc2FnZSJdID0gbXNnLnRleHQgaWYgbXNnIGlzIG5vdCBOb25lIGVsc2UgIlRlc3QgZmFpbGVkIg0KICAgICAgICBzdCA9IHV0ci5maW5kKCIuLy90OlN0YWNrVHJhY2UiLCBucykNCiAgICAgICAgaWYgc3QgaXMgbm90IE5vbmUgYW5kIHN0LnRleHQ6DQogICAgICAgICAgICByWyJzdGFja1RyYWNlIl0gPSBzdC50ZXh0DQogICAgcmVzdWx0cy5hcHBlbmQocikNCg0KcHJpbnQoZiJQYXJzZWQge2xlbihyZXN1bHRzKX0gcmVzdWx0cyBmcm9tIHt0cnh9IikNCmZvciByIGluIHJlc3VsdHM6DQogICAgcHJpbnQoZiIgIC0ge3JbJ3Rlc3RDYXNlVGl0bGUnXX06IHtyWydvdXRjb21lJ119ICh7clsnZHVyYXRpb25Jbk1zJ119bXMpIikNCg0Kbm93ID0gZGF0ZXRpbWUuZGF0ZXRpbWUudXRjbm93KCkuaXNvZm9ybWF0KCkgKyAiWiINCnN0LCBydW4gPSBjYWxsKCJQT1NUIiwgZiJ7b3JnfS97cHJvamVjdH0vX2FwaXMvdGVzdC9ydW5zP3thcGl9IiwNCiAgICAgICAgICAgICAgIHsibmFtZSI6ICJHSCBBY3Rpb25zIE9JREMgLT4gVENNIFBPQyIsICJhdXRvbWF0ZWQiOiBUcnVlLCAic3RhdGUiOiAiSW5Qcm9ncmVzcyIsICJzdGFydGVkRGF0ZSI6IG5vd30pDQpwcmludCgiY3JlYXRlIHJ1biAtPiBIVFRQIiwgc3QpDQppZiBzdCA+PSAzMDA6DQogICAgcHJpbnQoIkNSRUFURSBSVU4gRkFJTEVEOiIsIHJ1bik7IHN5cy5leGl0KDEpDQpydW5faWQgPSBydW5bImlkIl0NCnByaW50KCJydW5JZCA9IiwgcnVuX2lkKQ0KDQpzdCwgcmVzID0gY2FsbCgiUE9TVCIsIGYie29yZ30ve3Byb2plY3R9L19hcGlzL3Rlc3QvcnVucy97cnVuX2lkfS9yZXN1bHRzP3thcGl9IiwgcmVzdWx0cykNCnByaW50KCJhZGQgcmVzdWx0cyAtPiBIVFRQIiwgc3QpDQppZiBzdCA+PSAzMDA6DQogICAgcHJpbnQoIkFERCBSRVNVTFRTIEZBSUxFRDoiLCByZXMpOyBzeXMuZXhpdCgxKQ0KDQpzdCwgZG9uZSA9IGNhbGwoIlBBVENIIiwgZiJ7b3JnfS97cHJvamVjdH0vX2FwaXMvdGVzdC9ydW5zL3tydW5faWR9P3thcGl9IiwNCiAgICAgICAgICAgICAgICB7InN0YXRlIjogIkNvbXBsZXRlZCIsICJjb21wbGV0ZWREYXRlIjogZGF0ZXRpbWUuZGF0ZXRpbWUudXRjbm93KCkuaXNvZm9ybWF0KCkgKyAiWiJ9KQ0KcHJpbnQoImNvbXBsZXRlIHJ1biAtPiBIVFRQIiwgc3QpDQppZiBzdCA+PSAzMDA6DQogICAgcHJpbnQoIkNPTVBMRVRFIEZBSUxFRDoiLCBkb25lKTsgc3lzLmV4aXQoMSkNCg0KcHJpbnQoIj09PT0gUFVCTElTSEVEIE9LID09PT0iKQ0KcHJpbnQoIlJ1biBVUkw6IiwgZiJ7b3JnfS97cHJvamVjdH0vX3Rlc3RNYW5hZ2VtZW50L3J1bnM/X2E9cmVzdWx0U3VtbWFyeSZydW5JZD17cnVuX2lkfSIpDQo=
+      SAMPLE_TRX_B64: PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxUZXN0UnVuIHhtbG5zPSJodHRwOi8vbWljcm9zb2Z0LmNvbS9zY2hlbWFzL1Zpc3VhbFN0dWRpby9UZWFtVGVzdC8yMDEwIj4NCiAgPFJlc3VsdHM+DQogICAgPFVuaXRUZXN0UmVzdWx0IHRlc3ROYW1lPSJTYW1wbGVUZXN0cy5Mb2dpbldvcmtzIiBvdXRjb21lPSJQYXNzZWQiIGR1cmF0aW9uPSIwMDowMDowMS4yMzQwMDAwIiAvPg0KICAgIDxVbml0VGVzdFJlc3VsdCB0ZXN0TmFtZT0iU2FtcGxlVGVzdHMuQ2hlY2tvdXRXb3JrcyIgb3V0Y29tZT0iUGFzc2VkIiBkdXJhdGlvbj0iMDA6MDA6MDAuNTY3MDAwMCIgLz4NCiAgICA8VW5pdFRlc3RSZXN1bHQgdGVzdE5hbWU9IlNhbXBsZVRlc3RzLlNlYXJjaFJldHVybnNSZXN1bHRzIiBvdXRjb21lPSJQYXNzZWQiIGR1cmF0aW9uPSIwMDowMDowMC44OTAwMDAwIiAvPg0KICAgIDxVbml0VGVzdFJlc3VsdCB0ZXN0TmFtZT0iU2FtcGxlVGVzdHMuUGF5bWVudEZhaWxzIiBvdXRjb21lPSJGYWlsZWQiIGR1cmF0aW9uPSIwMDowMDowMi4xMDAwMDAwIj4NCiAgICAgIDxPdXRwdXQ+DQogICAgICAgIDxFcnJvckluZm8+DQogICAgICAgICAgPE1lc3NhZ2U+RXhwZWN0ZWQgSFRUUCAyMDAgYnV0IHJlY2VpdmVkIDUwMCBmcm9tIC9hcGkvcGF5bWVudDwvTWVzc2FnZT4NCiAgICAgICAgICA8U3RhY2tUcmFjZT5hdCBTYW1wbGVUZXN0cy5QYXltZW50RmFpbHMoKSBpbiBQYXltZW50VGVzdHMuY3M6bGluZSA0MjwvU3RhY2tUcmFjZT4NCiAgICAgICAgPC9FcnJvckluZm8+DQogICAgICA8L091dHB1dD4NCiAgICA8L1VuaXRUZXN0UmVzdWx0Pg0KICA8L1Jlc3VsdHM+DQo8L1Rlc3RSdW4+DQo=
     steps:
-      - name: OIDC -> Entra -> ADO (no secrets, no third-party actions)
+      - name: OIDC -> Entra -> ADO -> TCM publish
         run: |
           set -euo pipefail
+          printf '%s' "$PUBLISH_PY_B64" | base64 -d > tcm_publish.py
+          printf '%s' "$SAMPLE_TRX_B64" | base64 -d > sample.trx
 
           echo "==== 1) Request GitHub OIDC token ===="
           GH_OIDC=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | python3 -c "import sys,json;print(json.load(sys.stdin)['value'])")
           echo "GitHub OIDC token length: ${#GH_OIDC}"
-          GH_OIDC="$GH_OIDC" python3 -c 'import os,base64,json; p=os.environ["GH_OIDC"].split(".")[1]; p+="="*(-len(p)%4); d=json.loads(base64.urlsafe_b64decode(p)); [print(f"  {k} = {d.get(k)}") for k in ("iss","sub","aud","enterprise","repository","ref")]'
 
-          echo "==== 2) Exchange at Entra for an ADO-scoped token ===="
-          RESP=$(curl -s -X POST "https://login.microsoftonline.com/$TENANT_ID/oauth2/v2.0/token" \
-            -d "grant_type=client_credentials" \
-            -d "client_id=$CLIENT_ID" \
-            -d "scope=$ADO_RESOURCE/.default" \
-            -d "client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer" \
-            --data-urlencode "client_assertion=$GH_OIDC")
-          ADO_TOKEN=$(echo "$RESP" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("access_token",""))')
-          if [ -z "$ADO_TOKEN" ]; then echo "TOKEN EXCHANGE FAILED:"; echo "$RESP" | head -c 1500; echo; exit 1; fi
+          echo "==== 2) Exchange at Entra for ADO-scoped token ===="
+          RESP=$(curl -s -X POST "https://login.microsoftonline.com/$TENANT_ID/oauth2/v2.0/token" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -d "scope=$ADO_RESOURCE/.default" -d "client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer" --data-urlencode "client_assertion=$GH_OIDC")
+          ADO_TOKEN=$(echo "$RESP" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("access_token",""))')
+          if [ -z "$ADO_TOKEN" ]; then echo "TOKEN EXCHANGE FAILED:"; echo "$RESP" | head -c 1200; echo; exit 1; fi
           echo "::add-mask::$ADO_TOKEN"
           echo "ADO access token length: ${#ADO_TOKEN}"
-          ADO_TOKEN="$ADO_TOKEN" python3 -c 'import os,base64,json; p=os.environ["ADO_TOKEN"].split(".")[1]; p+="="*(-len(p)%4); d=json.loads(base64.urlsafe_b64decode(p)); [print(f"  {k} = {d.get(k)}") for k in ("aud","iss","appid","oid","tid","idtyp")]'
 
-          echo "==== 3) Call ADO: does it recognize the identity? ===="
-          CODE=$(curl -s -o conn.json -w "%{http_code}" -H "Authorization: Bearer $ADO_TOKEN" "$ADO_ORG_URL/_apis/connectionData?api-version=7.1-preview")
-          echo "HTTP $CODE"
-          echo "---- response (first 1500 chars) ----"
-          head -c 1500 conn.json || true
-          echo ""
+          echo "==== 3) Publish sample.trx to TCM (project $ADO_PROJECT) ===="
+          ADO_TOKEN="$ADO_TOKEN" ADO_ORG_URL="$ADO_ORG_URL" ADO_PROJECT="$ADO_PROJECT" TRX_PATH=sample.trx python3 tcm_publish.py
