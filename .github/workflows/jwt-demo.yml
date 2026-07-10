@@ -1,17 +1,12 @@
 name: JWT Demo
-
 on:
+  push:
+    branches:
+      - "kathans/**"
   workflow_dispatch:
-    inputs:
-      audience:
-        description: "Audience to request in the OIDC token"
-        required: false
-        default: "api://AzureADTokenExchange"
-
 permissions:
   id-token: write
   contents: read
-
 jobs:
   jwt-demo:
     runs-on: ubuntu-latest
@@ -20,9 +15,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install deps
-        run: python -m pip install --quiet pyjwt cryptography requests
-      - name: Mint the JWT, print it, and verify it the way ADO does
-        run: python jwt_demo.py
+      - run: python -m pip install --quiet pyjwt cryptography requests
+      - run: python jwt_demo.py
         env:
-          JWT_AUDIENCE: ${{ github.event.inputs.audience }}
+          JWT_AUDIENCE: "api://AzureADTokenExchange"
