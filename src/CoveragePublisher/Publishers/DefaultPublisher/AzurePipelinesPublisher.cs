@@ -86,10 +86,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Publishers.DefaultPublishe
                     // Upload to tcm/tfs based on feature flag
                     if (uploadToTcm)
                     {
-                        TestResultsHttpClient tcmClient = _clientFactory.GetClient<TestResultsHttpClient>();
+                        TestManagementHttpClient tfsClient = _clientFactory.GetClient<TestManagementHttpClient>();
                         using (new SimpleTimer("AzurePipelinesPublisher", "UploadSummary", _executionContext.TelemetryDataCollector))
                         {
-                            await tcmClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
+                            await tfsClient.UpdateCodeCoverageSummaryAsync(coverageData, _executionContext.ProjectId, _executionContext.BuildId, cancellationToken: cancellationToken);
                         }
                     }
                     else
