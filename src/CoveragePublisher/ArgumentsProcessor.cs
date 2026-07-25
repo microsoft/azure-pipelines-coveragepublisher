@@ -28,6 +28,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
 
             [Option("noTelemetry", Default = false, HelpText = "Disable telemetry data collection.")]
             public override bool DisableTelemetry { get; set; }
+
+            [Option("parallelism", Default = 1, HelpText = "Number of reports to parse/merge in parallel. Defaults to 1 (single-threaded).")]
+            public override int Parallelism { get; set; }
         }
 
 

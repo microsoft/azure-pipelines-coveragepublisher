@@ -143,7 +143,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
         {
             TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
 
-            CoverageReportParser parser = new CoverageReportParser(1, 1, new string[] { }, new DefaultFilter(new string[] { }),
+            int parallelism = Math.Max(1, Configuration.Parallelism);
+
+            TraceLogger.Debug($"ReportGeneratorTool.ParseCoverageFiles: Using parallelism {parallelism} (ProcessorCount: {Environment.ProcessorCount}).");
+
+            CoverageReportParser parser = new CoverageReportParser(parallelism, parallelism, new string[] { }, new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }));
 

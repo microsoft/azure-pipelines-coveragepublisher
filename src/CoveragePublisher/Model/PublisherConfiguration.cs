@@ -44,5 +44,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// Gets the configuration for whether telemetry is disabled.
         /// </summary>
         virtual public bool DisableTelemetry { get; set; }
+
+        /// <summary>
+        /// Number of coverage reports to parse and merge in parallel.
+        /// Defaults to 1 (single-threaded). Set higher for parallel parsing.
+        /// </summary>
+        virtual public int Parallelism { get; set; } = 1;
     }
 }
