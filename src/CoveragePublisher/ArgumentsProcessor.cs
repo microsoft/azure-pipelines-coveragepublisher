@@ -23,6 +23,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             [Option("sourceDirectory", Default = "", HelpText = "List of source directories separated by ';'.")]
             override public string SourceDirectory { get; set; }
 
+            [Option("reportGeneratorArgs", Default = "", HelpText = "Additional arguments (in \"-key:value\" form, space separated) to forward to ReportGenerator when generating the HTML report.")]
+            override public string ReportGeneratorArguments { get; set; }
+
             [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
             public override int TimeoutInSeconds { get; set; }
 

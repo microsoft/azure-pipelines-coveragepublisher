@@ -19,6 +19,8 @@ namespace CoveragePublisher.Tests
 
             --sourceDirectory    (Default: ) List of source directories separated by ';'.
 
+            --reportGeneratorArgs (Default: ) Additional arguments (in ""-key:value"" form, space separated) to forward to ReportGenerator when generating the HTML report.
+
             --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
 
             --noTelemetry        (Default: false) Disable telemetry data collection.
@@ -94,6 +96,29 @@ namespace CoveragePublisher.Tests
             {
                 Assert.IsTrue(cliArgs.CoverageFiles.Contains(file));
             }
+        }
+
+        [TestMethod]
+        public void WillParseReportGeneratorArgs()
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var cliArgs = argsProcessor.ProcessCommandLineArgs(new string[] { @"C:\a.txt", "--reportGeneratorArgs=-reporttypes:Cobertura -verbosity:Verbose" });
+
+            Assert.AreEqual("-reporttypes:Cobertura -verbosity:Verbose", cliArgs.ReportGeneratorArguments);
+        }
+
+        [TestMethod]
+        public void WillNotFailWhenReportGeneratorArgsIsNotProvided()
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var cliArgs = argsProcessor.ProcessCommandLineArgs(new string[] { @"C:\a.txt" });
+
+            Assert.IsNotNull(cliArgs);
+            Assert.AreEqual("", cliArgs.ReportGeneratorArguments);
+            Assert.IsTrue(cliArgs.CoverageFiles.Contains(@"C:\a.txt"));
+            Assert.IsFalse(ConsoleWriter.ToString().Contains("ERROR"));
         }
     }
 }
