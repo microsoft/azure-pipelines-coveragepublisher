@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
@@ -118,6 +119,38 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return summary;
         }
 
+        private static readonly Regex ReportGeneratorArgumentRegex =
+            new Regex(@"-(?<key>[a-zA-Z]{2,}):(?<value>""(?:[^""\\]|\\.)*""|\S+)", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Parses a "-key:value -key2:value2 ..." string (ReportGenerator's own command line syntax)
+        /// into a case-insensitive dictionary. Quoted values ("...") are supported
+        /// so a value may contain spaces; unquoted values may not. Within a quoted value, \" is
+        /// unescaped to a literal ".
+        /// </summary>
+        private static Dictionary<string, string> ParseReportGeneratorArguments(string arguments)
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                return result;
+            }
+
+            foreach (Match match in ReportGeneratorArgumentRegex.Matches(arguments))
+            {
+                var value = match.Groups["value"].Value;
+                if (value.Length >= 2 && value[0] == '"' && value[value.Length - 1] == '"')
+                {
+                    value = value.Substring(1, value.Length - 2).Replace("\\\"", "\"");
+                }
+
+                result[match.Groups["key"].Value] = value;
+            }
+
+            return result;
+        }
+
         public void GenerateHTMLReport()
         {
             TraceLogger.Debug("ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.");
@@ -127,12 +160,20 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 Directory.CreateDirectory(Configuration.ReportDirectory);
             }
 
-            // Generate the html report with custom configuration for report generator.
-            var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
+            // Task defaults first, then merge in caller-supplied arguments so that e.g. a
+            // user-supplied -reporttypes: replaces the default instead of being combined with it.
+            var reportGeneratorSettings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
                 { "targetdir", Configuration.ReportDirectory },
                 { "sourcedirs", string.IsNullOrEmpty(Configuration.SourceDirectory) ? "" : Configuration.SourceDirectory },
                 { "reporttypes", "HtmlInline_AzurePipelines" }
-            });
+            };
+
+            foreach (var kvp in ParseReportGeneratorArguments(Configuration.ReportGeneratorArguments))
+            {
+                reportGeneratorSettings[kvp.Key] = kvp.Value;
+            }
+
+            var reportGeneratorConfig = new ReportConfigurationBuilder().Create(reportGeneratorSettings);
 
             var generator = new Generator();
 

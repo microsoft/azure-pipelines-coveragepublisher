@@ -44,5 +44,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// Gets the configuration for whether telemetry is disabled.
         /// </summary>
         virtual public bool DisableTelemetry { get; set; }
+
+        /// <summary>
+        /// Gets additional ReportGenerator arguments, in "-key:value" form, space separated.
+        /// </summary>
+        virtual public string ReportGeneratorArguments { get; set; }
     }
 }
