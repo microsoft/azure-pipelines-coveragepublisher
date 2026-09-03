@@ -23,6 +23,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             [Option("sourceDirectory", Default = "", HelpText = "List of source directories separated by ';'.")]
             override public string SourceDirectory { get; set; }
 
+            [Option("publishHtmlReport", Default = "true", HelpText = "Publish an HTML coverage report.")]
+            public string PublishHTMLReportValue { get; set; }
+
             [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
             public override int TimeoutInSeconds { get; set; }
 
@@ -39,6 +42,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts =>
                 {
+                    opts.PublishHTMLReport = bool.Parse(opts.PublishHTMLReportValue);
                     config = opts;
                 });
 
