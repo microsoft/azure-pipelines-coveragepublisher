@@ -73,6 +73,23 @@ debug: Parser.GenerateHTMLReport: Copying summary file SampleCoverage/JaCoCo.xml
         }
 
         [TestMethod]
+        public void WillNotGenerateHTMLReportWhenPublicationIsDisabled()
+        {
+            var mockTool = new Mock<ICoverageParserTool>();
+            var config = new PublisherConfiguration()
+            {
+                CoverageFiles = new List<string>() { "SampleCoverage/Cobertura.xml" },
+                ReportDirectory = "report",
+                PublishHTMLReport = false
+            };
+
+            var parser = new TestParser(config, _mockTelemetry.Object);
+            parser.GenerateReport(mockTool.Object);
+
+            mockTool.Verify(x => x.GenerateHTMLReport(), Times.Never);
+        }
+
+        [TestMethod]
         public void WillSafelyLogException()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
