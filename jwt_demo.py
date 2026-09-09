@@ -1,6 +1,6 @@
 """
-Standalone demo: mint a real GitHub Actions OIDC JWT, print it and its parts, then
-show EXACTLY how ADO (the relying party) verifies it using GitHub's public key.
+Standalone demo: mint a GitHub Actions OIDC JWT, inspect its claims without
+logging the credential, and verify its signature using GitHub's public key.
 """
 import os
 import json
@@ -26,14 +26,11 @@ resp = requests.get(f"{url}&audience={AUDIENCE}",
                     headers={"Authorization": f"Bearer {req_token}"}, timeout=30)
 resp.raise_for_status()
 token = resp.json()["value"]
+print(f"::add-mask::{token}")
 
 print("=" * 60)
-print("  THE GITHUB OIDC JWT  (this is what the workflow receives)")
+print("  GITHUB OIDC TOKEN METADATA (credential redacted)")
 print("=" * 60)
-# base64-wrap the whole token so GitHub's log masking does not redact it.
-print("RAW_JWT_B64_BEGIN")
-print(base64.b64encode(token.encode()).decode())
-print("RAW_JWT_B64_END")
 
 header_b64, payload_b64, signature_b64 = token.split(".")
 print("\n--- part 1: HEADER  (base64url; plain text) ---")
@@ -41,7 +38,7 @@ print(json.dumps(d(header_b64), indent=2))
 print("\n--- part 2: PAYLOAD / claims  (base64url; plain text, anyone can read) ---")
 print(json.dumps(d(payload_b64), indent=2))
 print("\n--- part 3: SIGNATURE  (RS256 over header.payload; only GitHub's private key can make it) ---")
-print(f"{signature_b64[:48]}...  ({len(signature_b64)} chars)")
+print(f"Signature redacted ({len(signature_b64)} chars)")
 
 print("\n" + "=" * 60)
 print("  HOW ADO VERIFIES IT  (relying party side, public key only)")
