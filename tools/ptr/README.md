@@ -46,10 +46,23 @@ publication, while preserving the failed test step/job status. Per-job files and
 the isolated Azure CLI cache are removed at the end, and GitHub disposes of the
 hosted VM after the job.
 
-## Known limitations
+## Observed publication
 
 This is a wrapper around the existing Windows EXE, not a new cross-platform host.
-End-to-end publication from this workflow has not been established.
+The first authenticated Windows run succeeded on 2026-09-09 (UTC):
+
+- [GitHub run 34392107301](https://github.com/microsoft/azure-pipelines-coveragepublisher/actions/runs/34392107301)
+  used the existing federation and the packaged EXE.
+- [ADO run 5297464](https://dev.azure.com/tfspfcusctest/TestAI/_testManagement/runs?_a=runSummary&runId=5297464)
+  is completed with 66 results, all passed, and no associated ADO build.
+- ADO exposes one run attachment: `TestResults_5297464.zip`.
+- The LogStore upload returned a Bad Request warning. The publisher fell back
+  to FileService, and the attachment was confirmed through the ADO attachment API.
+
+This establishes the exercised TRX/run-attachment path, not every parser format,
+result-level attachment case or target organization.
+
+## Known limitations
 
 - Exit `20000`: the EXE selection feature flag is off or its query failed.
   Inspect authentication/dependency/feature-flag diagnostics. There is no Azure
