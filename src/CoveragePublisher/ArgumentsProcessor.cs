@@ -26,6 +26,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             [Option("publishHtmlReport", Default = "true", HelpText = "Publish an HTML coverage report.")]
             public string PublishHTMLReportValue { get; set; }
 
+            [Option("trustedSourceDirectory", Default = "", HelpText = "List of directories from which source files may be read, separated by ';'.")]
+            override public string TrustedSourceDirectory { get; set; }
+
             [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
             public override int TimeoutInSeconds { get; set; }
 
@@ -43,6 +46,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
                 .WithParsed<Options>(opts =>
                 {
                     opts.PublishHTMLReport = bool.Parse(opts.PublishHTMLReportValue);
+                    string trustedSourceDirectories = Environment.GetEnvironmentVariable("AZP_COVERAGE_TRUSTED_SOURCE_DIRECTORIES");
+                    if (!string.IsNullOrWhiteSpace(trustedSourceDirectories))
+                    {
+                        opts.TrustedSourceDirectory = string.IsNullOrWhiteSpace(opts.TrustedSourceDirectory)
+                            ? trustedSourceDirectories
+                            : string.Concat(opts.TrustedSourceDirectory, ";", trustedSourceDirectories);
+                    }
+
                     config = opts;
                 });
 
