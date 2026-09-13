@@ -21,6 +21,8 @@ namespace CoveragePublisher.Tests
 
             --publishHtmlReport  (Default: true) Publish an HTML coverage report.
 
+            --trustedSourceDirectory    (Default: ) List of directories from which source files may be read, separated by ';'.
+
             --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
 
             --noTelemetry        (Default: false) Disable telemetry data collection.
@@ -109,6 +111,21 @@ namespace CoveragePublisher.Tests
 
             Assert.AreEqual(expected, config.PublishHTMLReport);
             Assert.AreEqual(expected, config.GenerateHTMLReport);
+            }
+
+        [TestMethod]
+        public void WillParseTrustedSourceDirectories()
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var cliArgs = argsProcessor.ProcessCommandLineArgs(new[]
+            {
+                @"C:\coverage.xml",
+                "--trustedSourceDirectory",
+                @"C:\agent\_work\1\s;D:\shared"
+            });
+
+            Assert.AreEqual(@"C:\agent\_work\1\s;D:\shared", cliArgs.TrustedSourceDirectory);
         }
     }
 }

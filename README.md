@@ -25,6 +25,7 @@ dotnet CoveragePublisher.Console.dll /path/to/jacoco.xml /path/to/cobertura.xml
 | --------------------- | ---------------------------------------------------------- |
 | --reportDirectory     | (Default: "") Path where html report will be generated.    |
 | --sourceDirectory     | (Default: "") List of source directories separated by ';'. |
+| --trustedSourceDirectory | (Default: "") List of directories from which source files may be read, separated by ';'. |
 | --timeout             | (Default: 120) Timeout for CoveragePublisher in seconds.   |
 | --noTelemetry         | (Default: false) Disable telemetry data collection.        |
 | --help                | Display this help screen.                                  |
