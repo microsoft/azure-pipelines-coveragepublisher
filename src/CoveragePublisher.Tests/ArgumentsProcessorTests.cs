@@ -19,6 +19,8 @@ namespace CoveragePublisher.Tests
 
             --sourceDirectory    (Default: ) List of source directories separated by ';'.
 
+            --publishHtmlReport  (Default: true) Publish an HTML coverage report.
+
             --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
 
             --noTelemetry        (Default: false) Disable telemetry data collection.
@@ -94,6 +96,19 @@ namespace CoveragePublisher.Tests
             {
                 Assert.IsTrue(cliArgs.CoverageFiles.Contains(file));
             }
+        }
+
+        [DataTestMethod]
+        [DataRow(new string[] { @"C:\a.txt", "--reportDirectory", @"C:\report" }, true)]
+        [DataRow(new string[] { @"C:\a.txt", "--reportDirectory", @"C:\report", "--publishHtmlReport", "false" }, false)]
+        public void WillParsePublishHtmlReport(string[] args, bool expected)
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var config = argsProcessor.ProcessCommandLineArgs(args);
+
+            Assert.AreEqual(expected, config.PublishHTMLReport);
+            Assert.AreEqual(expected, config.GenerateHTMLReport);
         }
     }
 }
