@@ -74,5 +74,30 @@ namespace CoveragePublisher.Tests
 
             Assert.IsFalse(filter.IsSafeForRead(sourceFile, new[] { _trustedDirectory }));
         }
+
+        [TestMethod]
+        public void RejectsTrustedDirectoryThatIsSymbolicLink()
+        {
+            string targetDirectory = Path.Combine(_testDirectory, "target");
+            string linkedDirectory = Path.Combine(_testDirectory, "linked");
+            Directory.CreateDirectory(targetDirectory);
+
+            try
+            {
+                Directory.CreateSymbolicLink(linkedDirectory, targetDirectory);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException
+                || ex is PlatformNotSupportedException
+                || ex is IOException)
+            {
+                Assert.Inconclusive($"Symbolic links are not available in this test environment: {ex.Message}");
+            }
+
+            string sourceFile = Path.Combine(linkedDirectory, "secret.txt");
+            File.WriteAllText(Path.Combine(targetDirectory, "secret.txt"), "secret");
+            var filter = new TrustedSourcePathFilter(new[] { linkedDirectory });
+
+            Assert.IsFalse(filter.IsSafeForRead(sourceFile, new[] { linkedDirectory }));
+        }
     }
 }

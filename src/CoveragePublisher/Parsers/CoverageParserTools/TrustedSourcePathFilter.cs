@@ -133,6 +133,11 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         private static bool ContainsReparsePoint(string path, string trustedRoot)
         {
+            if (IsExistingReparsePoint(trustedRoot))
+            {
+                return true;
+            }
+
             string relativePath = path.Substring(trustedRoot.Length)
                 .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             string currentPath = trustedRoot;
@@ -145,13 +150,26 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                     break;
                 }
 
-                if ((File.GetAttributes(currentPath) & FileAttributes.ReparsePoint) != 0)
+                if (IsExistingReparsePoint(currentPath))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private static bool IsExistingReparsePoint(string path)
+        {
+            try
+            {
+                return (File.Exists(path) || Directory.Exists(path))
+                    && (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                return true;
+            }
         }
 
         private static IEnumerable<string> GetSourceDirectoryCandidates(string path, IEnumerable<string> sourceDirectories)
