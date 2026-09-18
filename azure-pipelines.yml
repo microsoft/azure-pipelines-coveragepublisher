@@ -87,10 +87,17 @@ extends:
         - task: NuGetToolInstaller@1
           displayName: Install NuGet
 
+        - task: NuGetAuthenticate@1
+          displayName: 'NuGet Authenticate'
+          inputs:
+            forceReinstallCredentialProvider: true
+
         - task: NuGetCommand@2
           displayName: NuGet restore
           inputs:
             restoreSolution: '$(solution)'
+            feedsToUse: config
+            nugetConfigPath: 'nuget.config'
 
         - task: UseDotNet@2
           displayName: 'Use .NET SDK 7.0.x'
