@@ -127,6 +127,30 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 Directory.CreateDirectory(Configuration.ReportDirectory);
             }
 
+            string[] sourceDirectories = SplitDirectories(Configuration.SourceDirectory);
+            var trustedSourcePathFilter = new TrustedSourcePathFilter(
+                sourceDirectories.Concat(SplitDirectories(Configuration.TrustedSourceDirectory)));
+            ParserResult htmlParserResult = ParseCoverageFiles(
+                new List<string>(Configuration.CoverageFiles),
+                trustedSourcePathFilter);
+
+            bool containsUnsafeSourcePath = htmlParserResult.Assemblies
+                .SelectMany(assembly => assembly.Classes)
+                .SelectMany(@class => @class.Files)
+                .Any(file => !trustedSourcePathFilter.IsSafeForRead(file.Path, sourceDirectories));
+
+            if (containsUnsafeSourcePath)
+            {
+                TraceLogger.Warning("HTML source report generation was blocked because coverage data referenced a source path outside the trusted directories.");
+                WriteBlockedSourceReport(Configuration.ReportDirectory);
+                return;
+            }
+
+            if (trustedSourcePathFilter.ExcludedPathCount > 0)
+            {
+                TraceLogger.Warning($"Skipped {trustedSourcePathFilter.ExcludedPathCount} untrusted source path(s) while generating the HTML coverage report.");
+            }
+
             // Generate the html report with custom configuration for report generator.
             var reportGeneratorConfig = new ReportConfigurationBuilder().Create(new Dictionary<string, string>() {
                 { "targetdir", Configuration.ReportDirectory },
@@ -136,19 +160,43 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             var generator = new Generator();
 
-            generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), _parserResult);
+            generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), htmlParserResult);
         }
 
         private ParserResult ParseCoverageFiles(List<string> coverageFiles)
+        {
+            return ParseCoverageFiles(coverageFiles, new DefaultFilter(new string[] { }));
+        }
+
+        private ParserResult ParseCoverageFiles(List<string> coverageFiles, IFilter fileFilter)
         {
             TraceLogger.Debug("ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.");
 
             CoverageReportParser parser = new CoverageReportParser(1, 1, new string[] { }, new DefaultFilter(new string[] { }),
                 new DefaultFilter(new string[] { }),
-                new DefaultFilter(new string[] { }));
+                fileFilter);
 
             ReadOnlyCollection<string> collection = new ReadOnlyCollection<string>(coverageFiles);
             return parser.ParseFiles(collection);
+        }
+
+        private static string[] SplitDirectories(string directories)
+        {
+            return string.IsNullOrWhiteSpace(directories)
+                ? Array.Empty<string>()
+                : directories.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(directory => directory.Trim())
+                    .Where(directory => directory.Length > 0)
+                    .ToArray();
+        }
+
+        private static void WriteBlockedSourceReport(string reportDirectory)
+        {
+            const string report = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Code coverage</title></head>"
+                + "<body><h1>Code coverage</h1><p>Source rendering was omitted because the coverage data referenced a file outside the trusted source directories.</p></body></html>";
+
+            File.WriteAllText(Path.Combine(reportDirectory, "index.html"), report);
+            File.WriteAllText(Path.Combine(reportDirectory, "index.htm"), report);
         }
     }
 }
