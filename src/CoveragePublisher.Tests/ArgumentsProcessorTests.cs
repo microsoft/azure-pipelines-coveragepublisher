@@ -132,7 +132,7 @@ namespace CoveragePublisher.Tests
 
         [DataTestMethod]
         [DataRow(new string[] { @"C:\coverage.xml" }, false)]
-        [DataRow(new string[] { @"C:\coverage.xml", "--enableTrustedSourcePathFiltering", "true" }, true)]
+        [DataRow(new string[] { @"C:\coverage.xml", "--enableTrustedSourcePathFiltering" }, true)]
         public void WillParseTrustedSourcePathFilteringFlag(string[] args, bool expected)
         {
             var argsProcessor = new ArgumentsProcessor();
@@ -140,6 +140,7 @@ namespace CoveragePublisher.Tests
             var config = argsProcessor.ProcessCommandLineArgs(args);
 
             Assert.AreEqual(expected, config.EnforceTrustedSourcePathFiltering);
+            CollectionAssert.AreEqual(new[] { @"C:\coverage.xml" }, config.CoverageFiles.ToArray());
         }
     }
 }
