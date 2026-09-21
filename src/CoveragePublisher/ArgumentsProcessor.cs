@@ -29,6 +29,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             [Option("trustedSourceDirectory", Default = "", HelpText = "List of directories from which source files may be read, separated by ';'.")]
             override public string TrustedSourceDirectory { get; set; }
 
+            [Option("enableTrustedSourcePathFiltering", Default = false, HelpText = "Exclude source files outside trusted source directories from HTML reports.")]
+            override public bool EnforceTrustedSourcePathFiltering { get; set; }
+
             [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
             public override int TimeoutInSeconds { get; set; }
 

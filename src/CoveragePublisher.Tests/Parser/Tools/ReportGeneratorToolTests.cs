@@ -182,7 +182,8 @@ debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML repor
             {
                 CoverageFiles = new[] { coverageFile },
                 ReportDirectory = reportDir,
-                TrustedSourceDirectory = trustedDir
+                TrustedSourceDirectory = trustedDir,
+                EnforceTrustedSourcePathFiltering = true
             });
 
             parser.GenerateHTMLReport();
@@ -226,13 +227,60 @@ debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML repor
             {
                 CoverageFiles = new[] { coverageFile },
                 ReportDirectory = reportDir,
-                TrustedSourceDirectory = trustedDir
+                TrustedSourceDirectory = trustedDir,
+                EnforceTrustedSourcePathFiltering = true
             });
 
             parser.GenerateHTMLReport();
 
             Assert.IsTrue(Directory.EnumerateFiles(reportDir, "*", SearchOption.AllDirectories)
                 .Any(file => File.ReadAllText(file).Contains(sourceMarker)));
+
+            Directory.Delete(tempDir, true);
+        }
+
+        [TestMethod]
+        public void WillPreserveLegacySourceRenderingWhenTrustedPathFilteringIsDisabled()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var trustedDir = Path.Combine(tempDir, "trusted");
+            var untrustedDir = Path.Combine(tempDir, "untrusted");
+            var reportDir = Path.Combine(tempDir, "report");
+            Directory.CreateDirectory(trustedDir);
+            Directory.CreateDirectory(untrustedDir);
+
+            const string sourceMarker = "LEGACY_SOURCE_RENDERING_TEST";
+            File.WriteAllText(Path.Combine(untrustedDir, "Source.cs"), sourceMarker);
+
+            var coverageFile = Path.Combine(tempDir, "coverage.xml");
+            File.WriteAllText(coverageFile, $@"<?xml version=""1.0""?>
+<coverage line-rate=""1"" branch-rate=""0"" version=""1"">
+  <sources><source>{untrustedDir}</source></sources>
+  <packages>
+    <package name=""sample"" line-rate=""1"" branch-rate=""0"">
+      <classes>
+        <class name=""Source"" filename=""Source.cs"" line-rate=""1"" branch-rate=""0"">
+          <methods />
+          <lines><line number=""1"" hits=""1"" /></lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>");
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new[] { coverageFile },
+                ReportDirectory = reportDir,
+                TrustedSourceDirectory = trustedDir,
+                EnforceTrustedSourcePathFiltering = false
+            });
+
+            parser.GenerateHTMLReport();
+
+            Assert.IsTrue(Directory.EnumerateFiles(reportDir, "*", SearchOption.AllDirectories)
+                .Any(file => File.ReadAllText(file).Contains(sourceMarker)));
+            Assert.IsFalse(_logger.Log.Contains("untrusted source path"));
 
             Directory.Delete(tempDir, true);
         }

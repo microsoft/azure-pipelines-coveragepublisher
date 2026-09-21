@@ -128,27 +128,32 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
 
             string[] sourceDirectories = SplitDirectories(Configuration.SourceDirectory);
-            var trustedSourcePathFilter = new TrustedSourcePathFilter(
-                sourceDirectories.Concat(SplitDirectories(Configuration.TrustedSourceDirectory)));
-            ParserResult htmlParserResult = ParseCoverageFiles(
-                new List<string>(Configuration.CoverageFiles),
-                trustedSourcePathFilter);
+            ParserResult htmlParserResult = _parserResult;
 
-            bool containsUnsafeSourcePath = htmlParserResult.Assemblies
-                .SelectMany(assembly => assembly.Classes)
-                .SelectMany(@class => @class.Files)
-                .Any(file => !trustedSourcePathFilter.IsSafeForRead(file.Path, sourceDirectories));
-
-            if (containsUnsafeSourcePath)
+            if (Configuration.EnforceTrustedSourcePathFiltering)
             {
-                TraceLogger.Warning("HTML source report generation was blocked because coverage data referenced a source path outside the trusted directories.");
-                WriteBlockedSourceReport(Configuration.ReportDirectory);
-                return;
-            }
+                var trustedSourcePathFilter = new TrustedSourcePathFilter(
+                    sourceDirectories.Concat(SplitDirectories(Configuration.TrustedSourceDirectory)));
+                htmlParserResult = ParseCoverageFiles(
+                    new List<string>(Configuration.CoverageFiles),
+                    trustedSourcePathFilter);
 
-            if (trustedSourcePathFilter.ExcludedPathCount > 0)
-            {
-                TraceLogger.Warning($"Skipped {trustedSourcePathFilter.ExcludedPathCount} untrusted source path(s) while generating the HTML coverage report.");
+                bool containsUnsafeSourcePath = htmlParserResult.Assemblies
+                    .SelectMany(assembly => assembly.Classes)
+                    .SelectMany(@class => @class.Files)
+                    .Any(file => !trustedSourcePathFilter.IsSafeForRead(file.Path, sourceDirectories));
+
+                if (containsUnsafeSourcePath)
+                {
+                    TraceLogger.Warning("HTML source report generation was blocked because coverage data referenced a source path outside the trusted directories.");
+                    WriteBlockedSourceReport(Configuration.ReportDirectory);
+                    return;
+                }
+
+                if (trustedSourcePathFilter.ExcludedPathCount > 0)
+                {
+                    TraceLogger.Warning($"Skipped {trustedSourcePathFilter.ExcludedPathCount} untrusted source path(s) while generating the HTML coverage report.");
+                }
             }
 
             // Generate the html report with custom configuration for report generator.
