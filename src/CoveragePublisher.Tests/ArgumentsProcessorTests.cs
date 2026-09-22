@@ -21,6 +21,10 @@ namespace CoveragePublisher.Tests
 
             --publishHtmlReport  (Default: true) Publish an HTML coverage report.
 
+            --trustedSourceDirectory    (Default: ) List of directories from which source files may be read, separated by ';'.
+
+            --enableTrustedSourcePathFiltering    (Default: false) Exclude source files outside trusted source directories from HTML reports.
+
             --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
 
             --noTelemetry        (Default: false) Disable telemetry data collection.
@@ -109,6 +113,34 @@ namespace CoveragePublisher.Tests
 
             Assert.AreEqual(expected, config.PublishHTMLReport);
             Assert.AreEqual(expected, config.GenerateHTMLReport);
+            }
+
+        [TestMethod]
+        public void WillParseTrustedSourceDirectories()
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var cliArgs = argsProcessor.ProcessCommandLineArgs(new[]
+            {
+                @"C:\coverage.xml",
+                "--trustedSourceDirectory",
+                @"C:\agent\_work\1\s;D:\shared"
+            });
+
+            Assert.AreEqual(@"C:\agent\_work\1\s;D:\shared", cliArgs.TrustedSourceDirectory);
+        }
+
+        [DataTestMethod]
+        [DataRow(new string[] { @"C:\coverage.xml" }, false)]
+        [DataRow(new string[] { @"C:\coverage.xml", "--enableTrustedSourcePathFiltering" }, true)]
+        public void WillParseTrustedSourcePathFilteringFlag(string[] args, bool expected)
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var config = argsProcessor.ProcessCommandLineArgs(args);
+
+            Assert.AreEqual(expected, config.EnforceTrustedSourcePathFiltering);
+            CollectionAssert.AreEqual(new[] { @"C:\coverage.xml" }, config.CoverageFiles.ToArray());
         }
     }
 }

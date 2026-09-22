@@ -29,7 +29,17 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         /// Gets or sets the configuration for whether HTML reports should be published.
         /// </summary>
         virtual public bool PublishHTMLReport { get; set; } = true;
-        
+
+        /// <summary>
+        /// Semi-colon separated list of directories from which source files may be read.
+        /// </summary>
+        virtual public string TrustedSourceDirectory { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether source files outside trusted directories are excluded from HTML reports.
+        /// </summary>
+        virtual public bool EnforceTrustedSourcePathFiltering { get; set; }
+
         /// <summary>
         /// Gets the configuration for whether HTML reports should be generated or not.
         /// </summary>
