@@ -1,69 +1,25 @@
 name: Publish test results action POC
 
 on:
-  pull_request:
-    branches:
-      - kathans/gh-tcm-oidc-poc
   push:
-    branches:
-      - kathans/gh-tcm-oidc-poc
-  workflow_dispatch:
+    branches: [kathans/gh-tcm-oidc-poc]
 
 permissions:
   contents: read
 
 jobs:
-  validate:
-    name: Validate tagged action
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            7.0.x
-            10.0.x
-
-      - name: Run tests and generate TRX
-        id: tests
-        continue-on-error: true
-        run: >
-          dotnet test src/CoveragePublisher.Tests/CoveragePublisher.Tests.csproj
-          --logger "trx;LogFileName=coveragepublisher.trx"
-          --results-directory "${{ runner.temp }}/TestResults"
-
-      - name: Parse TRX with tagged action
-        if: always() && !cancelled()
-        uses: haddanki-msft/ado-publish-test-results@v0.1.0
-        with:
-          results-dir: ${{ runner.temp }}/TestResults
-          pattern: '*.trx'
-          test-runner: VSTest
-          dry-run: 'true'
-
-      - name: Preserve test failure
-        if: steps.tests.outcome == 'failure'
-        run: exit 1
-
   publish:
-    name: Publish from trusted branch
-    if: >-
-      github.event_name != 'pull_request' &&
-      github.repository == 'microsoft/azure-pipelines-coveragepublisher' &&
-      github.ref == 'refs/heads/kathans/gh-tcm-oidc-poc'
+    if: github.repository == 'microsoft/azure-pipelines-coveragepublisher' && github.ref == 'refs/heads/kathans/gh-tcm-oidc-poc'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
       id-token: write
+    env:
+      CLIENT_ID: 5c299c5c-74de-4ce9-b943-98e12d31f858
+      TENANT_ID: 72f988bf-86f1-41af-91ab-2d7cd011db47
+      ADO_ORG_URL: https://dev.azure.com/tfspfcusctest
+      ADO_PROJECT: TestAI
 
     steps:
       - name: Checkout repository
@@ -94,11 +50,11 @@ jobs:
           results-dir: ${{ runner.temp }}/TestResults
           pattern: '*.trx'
           test-runner: VSTest
-          collection-url: https://dev.azure.com/tfspfcusctest
-          project: TestAI
+          collection-url: ${{ env.ADO_ORG_URL }}
+          project: ${{ env.ADO_PROJECT }}
           run-title: GitHub tagged action POC - ${{ github.run_id }}
-          client-id: 5c299c5c-74de-4ce9-b943-98e12d31f858
-          tenant-id: 72f988bf-86f1-41af-91ab-2d7cd011db47
+          client-id: ${{ env.CLIENT_ID }}
+          tenant-id: ${{ env.TENANT_ID }}
           dry-run: 'false'
 
       - name: Show published run
