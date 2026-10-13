@@ -34,10 +34,10 @@ jobs:
           dotnet test src/CoveragePublisher.Tests/CoveragePublisher.Tests.csproj
           --logger "trx;LogFileName=coveragepublisher.trx"
           --results-directory "${{ runner.temp }}/TestResults"
-
+      #Ensure this step runs even if previous steps fail, but not if the workflow is cancelled
       - name: Publish TRX with tagged action
         id: publish
-        if: always() && !cancelled() // Ensure this step runs even if previous steps fail, but not if the workflow is cancelled
+        if: always() && !cancelled() 
         uses: haddanki-msft/ado-publish-test-results@v0.1.0
         with:
           results-dir: ${{ runner.temp }}/TestResults
