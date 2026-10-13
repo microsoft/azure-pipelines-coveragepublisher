@@ -10,7 +10,7 @@ permissions:
 jobs:
   publish:
     if: github.repository == 'microsoft/azure-pipelines-coveragepublisher' && github.ref == 'refs/heads/kathans/gh-tcm-oidc-poc'
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
@@ -26,6 +26,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+    
+      # Set up .NET SDKs for testing and publishing Trx
       - name: Set up test and publisher SDKs
         id: setup-dotnet
         uses: actions/setup-dotnet@v4
@@ -40,7 +42,9 @@ jobs:
           dotnet test src/CoveragePublisher.Tests/CoveragePublisher.Tests.csproj
           --logger "trx;LogFileName=coveragepublisher.trx"
           --results-directory "${{ runner.temp }}/TestResults"
-      #Ensure this step runs even if previous steps fail, but not if the workflow is cancelled
+
+      # PTR Action
+      # Ensure this step runs even if previous steps fail, but not if the workflow is cancelled
       - name: Publish TRX with tagged action
         id: publish
         if: always() && !cancelled() 
