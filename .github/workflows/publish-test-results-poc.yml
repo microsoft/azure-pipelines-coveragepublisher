@@ -43,7 +43,6 @@ jobs:
           --logger "trx;LogFileName=coveragepublisher.trx"
           --results-directory "${{ runner.temp }}/TestResults"
 
-      # PTR Action
       # Ensure this step runs even if previous steps fail, but not if the workflow is cancelled
       - name: Publish TRX with tagged action
         id: publish
