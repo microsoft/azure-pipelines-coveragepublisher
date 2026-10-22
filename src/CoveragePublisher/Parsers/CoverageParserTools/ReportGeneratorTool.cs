@@ -34,6 +34,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             _parserResult = ParseCoverageFiles(new List<string>(Configuration.CoverageFiles));
         }
 
+        /// <summary>FOR INTERNAL TEST USAGE ONLY. Runs after the approved text is captured and before the report is drawn.</summary>
+        internal Action TEST_BeforeGenerateReport { get; set; }
+
         public List<FileCoverageInfo> GetFileCoverageInfos()
         {
             TraceLogger.Debug("ReportGeneratorTool.GetFileCoverageInfos: Generating file coverage info from coverage files.");
@@ -138,22 +141,65 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                     new List<string>(Configuration.CoverageFiles),
                     trustedSourcePathFilter);
 
-                bool containsUnsafeSourcePath = htmlParserResult.Assemblies
-                    .SelectMany(assembly => assembly.Classes)
-                    .SelectMany(@class => @class.Files)
-                    .Any(file => !trustedSourcePathFilter.IsSafeForRead(file.Path, sourceDirectories));
-
-                if (containsUnsafeSourcePath)
-                {
-                    TraceLogger.Warning("HTML source report generation was blocked because coverage data referenced a source path outside the trusted directories.");
-                    WriteBlockedSourceReport(Configuration.ReportDirectory);
-                    return;
-                }
-
                 if (trustedSourcePathFilter.ExcludedPathCount > 0)
                 {
                     TraceLogger.Warning($"Skipped {trustedSourcePathFilter.ExcludedPathCount} untrusted source path(s) while generating the HTML coverage report.");
                 }
+
+                List<Palmmedia.ReportGenerator.Core.Parser.Analysis.CodeFile> sourceFiles = htmlParserResult.Assemblies
+                    .SelectMany(assembly => assembly.Classes)
+                    .SelectMany(@class => @class.Files)
+                    .ToList();
+
+                // Depends on DistributedTask.Tasks.EnablePublishCodeCoverageResultsV2SourcePathContainment — see Cross-Flag Dependencies in the feature-flag-creation skill.
+                // The pin runs only when that check is already on and PublishCodeCoverageResultsV2ApprovedSourceTextFixEnabled is on.
+                // If the pin flag is off, keep the existing yes-or-no check and let the report library open the source name.
+                if (Configuration.PinApprovedSourceText)
+                {
+                    var approvedLines = new Dictionary<string, string[]>(StringComparer.Ordinal);
+                    foreach (var file in sourceFiles)
+                    {
+                        ApprovedSourceStatus status = trustedSourcePathFilter.TryReadApprovedLines(
+                            file.Path,
+                            sourceDirectories,
+                            out string[] lines);
+                        if (status == ApprovedSourceStatus.Unsafe)
+                        {
+                            TraceLogger.Warning("HTML source report generation was blocked because coverage data referenced a source path outside the trusted directories.");
+                            WriteBlockedSourceReport(Configuration.ReportDirectory);
+                            return;
+                        }
+
+                        if (status == ApprovedSourceStatus.Missing)
+                        {
+                            int lineCount = file.LineCoverage == null ? 0 : file.LineCoverage.Count;
+                            lines = Enumerable.Repeat(string.Empty, lineCount).ToArray();
+                        }
+
+                        approvedLines[file.Path] = lines;
+                    }
+
+                    if (!ApprovedSourcePin.TryPin(sourceFiles, approvedLines))
+                    {
+                        TraceLogger.Warning("HTML source report generation was blocked because the approved source text could not be kept for rendering.");
+                        WriteBlockedSourceReport(Configuration.ReportDirectory);
+                        return;
+                    }
+                }
+                else
+                {
+                    foreach (var file in sourceFiles)
+                    {
+                        if (!trustedSourcePathFilter.IsSafeForRead(file.Path, sourceDirectories))
+                        {
+                            TraceLogger.Warning("HTML source report generation was blocked because coverage data referenced a source path outside the trusted directories.");
+                            WriteBlockedSourceReport(Configuration.ReportDirectory);
+                            return;
+                        }
+                    }
+                }
+
+                TEST_BeforeGenerateReport?.Invoke();
             }
 
             // Generate the html report with custom configuration for report generator.

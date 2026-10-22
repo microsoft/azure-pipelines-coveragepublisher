@@ -197,6 +197,134 @@ debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML repor
         }
 
         [TestMethod]
+        public void WillNotIncludeSourceOutsideTrustedDirectoryWhenApprovedSourceTextFixIsEnabled()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var trustedDir = Path.Combine(tempDir, "trusted");
+            var untrustedDir = Path.Combine(tempDir, "untrusted");
+            var reportDir = Path.Combine(tempDir, "report");
+            Directory.CreateDirectory(trustedDir);
+            Directory.CreateDirectory(untrustedDir);
+
+            const string secret = "MSRC_SOURCE_DISCLOSURE_TEST_SECRET";
+            File.WriteAllText(Path.Combine(untrustedDir, "Secret.cs"), secret);
+
+            var coverageFile = Path.Combine(tempDir, "coverage.xml");
+            File.WriteAllText(coverageFile, $@"<?xml version=""1.0""?>
+<coverage line-rate=""1"" branch-rate=""0"" version=""1"">
+  <sources><source>{untrustedDir}</source></sources>
+  <packages><package name=""sample"" line-rate=""1"" branch-rate=""0"">
+    <classes><class name=""Secret"" filename=""Secret.cs"" line-rate=""1"" branch-rate=""0"">
+      <methods /><lines><line number=""1"" hits=""1"" /></lines>
+    </class></classes>
+  </package></packages>
+</coverage>");
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new[] { coverageFile },
+                ReportDirectory = reportDir,
+                TrustedSourceDirectory = trustedDir,
+                EnforceTrustedSourcePathFiltering = true,
+                PinApprovedSourceText = true
+            });
+
+            parser.GenerateHTMLReport();
+
+            Assert.IsFalse(Directory.EnumerateFiles(reportDir, "*", SearchOption.AllDirectories)
+                .Any(file => File.ReadAllText(file).Contains(secret)));
+            Assert.IsTrue(_logger.Log.Contains("untrusted source path"));
+
+            Directory.Delete(tempDir, true);
+        }
+
+        [TestMethod]
+        public void WillRenderTextCapturedBeforeSourceSwap()
+        {
+            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var trustedDir = Path.Combine(root, "trusted");
+            var reportDir = Path.Combine(root, "report");
+            Directory.CreateDirectory(trustedDir);
+
+            var trustedFile = Path.Combine(trustedDir, "Source.cs");
+            File.WriteAllText(trustedFile, "TRUSTED_MARKER");
+
+            var coverageFile = Path.Combine(root, "coverage.xml");
+            File.WriteAllText(coverageFile, $@"<?xml version=""1.0""?>
+<coverage line-rate=""1"" branch-rate=""0"" version=""1"">
+  <sources><source>{trustedDir}</source></sources>
+  <packages><package name=""sample"" line-rate=""1"" branch-rate=""0"">
+    <classes><class name=""Source"" filename=""Source.cs"" line-rate=""1"" branch-rate=""0"">
+      <methods /><lines><line number=""1"" hits=""1"" /></lines>
+    </class></classes>
+  </package></packages>
+</coverage>");
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration
+            {
+                CoverageFiles = new[] { coverageFile },
+                ReportDirectory = reportDir,
+                TrustedSourceDirectory = trustedDir,
+                EnforceTrustedSourcePathFiltering = true,
+                PinApprovedSourceText = true
+            });
+            parser.TEST_BeforeGenerateReport = () => File.WriteAllText(trustedFile, "SWAPPED_MARKER");
+
+            parser.GenerateHTMLReport();
+
+            string reportText = string.Join(
+                "\n",
+                Directory.EnumerateFiles(reportDir, "*", SearchOption.AllDirectories).Select(File.ReadAllText));
+            Directory.Delete(root, true);
+
+            Assert.IsTrue(reportText.Contains("TRUSTED_MARKER"), "The report did not keep the text captured by the safe read.");
+            Assert.IsFalse(reportText.Contains("SWAPPED_MARKER"), "The report opened the source name again after the safe read.");
+        }
+
+        [TestMethod]
+        public void WillOpenSourceNameAgainWhenApprovedSourceTextFixIsOff()
+        {
+            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var trustedDir = Path.Combine(root, "trusted");
+            var reportDir = Path.Combine(root, "report");
+            Directory.CreateDirectory(trustedDir);
+
+            var trustedFile = Path.Combine(trustedDir, "Source.cs");
+            File.WriteAllText(trustedFile, "TRUSTED_MARKER");
+
+            var coverageFile = Path.Combine(root, "coverage.xml");
+            File.WriteAllText(coverageFile, $@"<?xml version=""1.0""?>
+<coverage line-rate=""1"" branch-rate=""0"" version=""1"">
+  <sources><source>{trustedDir}</source></sources>
+  <packages><package name=""sample"" line-rate=""1"" branch-rate=""0"">
+    <classes><class name=""Source"" filename=""Source.cs"" line-rate=""1"" branch-rate=""0"">
+      <methods /><lines><line number=""1"" hits=""1"" /></lines>
+    </class></classes>
+  </package></packages>
+</coverage>");
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration
+            {
+                CoverageFiles = new[] { coverageFile },
+                ReportDirectory = reportDir,
+                TrustedSourceDirectory = trustedDir,
+                EnforceTrustedSourcePathFiltering = true,
+                PinApprovedSourceText = false
+            });
+            parser.TEST_BeforeGenerateReport = () => File.WriteAllText(trustedFile, "SWAPPED_MARKER");
+
+            parser.GenerateHTMLReport();
+
+            string reportText = string.Join(
+                "\n",
+                Directory.EnumerateFiles(reportDir, "*", SearchOption.AllDirectories).Select(File.ReadAllText));
+            Directory.Delete(root, true);
+
+            Assert.IsTrue(reportText.Contains("SWAPPED_MARKER"), "With the pin flag off, the report should still open the source name.");
+            Assert.IsFalse(reportText.Contains("TRUSTED_MARKER"), "The pin flag off path kept the captured text.");
+        }
+
+        [TestMethod]
         public void WillIncludeSourceInsideTrustedDirectoryInHtmlReport()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());

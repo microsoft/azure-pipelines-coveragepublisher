@@ -81,6 +81,71 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return IsWithinTrustedRoot(directPath);
         }
 
+        internal ApprovedSourceStatus TryReadApprovedLines(string path, IEnumerable<string> sourceDirectories, out string[] lines)
+        {
+            lines = null;
+            if (!HasTrustedRoots || string.IsNullOrWhiteSpace(path) || IsRemoteOrDevicePath(path))
+            {
+                return ApprovedSourceStatus.Unsafe;
+            }
+
+            if (GetPathSegments(path).Any(segment => segment == ".."))
+            {
+                return ApprovedSourceStatus.Unsafe;
+            }
+
+            string directPath = NormalizePath(path);
+            if (directPath == null)
+            {
+                return ApprovedSourceStatus.Unsafe;
+            }
+
+            if (File.Exists(directPath))
+            {
+                return ReadIfTrusted(directPath, out lines);
+            }
+
+            if (IsAbsolutePath(path))
+            {
+                return IsWithinTrustedRoot(directPath)
+                    ? ApprovedSourceStatus.Missing
+                    : ApprovedSourceStatus.Unsafe;
+            }
+
+            foreach (string candidate in GetSourceDirectoryCandidates(path, sourceDirectories))
+            {
+                if (File.Exists(candidate))
+                {
+                    return ReadIfTrusted(candidate, out lines);
+                }
+            }
+
+            return IsWithinTrustedRoot(directPath)
+                ? ApprovedSourceStatus.Missing
+                : ApprovedSourceStatus.Unsafe;
+        }
+
+        private ApprovedSourceStatus ReadIfTrusted(string path, out string[] lines)
+        {
+            lines = null;
+            string trustedRoot = _trustedRoots
+                .Where(root => IsWithinRoot(path, root))
+                .OrderByDescending(root => root.Length)
+                .FirstOrDefault();
+            if (trustedRoot == null)
+            {
+                return ApprovedSourceStatus.Unsafe;
+            }
+
+            bool read = NonFollowingFileReader.TryReadLines(trustedRoot, path, out lines, out bool blocked);
+            if (read)
+            {
+                return ApprovedSourceStatus.Approved;
+            }
+
+            return blocked ? ApprovedSourceStatus.Unsafe : ApprovedSourceStatus.Missing;
+        }
+
         private bool IsPotentiallyTrustedPath(string path)
         {
             if (!HasTrustedRoots || string.IsNullOrWhiteSpace(path) || IsRemoteOrDevicePath(path))

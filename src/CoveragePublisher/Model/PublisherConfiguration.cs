@@ -41,6 +41,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Model
         virtual public bool EnforceTrustedSourcePathFiltering { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the HTML report keeps the text captured by the trusted read.
+        /// Has no effect unless <see cref="EnforceTrustedSourcePathFiltering"/> is also set.
+        /// </summary>
+        virtual public bool PinApprovedSourceText { get; set; }
+
+        /// <summary>
         /// Gets the configuration for whether HTML reports should be generated or not.
         /// </summary>
         virtual public bool GenerateHTMLReport {
