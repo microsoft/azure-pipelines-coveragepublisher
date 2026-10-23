@@ -136,7 +136,10 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
         {
             lines = null;
             blocked = true;
-            int rootFd = Open(trustedRoot, UnixReadOnly | UnixDirectory | UnixNoFollow | UnixCloseOnExec);
+            UnixOpenFlagValues openFlags = GetUnixOpenFlags(CurrentUnixOpenPlatform());
+            int directoryOpenFlags = UnixReadOnly | openFlags.Directory | openFlags.NoFollow | openFlags.CloseOnExec;
+            int fileOpenFlags = UnixReadOnly | openFlags.NoFollow | openFlags.CloseOnExec;
+            int rootFd = Open(trustedRoot, directoryOpenFlags);
             if (rootFd < 0)
             {
                 blocked = Marshal.GetLastWin32Error() != ErrorFileNotFound;
@@ -151,7 +154,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 {
                     for (int index = 0; index < segments.Length - 1; index++)
                     {
-                        int childFd = OpenAt((int)current.DangerousGetHandle(), segments[index], UnixReadOnly | UnixDirectory | UnixNoFollow | UnixCloseOnExec);
+                        int childFd = OpenAt((int)current.DangerousGetHandle(), segments[index], directoryOpenFlags);
                         if (childFd < 0)
                         {
                             blocked = Marshal.GetLastWin32Error() != ErrorFileNotFound;
@@ -170,7 +173,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                     int fileFd = OpenAt(
                         (int)current.DangerousGetHandle(),
                         segments[segments.Length - 1],
-                        UnixReadOnly | UnixNoFollow | UnixCloseOnExec);
+                        fileOpenFlags);
                     if (fileFd < 0)
                     {
                         blocked = Marshal.GetLastWin32Error() != ErrorFileNotFound;
@@ -342,22 +345,46 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             return @"\??\" + fullPath;
         }
 
-        private static int UnixNoFollow
-        {
-            get { return 0x20000; }
-        }
-
-        private static int UnixDirectory
-        {
-            get { return 0x10000; }
-        }
-
-        private static int UnixCloseOnExec
-        {
-            get { return 0x80000; }
-        }
-
+        // Linux and Mac use different numbers for the same open instructions.
+        // Apple's fcntl.h: O_NOFOLLOW 0x100, O_DIRECTORY 0x100000, O_CLOEXEC 0x1000000.
+        private const int LinuxNoFollow = 0x20000;
+        private const int LinuxDirectory = 0x10000;
+        private const int LinuxCloseOnExec = 0x80000;
+        private const int MacNoFollow = 0x100;
+        private const int MacDirectory = 0x100000;
+        private const int MacCloseOnExec = 0x1000000;
         private const int UnixReadOnly = 0;
+
+        internal static UnixOpenFlagValues GetUnixOpenFlags(UnixOpenPlatform platform)
+        {
+            if (platform == UnixOpenPlatform.MacOs)
+            {
+                return new UnixOpenFlagValues(MacNoFollow, MacDirectory, MacCloseOnExec);
+            }
+
+            return new UnixOpenFlagValues(LinuxNoFollow, LinuxDirectory, LinuxCloseOnExec);
+        }
+
+        private static UnixOpenPlatform CurrentUnixOpenPlatform()
+        {
+#if NETFRAMEWORK
+            // net462 has no RuntimeInformation. The published Mac copy is net7.0.
+            return UnixOpenPlatform.Linux;
+#else
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return UnixOpenPlatform.MacOs;
+            }
+
+            return UnixOpenPlatform.Linux;
+#endif
+        }
+
+        /// <summary>FOR INTERNAL TEST USAGE ONLY.</summary>
+        internal static UnixOpenPlatform TEST_CurrentUnixOpenPlatform()
+        {
+            return CurrentUnixOpenPlatform();
+        }
 
         [DllImport("ntdll.dll")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -452,6 +479,28 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             {
                 get { return Handle != null && !Handle.IsInvalid; }
             }
+        }
+
+        internal enum UnixOpenPlatform
+        {
+            Linux,
+            MacOs
+        }
+
+        internal readonly struct UnixOpenFlagValues
+        {
+            public UnixOpenFlagValues(int noFollow, int directory, int closeOnExec)
+            {
+                NoFollow = noFollow;
+                Directory = directory;
+                CloseOnExec = closeOnExec;
+            }
+
+            public int NoFollow { get; }
+
+            public int Directory { get; }
+
+            public int CloseOnExec { get; }
         }
     }
 }
