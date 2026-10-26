@@ -199,27 +199,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         private static string[] ReadLines(SafeFileHandle handle)
         {
-            var bytes = new MemoryStream();
-            var buffer = new byte[8192];
-            while (true)
-            {
-                int read = Read(handle, buffer);
-                if (read == 0)
-                {
-                    break;
-                }
-
-                if (read < 0)
-                {
-                    throw new IOException("Could not read the approved source file.");
-                }
-
-                bytes.Write(buffer, 0, read);
-            }
-
-            bytes.Position = 0;
             var lines = new List<string>();
-            using (var reader = new StreamReader(bytes, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+            using (var stream = new FileStream(handle, FileAccess.Read))
+            using (var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -229,28 +211,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
 
             return lines.ToArray();
-        }
-
-        private static int Read(SafeFileHandle handle, byte[] buffer)
-        {
-            if (Path.DirectorySeparatorChar == '\\')
-            {
-                int read;
-                if (!ReadFile(handle, buffer, buffer.Length, out read, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    if (error == 38 || error == 109)
-                    {
-                        return 0;
-                    }
-
-                    return -1;
-                }
-
-                return read;
-            }
-
-            return UnixRead((int)handle.DangerousGetHandle(), buffer, buffer.Length);
         }
 
         private static bool IsReparsePoint(SafeFileHandle handle)
@@ -403,15 +363,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        private static extern bool ReadFile(
-            SafeFileHandle file,
-            byte[] buffer,
-            int numberOfBytesToRead,
-            out int numberOfBytesRead,
-            IntPtr overlapped);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         private static extern bool GetFileInformationByHandleEx(
             SafeFileHandle file,
             int fileInformationClass,
@@ -423,9 +374,6 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         [DllImport("libc", EntryPoint = "openat", SetLastError = true)]
         private static extern int OpenAt(int directoryHandle, string path, int flags);
-
-        [DllImport("libc", EntryPoint = "read", SetLastError = true)]
-        private static extern int UnixRead(int fileHandle, byte[] buffer, int count);
 
         [StructLayout(LayoutKind.Sequential)]
         private struct UnicodeStringNative

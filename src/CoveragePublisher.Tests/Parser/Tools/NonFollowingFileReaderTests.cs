@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -58,6 +61,86 @@ namespace CoveragePublisher.Tests
             Assert.AreEqual(expected.NoFollow, actual.NoFollow);
             Assert.AreEqual(expected.Directory, actual.Directory);
             Assert.AreEqual(expected.CloseOnExec, actual.CloseOnExec);
+        }
+
+        [TestMethod]
+        public void ReadsEmptyFile()
+        {
+            string[] lines = ReadTrustedLines(string.Empty, new UTF8Encoding(false));
+
+            CollectionAssert.AreEqual(Array.Empty<string>(), lines);
+        }
+
+        [TestMethod]
+        public void ReadsUtf8WithoutEncodingMarker()
+        {
+            string[] expected = { "class Source { }", "\u00E9 \u03A9 \u4E2D \uD83D\uDE00" };
+            string[] lines = ReadTrustedLines(string.Join("\n", expected), new UTF8Encoding(false));
+
+            CollectionAssert.AreEqual(expected, lines);
+        }
+
+        [TestMethod]
+        [DataRow("utf-8")]
+        [DataRow("utf-16")]
+        [DataRow("utf-16BE")]
+        [DataRow("utf-32")]
+        [DataRow("utf-32BE")]
+        public void ReadsTextWithEncodingMarker(string encodingName)
+        {
+            string[] expected = { "class Source { }", "\u00E9 \u03A9 \u4E2D \uD83D\uDE00" };
+            string[] lines = ReadTrustedLines(string.Join("\n", expected), Encoding.GetEncoding(encodingName));
+
+            CollectionAssert.AreEqual(expected, lines);
+        }
+
+        [TestMethod]
+        [DataRow("\n")]
+        [DataRow("\r")]
+        [DataRow("\r\n")]
+        public void ReadsEmptyLinesWithDifferentLineEndings(string lineEnding)
+        {
+            string[] expected = { "first", string.Empty, "third" };
+            string contents = string.Join(lineEnding, expected) + lineEnding;
+            string[] lines = ReadTrustedLines(contents, new UTF8Encoding(false));
+
+            CollectionAssert.AreEqual(expected, lines);
+        }
+
+        [TestMethod]
+        public void ReadsMultibyteTextAcrossBufferBoundaries()
+        {
+            string longLine = new string('x', 8191) + "\u00E9" + new string('y', 16384);
+            string[] expected = { longLine, "\u4E2D" };
+            string[] lines = ReadTrustedLines(string.Join("\r\n", expected), new UTF8Encoding(false));
+
+            CollectionAssert.AreEqual(expected, lines);
+        }
+
+        private static string[] ReadTrustedLines(string contents, Encoding encoding)
+        {
+            string trustedDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(trustedDirectory);
+            try
+            {
+                string sourceFile = Path.Combine(trustedDirectory, "Source.cs");
+                File.WriteAllText(sourceFile, contents, encoding);
+
+                bool read = NonFollowingFileReader.TryReadLines(
+                    trustedDirectory,
+                    sourceFile,
+                    out string[] lines,
+                    out bool blocked);
+
+                Assert.IsTrue(read, "The trusted source file could not be read.");
+                Assert.IsFalse(blocked, "The trusted source file was blocked.");
+
+                return lines;
+            }
+            finally
+            {
+                Directory.Delete(trustedDirectory, true);
+            }
         }
     }
 }
