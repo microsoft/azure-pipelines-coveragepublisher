@@ -76,6 +76,67 @@ namespace CoveragePublisher.Tests
         }
 
         [TestMethod]
+        public void AllowsDeterministicPathOfFileInsideTrustedDirectory()
+        {
+            // Deterministic builds report paths from the virtual root /_/, which ReportGenerator reads from the source directories
+            Directory.CreateDirectory(Path.Combine(_trustedDirectory, "src"));
+            File.WriteAllText(Path.Combine(_trustedDirectory, "src", "Source.cs"), "class Source {}");
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory }, new[] { _trustedDirectory });
+
+            Assert.IsTrue(filter.IsElementIncludedInReport("/_/src/Source.cs"));
+            Assert.IsTrue(filter.IsSafeForRead("/_/src/Source.cs", new[] { _trustedDirectory }));
+            Assert.IsTrue(filter.IsElementIncludedInReport("/_1/src/Source.cs"));
+            Assert.IsTrue(filter.IsSafeForRead("/_1/src/Source.cs", new[] { _trustedDirectory }));
+        }
+
+        [TestMethod]
+        public void AllowsPathFromAnotherAgentOfFileInsideTrustedDirectory()
+        {
+            // Coverage collected on another agent, e.g. tests run on Linux and published on Windows
+            Directory.CreateDirectory(Path.Combine(_trustedDirectory, "src"));
+            File.WriteAllText(Path.Combine(_trustedDirectory, "src", "Source.cs"), "class Source {}");
+            string otherAgentPath = $"/{Guid.NewGuid()}/work/1/s/src/Source.cs";
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory }, new[] { _trustedDirectory });
+
+            Assert.IsTrue(filter.IsElementIncludedInReport(otherAgentPath));
+            Assert.IsTrue(filter.IsSafeForRead(otherAgentPath, new[] { _trustedDirectory }));
+        }
+
+        [TestMethod]
+        public void RejectsDeterministicPathOfFileOutsideTrustedDirectory()
+        {
+            string untrustedDirectory = Path.Combine(_testDirectory, "untrusted");
+            Directory.CreateDirectory(Path.Combine(untrustedDirectory, "src"));
+            File.WriteAllText(Path.Combine(untrustedDirectory, "src", "Secret.cs"), "secret");
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory }, new[] { untrustedDirectory });
+
+            Assert.IsFalse(filter.IsElementIncludedInReport("/_/src/Secret.cs"));
+            Assert.IsFalse(filter.IsSafeForRead("/_/src/Secret.cs", new[] { untrustedDirectory }));
+        }
+
+        [TestMethod]
+        public void RejectsDeterministicPathOfMissingFile()
+        {
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory }, new[] { _trustedDirectory });
+
+            Assert.IsFalse(filter.IsElementIncludedInReport("/_/src/Missing.cs"));
+            Assert.IsFalse(filter.IsSafeForRead("/_/src/Missing.cs", new[] { _trustedDirectory }));
+        }
+
+        [TestMethod]
+        public void RejectsExistingFileOutsideTrustedDirectoryEvenIfSourceDirectoryHasOne()
+        {
+            // ReportGenerator reads a file at the path itself before searching the source directories
+            string secretFile = Path.Combine(_testDirectory, "Source.cs");
+            File.WriteAllText(secretFile, "secret");
+            File.WriteAllText(Path.Combine(_trustedDirectory, "Source.cs"), "class Source {}");
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory }, new[] { _trustedDirectory });
+
+            Assert.IsFalse(filter.IsElementIncludedInReport(secretFile));
+            Assert.IsFalse(filter.IsSafeForRead(secretFile, new[] { _trustedDirectory }));
+        }
+
+        [TestMethod]
         public void RejectsTrustedDirectoryThatIsSymbolicLink()
         {
             string targetDirectory = Path.Combine(_testDirectory, "target");
@@ -135,6 +196,36 @@ namespace CoveragePublisher.Tests
 
             var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory });
             ApprovedSourceStatus status = filter.TryReadApprovedLines(linkedFile, new[] { _trustedDirectory }, out string[] lines);
+
+            Assert.AreEqual(ApprovedSourceStatus.Unsafe, status);
+            Assert.IsNull(lines);
+        }
+
+        [TestMethod]
+        public void ReadsApprovedTextForDeterministicAndOtherAgentPaths()
+        {
+            Directory.CreateDirectory(Path.Combine(_trustedDirectory, "src"));
+            File.WriteAllText(Path.Combine(_trustedDirectory, "src", "Source.cs"), "TRUSTED_MARKER");
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory }, new[] { _trustedDirectory });
+
+            foreach (string path in new[] { "/_/src/Source.cs", $"/{Guid.NewGuid()}/work/1/s/src/Source.cs" })
+            {
+                ApprovedSourceStatus status = filter.TryReadApprovedLines(path, new[] { _trustedDirectory }, out string[] lines);
+
+                Assert.AreEqual(ApprovedSourceStatus.Approved, status, path);
+                Assert.AreEqual("TRUSTED_MARKER", lines[0], path);
+            }
+        }
+
+        [TestMethod]
+        public void DoesNotReadApprovedTextForDeterministicPathOfFileOutsideTrustedDirectory()
+        {
+            string untrustedDirectory = Path.Combine(_testDirectory, "untrusted");
+            Directory.CreateDirectory(Path.Combine(untrustedDirectory, "src"));
+            File.WriteAllText(Path.Combine(untrustedDirectory, "src", "Secret.cs"), "secret");
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory }, new[] { untrustedDirectory });
+
+            ApprovedSourceStatus status = filter.TryReadApprovedLines("/_/src/Secret.cs", new[] { untrustedDirectory }, out string[] lines);
 
             Assert.AreEqual(ApprovedSourceStatus.Unsafe, status);
             Assert.IsNull(lines);

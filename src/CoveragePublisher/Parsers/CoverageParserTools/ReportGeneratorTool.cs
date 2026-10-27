@@ -136,7 +136,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             if (Configuration.EnforceTrustedSourcePathFiltering)
             {
                 var trustedSourcePathFilter = new TrustedSourcePathFilter(
-                    sourceDirectories.Concat(SplitDirectories(Configuration.TrustedSourceDirectory)));
+                    sourceDirectories.Concat(SplitDirectories(Configuration.TrustedSourceDirectory)),
+                    sourceDirectories);
                 htmlParserResult = ParseCoverageFiles(
                     new List<string>(Configuration.CoverageFiles),
                     trustedSourcePathFilter);
