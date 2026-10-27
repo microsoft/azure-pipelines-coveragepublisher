@@ -367,6 +367,53 @@ debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML repor
             Directory.Delete(tempDir, true);
         }
 
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void WillIncludeDeterministicSourcePathInsideTrustedDirectoryInHtmlReport(bool pinApprovedSourceText)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var sourcesDir = Path.Combine(tempDir, "s");
+            var reportDir = Path.Combine(tempDir, "report");
+            Directory.CreateDirectory(Path.Combine(sourcesDir, "src"));
+
+            const string sourceMarker = "DETERMINISTIC_SOURCE_RENDERING_TEST";
+            File.WriteAllText(Path.Combine(sourcesDir, "src", "Source.cs"), sourceMarker);
+
+            // A deterministic build (ContinuousIntegrationBuild) reports paths from the virtual root /_/
+            var coverageFile = Path.Combine(tempDir, "coverage.xml");
+            File.WriteAllText(coverageFile, @"<?xml version=""1.0""?>
+<coverage line-rate=""1"" branch-rate=""0"" version=""1"">
+  <packages>
+    <package name=""sample"" line-rate=""1"" branch-rate=""0"">
+      <classes>
+        <class name=""Source"" filename=""/_/src/Source.cs"" line-rate=""1"" branch-rate=""0"">
+          <methods />
+          <lines><line number=""1"" hits=""1"" /></lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>");
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new[] { coverageFile },
+                ReportDirectory = reportDir,
+                SourceDirectory = sourcesDir,
+                TrustedSourceDirectory = sourcesDir,
+                EnforceTrustedSourcePathFiltering = true,
+                PinApprovedSourceText = pinApprovedSourceText
+            });
+
+            parser.GenerateHTMLReport();
+
+            Assert.IsTrue(Directory.EnumerateFiles(reportDir, "*", SearchOption.AllDirectories)
+                .Any(file => File.ReadAllText(file).Contains(sourceMarker)));
+
+            Directory.Delete(tempDir, true);
+        }
+
         [TestMethod]
         public void WillPreserveLegacySourceRenderingWhenTrustedPathFilteringIsDisabled()
         {

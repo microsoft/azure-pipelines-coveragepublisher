@@ -6,16 +6,41 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 {
     internal sealed class TrustedSourcePathFilter : IFilter
     {
+        /// <summary>
+        /// A deterministic path, as ReportGenerator recognizes it, e.g. <c>/_/src/File.cs</c>
+        /// </summary>
+        private static readonly Regex DeterministicPathRegex = new Regex("\\/_\\d?\\/", RegexOptions.Compiled);
+
+        /// <summary>
+        /// The directories ReportGenerator searches for deterministic paths when no source directories are given
+        /// </summary>
+        private static readonly IReadOnlyList<string> DeterministicSourceDirectories = GetDeterministicSourceDirectories();
+
         private readonly IReadOnlyList<string> _trustedRoots;
+        private readonly IReadOnlyList<string> _sourceDirectories;
         private readonly StringComparison _pathComparison;
 
         public TrustedSourcePathFilter(IEnumerable<string> trustedRoots)
+            : this(trustedRoots, null)
         {
+        }
+
+        /// <param name="trustedRoots">The directories source files may be read from</param>
+        /// <param name="sourceDirectories">
+        /// The source directories ReportGenerator searches for source files that are not at their path in the coverage report
+        /// </param>
+        public TrustedSourcePathFilter(IEnumerable<string> trustedRoots, IEnumerable<string> sourceDirectories)
+        {
+            _sourceDirectories = (sourceDirectories ?? Enumerable.Empty<string>())
+                .Where(directory => !string.IsNullOrWhiteSpace(directory))
+                .ToArray();
+
             _pathComparison = Path.DirectorySeparatorChar == '\\'
                 ? StringComparison.OrdinalIgnoreCase
                 : StringComparison.Ordinal;
@@ -52,33 +77,15 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 return false;
             }
 
+            string resolvedPath = ResolveSourceFile(path, sourceDirectories);
+            if (resolvedPath != null)
+            {
+                return IsTrustedExistingPath(resolvedPath);
+            }
+
+            // ReportGenerator finds no file for the path: only one created at the path itself could be read later
             string directPath = NormalizePath(path);
-            if (directPath == null)
-            {
-                return false;
-            }
-
-            if (File.Exists(directPath))
-            {
-                return IsTrustedExistingPath(directPath);
-            }
-
-            if (IsAbsolutePath(path))
-            {
-                return IsWithinTrustedRoot(directPath);
-            }
-
-            foreach (string candidate in GetSourceDirectoryCandidates(path, sourceDirectories))
-            {
-                if (File.Exists(candidate))
-                {
-                    return IsTrustedExistingPath(candidate);
-                }
-            }
-
-            // A missing relative path can only be resolved from the process working directory
-            // or one of the explicitly configured source directories.
-            return IsWithinTrustedRoot(directPath);
+            return directPath != null && IsWithinTrustedRoot(directPath);
         }
 
         internal ApprovedSourceStatus TryReadApprovedLines(string path, IEnumerable<string> sourceDirectories, out string[] lines)
@@ -100,24 +107,12 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                 return ApprovedSourceStatus.Unsafe;
             }
 
-            if (File.Exists(directPath))
+            // The file ReportGenerator would read, e.g. for a deterministic path (/_/src/File.cs)
+            // or a path on the agent that ran the tests
+            string resolvedPath = ResolveSourceFile(path, sourceDirectories);
+            if (resolvedPath != null)
             {
-                return ReadIfTrusted(directPath, out lines);
-            }
-
-            if (IsAbsolutePath(path))
-            {
-                return IsWithinTrustedRoot(directPath)
-                    ? ApprovedSourceStatus.Missing
-                    : ApprovedSourceStatus.Unsafe;
-            }
-
-            foreach (string candidate in GetSourceDirectoryCandidates(path, sourceDirectories))
-            {
-                if (File.Exists(candidate))
-                {
-                    return ReadIfTrusted(candidate, out lines);
-                }
+                return ReadIfTrusted(resolvedPath, out lines);
             }
 
             return IsWithinTrustedRoot(directPath)
@@ -164,7 +159,76 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
             }
 
             string normalizedPath = NormalizePath(path);
-            return normalizedPath != null && IsWithinTrustedRoot(normalizedPath);
+            if (normalizedPath != null && IsWithinTrustedRoot(normalizedPath))
+            {
+                return true;
+            }
+
+            // An absolute path outside the trusted roots that does not exist, e.g. a deterministic path (/_/src/File.cs)
+            // or a path on the agent that ran the tests: ReportGenerator reads it from under the source directories.
+            // Trusted if the file it would read is.
+            string resolvedPath = ResolveSourceFile(path, _sourceDirectories);
+            return resolvedPath != null && IsTrustedExistingPath(resolvedPath);
+        }
+
+        /// <summary>
+        /// Gets the file ReportGenerator reads for a path in a coverage report, or null if there is none.
+        /// </summary>
+        /// <remarks>
+        /// The same search as ReportGenerator's LocalFileReader, so that the file checked is the file read:
+        /// the path itself; then, for a deterministic path, the path after the /_/ segment, from the working directory;
+        /// then the path under each source directory, without each of its leading segments in turn.
+        /// For a deterministic path with no source directories, ReportGenerator searches its own deterministic source directories.
+        /// </remarks>
+        private static string ResolveSourceFile(string path, IEnumerable<string> sourceDirectories)
+        {
+            IEnumerable<string> directories = sourceDirectories ?? Enumerable.Empty<string>();
+
+            string directPath = NormalizePath(path);
+            if (directPath != null && File.Exists(directPath))
+            {
+                return directPath;
+            }
+
+            if (path.StartsWith("/_", StringComparison.Ordinal) && DeterministicPathRegex.IsMatch(path))
+            {
+                path = path.Substring(path.IndexOf('/', 2) + 1);
+
+                string relativePath = NormalizePath(path);
+                if (relativePath != null && File.Exists(relativePath))
+                {
+                    return relativePath;
+                }
+
+                if (!directories.Any())
+                {
+                    directories = DeterministicSourceDirectories;
+                }
+            }
+
+            return GetSourceDirectoryCandidates(path, directories).FirstOrDefault(File.Exists);
+        }
+
+        /// <summary>
+        /// As ReportGenerator's LocalFileReader
+        /// </summary>
+        private static IReadOnlyList<string> GetDeterministicSourceDirectories()
+        {
+            var directories = new List<string>();
+
+            if ("true".Equals(Environment.GetEnvironmentVariable("TF_BUILD"), StringComparison.OrdinalIgnoreCase)
+                && Environment.GetEnvironmentVariable("Build.SourcesDirectory") != null)
+            {
+                directories.Add(Environment.GetEnvironmentVariable("Build.SourcesDirectory"));
+            }
+
+            if ("true".Equals(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"), StringComparison.OrdinalIgnoreCase)
+                && Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") != null)
+            {
+                directories.Add(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"));
+            }
+
+            return directories;
         }
 
         private bool IsTrustedExistingPath(string path)
