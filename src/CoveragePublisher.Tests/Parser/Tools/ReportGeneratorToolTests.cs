@@ -412,5 +412,135 @@ debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML repor
 
             Directory.Delete(tempDir, true);
         }
+
+        [TestMethod]
+        public void WillGenerateHtmlReportWhenReportGeneratorArgumentsIsEmpty()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new string[] { "SampleCoverage/Cobertura.xml" },
+                ReportDirectory = tempDir,
+                ReportGeneratorArguments = null
+            });
+
+            parser.GenerateHTMLReport();
+
+            Assert.IsTrue(Directory.EnumerateFiles(tempDir, "index.htm").Any());
+
+            Directory.Delete(tempDir, true);
+
+            Assert.IsTrue(_logger.Log.Contains(@"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
+".Trim()));
+        }
+
+        [TestMethod]
+        public void WillPassThroughAdditionalArgumentsWithoutChangingDefaultReportType()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new string[] { "SampleCoverage/Cobertura.xml" },
+                ReportDirectory = tempDir,
+                ReportGeneratorArguments = "-verbosity:Verbose"
+            });
+
+            parser.GenerateHTMLReport();
+
+            // reporttypes default (HtmlInline_AzurePipelines) is unaffected by the unrelated -verbosity: argument.
+            Assert.IsTrue(Directory.EnumerateFiles(tempDir, "index.htm").Any());
+
+            Directory.Delete(tempDir, true);
+
+            Assert.IsTrue(_logger.Log.Contains(@"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
+".Trim()));
+        }
+
+        [TestMethod]
+        public void WillOverrideDefaultReportTypeWithReportGeneratorArguments()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new string[] { "SampleCoverage/Cobertura.xml" },
+                ReportDirectory = tempDir,
+                ReportGeneratorArguments = "-reporttypes:Cobertura"
+            });
+
+            parser.GenerateHTMLReport();
+
+            // The user-supplied reporttypes:Cobertura replaces the HtmlInline_AzurePipelines default,
+            // so a Cobertura xml report is generated instead of the html report.
+            Assert.IsTrue(Directory.EnumerateFiles(tempDir, "Cobertura.xml").Any());
+            Assert.IsFalse(Directory.EnumerateFiles(tempDir, "index.htm").Any());
+
+            Directory.Delete(tempDir, true);
+
+            Assert.IsTrue(_logger.Log.Contains(@"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
+".Trim()));
+        }
+
+        [TestMethod]
+        [DataRow("-title:MyTitle", "MyTitle", DisplayName = "No quotes")]
+        [DataRow("-title:\"MyTitle\"", "MyTitle", DisplayName = "Quotes, no spaces")]
+        [DataRow("-title:\"My Custom Title\"", "My Custom Title", DisplayName = "Quotes, spaces")]
+        [DataRow("-title:\"She said \\\"hi\\\"\"", "She said &quot;hi&quot;", DisplayName = "Escaped quotes")]
+        public void WillParseReportGeneratorArgumentValue(string reportGeneratorArguments, string expectedTitle)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new string[] { "SampleCoverage/Cobertura.xml" },
+                ReportDirectory = tempDir,
+                ReportGeneratorArguments = reportGeneratorArguments
+            });
+
+            parser.GenerateHTMLReport();
+
+            var indexPath = Path.Combine(tempDir, "index.htm");
+            Assert.IsTrue(File.Exists(indexPath));
+            Assert.IsTrue(File.ReadAllText(indexPath).Contains(expectedTitle));
+
+            Directory.Delete(tempDir, true);
+
+            Assert.IsTrue(_logger.Log.Contains(@"
+debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
+debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
+".Trim()));
+        }
+
+        [TestMethod]
+        public void WillNotReplaceReservedSettingsWithReportGeneratorArguments()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var otherDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            var parser = new ReportGeneratorTool(new PublisherConfiguration()
+            {
+                CoverageFiles = new string[] { "SampleCoverage/Cobertura.xml" },
+                ReportDirectory = tempDir,
+                ReportGeneratorArguments = $"-targetdir:\"{otherDir}\" -sourcedirs:\"{otherDir}\""
+            });
+
+            parser.GenerateHTMLReport();
+
+            // The source and report directories are the publisher's own: the trusted source path checks depend on them
+            Assert.IsTrue(Directory.EnumerateFiles(tempDir, "index.htm").Any());
+            Assert.IsFalse(Directory.Exists(otherDir));
+            Assert.IsTrue(_logger.Log.Contains("Ignored ReportGenerator argument -targetdir"));
+            Assert.IsTrue(_logger.Log.Contains("Ignored ReportGenerator argument -sourcedirs"));
+
+            Directory.Delete(tempDir, true);
+        }
     }
 }
