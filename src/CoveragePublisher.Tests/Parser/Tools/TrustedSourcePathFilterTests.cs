@@ -99,5 +99,45 @@ namespace CoveragePublisher.Tests
 
             Assert.IsFalse(filter.IsSafeForRead(sourceFile, new[] { linkedDirectory }));
         }
+
+        [TestMethod]
+        public void ReadsApprovedTextFromTrustedFile()
+        {
+            string sourceFile = Path.Combine(_trustedDirectory, "source.cs");
+            File.WriteAllText(sourceFile, "TRUSTED_MARKER");
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory });
+
+            ApprovedSourceStatus status = filter.TryReadApprovedLines(sourceFile, new[] { _trustedDirectory }, out string[] lines);
+
+            Assert.AreEqual(ApprovedSourceStatus.Approved, status);
+            Assert.AreEqual("TRUSTED_MARKER", lines[0]);
+        }
+
+        [TestMethod]
+        public void DoesNotReadThroughSymbolicLink()
+        {
+            string outsideDirectory = Path.Combine(_testDirectory, "outside");
+            Directory.CreateDirectory(outsideDirectory);
+            string outsideFile = Path.Combine(outsideDirectory, "secret.txt");
+            File.WriteAllText(outsideFile, "SWAPPED_MARKER");
+            string linkedFile = Path.Combine(_trustedDirectory, "source.cs");
+
+            try
+            {
+                File.CreateSymbolicLink(linkedFile, outsideFile);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException
+                || ex is PlatformNotSupportedException
+                || ex is IOException)
+            {
+                Assert.Inconclusive($"Symbolic links are not available in this test environment: {ex.Message}");
+            }
+
+            var filter = new TrustedSourcePathFilter(new[] { _trustedDirectory });
+            ApprovedSourceStatus status = filter.TryReadApprovedLines(linkedFile, new[] { _trustedDirectory }, out string[] lines);
+
+            Assert.AreEqual(ApprovedSourceStatus.Unsafe, status);
+            Assert.IsNull(lines);
+        }
     }
 }

@@ -25,6 +25,8 @@ namespace CoveragePublisher.Tests
 
             --enableTrustedSourcePathFiltering    (Default: false) Exclude source files outside trusted source directories from HTML reports.
 
+            --pinApprovedSourceText    (Default: false) Keep the approved source text for the HTML report. No effect unless trusted source path filtering is also enabled.
+
             --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
 
             --noTelemetry        (Default: false) Disable telemetry data collection.
