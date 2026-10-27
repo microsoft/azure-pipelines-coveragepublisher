@@ -6,6 +6,7 @@ using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using Palmmedia.ReportGenerator.Core.Parser;
+using Palmmedia.ReportGenerator.Core.Parser.FileReading;
 using Palmmedia.ReportGenerator.Core.Parser.Filtering;
 using System;
 using System.Collections.Generic;
@@ -132,6 +133,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             string[] sourceDirectories = SplitDirectories(Configuration.SourceDirectory);
             ParserResult htmlParserResult = _parserResult;
+            IFileReader fileReader = null;
 
             if (Configuration.EnforceTrustedSourcePathFiltering)
             {
@@ -173,19 +175,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                         if (status == ApprovedSourceStatus.Missing)
                         {
-                            int lineCount = file.LineCoverage == null ? 0 : file.LineCoverage.Count;
+                            int lineCount = file.LineCoverage == null ? 0 : file.LineCoverage.Length;
                             lines = Enumerable.Repeat(string.Empty, lineCount).ToArray();
                         }
 
                         approvedLines[file.Path] = lines;
                     }
 
-                    if (!ApprovedSourcePin.TryPin(sourceFiles, approvedLines))
-                    {
-                        TraceLogger.Warning("HTML source report generation was blocked because the approved source text could not be kept for rendering.");
-                        WriteBlockedSourceReport(Configuration.ReportDirectory);
-                        return;
-                    }
+                    fileReader = new ApprovedSourceFileReader(approvedLines);
                 }
                 else
                 {
@@ -212,7 +209,14 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
             var generator = new Generator();
 
-            generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), htmlParserResult);
+            if (fileReader == null)
+            {
+                generator.GenerateReport(reportGeneratorConfig, new Settings(), new RiskHotspotsAnalysisThresholds(), htmlParserResult);
+            }
+            else
+            {
+                generator.GenerateReport(reportGeneratorConfig, new Settings(), new MinimumCoverageThresholds(), new RiskHotspotsAnalysisThresholds(), htmlParserResult, fileReader);
+            }
         }
 
         private ParserResult ParseCoverageFiles(List<string> coverageFiles)
