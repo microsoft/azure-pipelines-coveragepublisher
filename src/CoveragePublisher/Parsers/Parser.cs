@@ -14,6 +14,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
         private PublisherConfiguration _configuration;
         private Lazy<ICoverageParserTool> _coverageParserTool;
         private ITelemetryDataCollector _telemetry;
+        private bool _htmlReportGenerated;
 
         public Parser(PublisherConfiguration config, ITelemetryDataCollector telemetry)
         {
@@ -56,7 +57,13 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
         protected virtual void GenerateHTMLReport(ICoverageParserTool tool)
         {
-            if (_configuration.GenerateHTMLReport)
+            // Both GetFileCoverageInfos() and GetCoverageSummary() call into this method,
+            // and CoverageProcessor invokes both in sequence. ReportGenerator is expensive
+            // (minutes for large reports - see issue #72) and produces identical output on
+            // every call against the same _parserResult, so render only once per Parser
+            // instance. On failure, leave _htmlReportGenerated = false so the next caller
+            // gets a retry, matching the existing swallow-and-log semantics.
+            if (_configuration.GenerateHTMLReport && !_htmlReportGenerated)
             {
                 try
                 {
@@ -95,6 +102,8 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
                             TraceLogger.Debug("Parser.GenerateHTMLReport: Directory " + _configuration.ReportDirectory + " doesn't exist, skipping copying of coverage input files.");
                         }
                     }
+
+                    _htmlReportGenerated = true;
                 }
                 catch (Exception e)
                 {
