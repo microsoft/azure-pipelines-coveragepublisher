@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFrameworks>net7.0;net462</TargetFrameworks>
+    <TargetFrameworks>net10.0;net462</TargetFrameworks>
     <RootNamespace>Microsoft.Azure.Pipelines.CoveragePublisher</RootNamespace>
     <AssemblyName>Microsoft.Azure.Pipelines.CoveragePublisher</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -12,7 +12,7 @@
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.239.0-preview" />
     <PackageReference Include="Microsoft.TeamFoundation.PublishTestResults" Version="19.239.0-preview" />
-    <PackageReference Include="ReportGenerator.Core" Version="5.5.0" />
+    <PackageReference Include="ReportGenerator.Core" Version="5.5.9" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />

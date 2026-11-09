@@ -172,7 +172,7 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher.Parsers
 
                         if (status == ApprovedSourceStatus.Missing)
                         {
-                            int lineCount = file.LineCoverage == null ? 0 : file.LineCoverage.Count;
+                            int lineCount = file.LineCoverage == null ? 0 : file.LineCoverage.Length;
                             lines = Enumerable.Repeat(string.Empty, lineCount).ToArray();
                         }
 
