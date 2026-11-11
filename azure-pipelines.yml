@@ -92,17 +92,17 @@ extends:
           inputs:
             forceReinstallCredentialProvider: true
 
-        - task: UseDotNet@2
-          displayName: 'Use .NET SDK 10.0.x'
-          inputs:
-            version: 10.0.x
-
         - task: NuGetCommand@2
           displayName: NuGet restore
           inputs:
             restoreSolution: '$(solution)'
             feedsToUse: config
             nugetConfigPath: 'nuget.config'
+
+        - task: UseDotNet@2
+          displayName: 'Use .NET SDK 7.0.x'
+          inputs:
+            version: 7.0.x
 
         - task: DotNetCoreCLI@2
           displayName: Build solution
@@ -129,7 +129,7 @@ extends:
             command: publish
             publishWebProjects: false
             projects: '**/CoveragePublisher.Console.csproj'
-            arguments: '--no-build -c $(buildConfiguration) -f net10.0 -r win-x64'
+            arguments: '--no-build -c $(buildConfiguration) -f net7.0 -r win-x64'
             zipAfterPublish: false
             modifyOutputPath: false
 
@@ -139,7 +139,7 @@ extends:
             command: publish
             publishWebProjects: false
             projects: '**/CoveragePublisher.Console.csproj'
-            arguments: '-c $(buildConfiguration) -f net10.0 -r linux-x64'
+            arguments: '-c $(buildConfiguration) -f net7.0 -r linux-x64'
             zipAfterPublish: false
             modifyOutputPath: false
 
@@ -149,28 +149,28 @@ extends:
             command: publish
             publishWebProjects: false
             projects: '**/CoveragePublisher.Console.csproj'
-            arguments: '-c $(buildConfiguration) -f net10.0 -r osx-x64'
+            arguments: '-c $(buildConfiguration) -f net7.0 -r osx-x64'
             zipAfterPublish: false
             modifyOutputPath: false
 
         - task: CopyFiles@2
           displayName: Stage win-x64 payload
           inputs:
-            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net10.0/win-x64/publish/'
+            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/win-x64/publish/'
             Contents: '**'
             TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
         - task: CopyFiles@2
           displayName: Stage linux-x64 payload
           inputs:
-            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net10.0/linux-x64/publish/'
+            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/linux-x64/publish/'
             Contents: '**'
             TargetFolder: '$(Build.ArtifactStagingDirectory)/linux-x64'
 
         - task: CopyFiles@2
           displayName: Stage win-x64 dll + runtimeconfig
           inputs:
-            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net10.0/win-x64'
+            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/win-x64'
             Contents: |
               **/*.dll
               CoveragePublisher.Console.runtimeconfig.json
@@ -179,7 +179,7 @@ extends:
         - task: CopyFiles@2
           displayName: Stage osx-x64 payload
           inputs:
-            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net10.0/osx-x64/publish/'
+            SourceFolder: '$(Build.SourcesDirectory)/src/CoveragePublisher.Console/bin/Release/net7.0/osx-x64/publish/'
             Contents: '**'
             TargetFolder: '$(Build.ArtifactStagingDirectory)/osx-x64'
 

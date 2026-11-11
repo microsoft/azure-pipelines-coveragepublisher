@@ -95,7 +95,7 @@ namespace CoveragePublisher.Tests
                 It.Is<int>(a => a == _context.BuildId),
                 It.Is<string>(b => b == containerPath),
                 It.Is<string>(c => c == ArtifactResourceTypes.Container),
-                It.Is<string>(d => d == $"#/{_context.ContainerId}/{containerPath}"),
+                It.Is<string>(d => d == string.Format($"#/{_context.ContainerId}/{containerPath}")),
                 It.Is<Dictionary<string, string>>(e => 
                     e[Constants.ArtifactUploadEventProperties.ContainerFolder] == containerPath &&
                     e[Constants.ArtifactUploadEventProperties.ArtifactName] == containerPath &&
