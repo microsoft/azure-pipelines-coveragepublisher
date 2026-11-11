@@ -4,11 +4,14 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Microsoft.Azure.Pipelines.CoveragePublisher;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Model;
 using Microsoft.Azure.Pipelines.CoveragePublisher.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CoveragePublisher.Tests
 {
@@ -146,6 +149,124 @@ debug: ReportGeneratorTool.GetCoverageSummary: Generating coverage summary for t
 debug: ReportGeneratorTool.ParseCoverageFiles: Parsing coverage files.
 debug: ReportGeneratorTool.CreateHTMLReportFromParserResult: Creating HTML report.
 ".Trim()));
+        }
+
+        [TestMethod]
+        [DataRow("\"\\", "\"\\", false)]
+        [DataRow("\"\\", "\"\\", true)]
+        [DataRow("</script><div data-coverage-test=\"inert\">&</div>", "\"\\&", false)]
+        [DataRow("</script><div data-coverage-test=\"inert\">&</div>", "\"\\&", true)]
+        [DataRow("\u2028\u2029", "\u2028\u2029", false)]
+        [DataRow("\u2028\u2029", "\u2028\u2029", true)]
+        public void WillEncodeCoverageNamesInHtmlReport(string packageMetadata, string classMetadata, bool enforceTrustedSourcePathFiltering)
+        {
+            string root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string reportDir = Path.Combine(root, "report");
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                string packageName = "Package" + packageMetadata;
+                string className = "Class" + classMetadata;
+                string coverageFile = Path.Combine(root, "coverage.xml");
+                File.WriteAllText(Path.Combine(root, "Source.cs"), "TRUSTED_SOURCE");
+                var coverage = new XDocument(
+                    new XElement("coverage",
+                        new XAttribute("line-rate", "1"),
+                        new XAttribute("branch-rate", "0"),
+                        new XAttribute("version", "1"),
+                        new XElement("sources", new XElement("source", root)),
+                        new XElement("packages",
+                            new XElement("package",
+                                new XAttribute("name", packageName),
+                                new XAttribute("line-rate", "1"),
+                                new XAttribute("branch-rate", "0"),
+                                new XElement("classes",
+                                    new XElement("class",
+                                        new XAttribute("name", className),
+                                        new XAttribute("filename", "Source.cs"),
+                                        new XAttribute("line-rate", "1"),
+                                        new XAttribute("branch-rate", "0"),
+                                        new XElement("methods"),
+                                        new XElement("lines",
+                                            new XElement("line", new XAttribute("number", "1"), new XAttribute("hits", "1")))))))));
+                coverage.Save(coverageFile);
+
+                var parser = new ReportGeneratorTool(new PublisherConfiguration
+                {
+                    CoverageFiles = new[] { coverageFile },
+                    ReportDirectory = reportDir,
+                    TrustedSourceDirectory = root,
+                    EnforceTrustedSourcePathFiltering = enforceTrustedSourcePathFiltering,
+                    PinApprovedSourceText = enforceTrustedSourcePathFiltering
+                });
+
+                parser.GenerateHTMLReport();
+
+                string report = File.ReadAllText(Path.Combine(reportDir, "index.html"));
+                Match assembliesMatch = Regex.Match(report, @"\bvar assemblies\s*=\s*(?<assemblies>\[.*?\]);", RegexOptions.Singleline);
+                Assert.IsTrue(assembliesMatch.Success, "The generated report must contain coverage metadata.");
+
+                string serializedAssemblies = assembliesMatch.Groups["assemblies"].Value;
+                Assert.AreEqual(-1, serializedAssemblies.IndexOfAny(new[] { '<', '>', '&', '\u2028', '\u2029' }),
+                    "Coverage metadata must not contain HTML delimiters or unescaped JavaScript line separators.");
+                JArray assemblies = JArray.Parse(serializedAssemblies);
+                Assert.AreEqual(1, assemblies.Count);
+                Assert.AreEqual(packageName, (string)assemblies[0]["name"]);
+                Assert.AreEqual(className, (string)assemblies[0]["classes"][0]["name"]);
+                Assert.IsTrue(Directory.EnumerateFiles(reportDir, "*.html")
+                    .Any(file => File.ReadAllText(file).Contains("TRUSTED_SOURCE", StringComparison.Ordinal)),
+                    "Trusted source rendering must survive the dependency upgrade.");
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
+        }
+
+        [TestMethod]
+        public void WillGenerateHtmlForMissingSourceWhenApprovedSourceTextFixIsEnabled()
+        {
+            string root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string reportDir = Path.Combine(root, "report");
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                string coverageFile = Path.Combine(root, "coverage.xml");
+                File.WriteAllText(coverageFile, $@"<?xml version=""1.0""?>
+<coverage line-rate=""1"" branch-rate=""0"" version=""1"">
+  <sources />
+  <packages><package name=""sample"" line-rate=""1"" branch-rate=""0"">
+    <classes><class name=""Missing"" filename=""{Path.Combine(root, "Missing.cs")}"" line-rate=""1"" branch-rate=""0"">
+      <methods /><lines><line number=""4"" hits=""1"" /></lines>
+    </class></classes>
+  </package></packages>
+</coverage>");
+
+                var parser = new ReportGeneratorTool(new PublisherConfiguration
+                {
+                    CoverageFiles = new[] { coverageFile },
+                    ReportDirectory = reportDir,
+                    SourceDirectory = root,
+                    TrustedSourceDirectory = root,
+                    EnforceTrustedSourcePathFiltering = true,
+                    PinApprovedSourceText = true
+                });
+
+                parser.GenerateHTMLReport();
+
+                string report = File.ReadAllText(Path.Combine(reportDir, "index.html"));
+                Assert.IsTrue(report.Contains("var assemblies", StringComparison.Ordinal), "Missing source must not block rendering coverage metadata.");
+                Assert.IsFalse(report.Contains("Source rendering was omitted", StringComparison.Ordinal), "A missing trusted source is not an unsafe source.");
+                var fileCoverage = parser.GetFileCoverageInfos();
+                Assert.AreEqual(1, fileCoverage[0].LineCoverageStatus.Count);
+                Assert.IsTrue(fileCoverage[0].LineCoverageStatus.ContainsKey(4));
+            }
+            finally
+            {
+                Directory.Delete(root, true);
+            }
         }
 
         [TestMethod]
