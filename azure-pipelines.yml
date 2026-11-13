@@ -45,7 +45,7 @@ extends:
       name: 1ESPtTfsAgentBuildPool1
     sdl:
       binskim:
-        # Temporary: third-party Mono.Posix binaries fail BA2008 and BA2009.
+        # temp: Passing on warning instead of failing the pipeline on binSkim fialure 
         break: false
     stages:
     - stage: Build
