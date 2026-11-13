@@ -21,14 +21,15 @@ dotnet CoveragePublisher.Console.dll /path/to/jacoco.xml /path/to/cobertura.xml
 
 ### CLI Options
 
-| Option                | Description                                                |
-| --------------------- | ---------------------------------------------------------- |
-| --reportDirectory     | (Default: "") Path where html report will be generated.    |
-| --sourceDirectory     | (Default: "") List of source directories separated by ';'. |
-| --trustedSourceDirectory | (Default: "") List of directories from which source files may be read, separated by ';'. |
-| --timeout             | (Default: 120) Timeout for CoveragePublisher in seconds.   |
-| --noTelemetry         | (Default: false) Disable telemetry data collection.        |
-| --help                | Display this help screen.                                  |
+| Option                   | Description                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --reportDirectory        | (Default: "") Path where html report will be generated.                                                                                                               |
+| --sourceDirectory        | (Default: "") List of source directories separated by ';'.                                                                                                            |
+| --trustedSourceDirectory | (Default: "") List of directories from which source files may be read, separated by ';'.                                                                              |
+| --reportGeneratorArgs    | (Default: "") Additional ReportGenerator arguments, in `"-key:value"` form, space separated. `-targetdir`, `-sourcedirs` and `-reports` are set by the options above. |
+| --timeout                | (Default: 120) Timeout for CoveragePublisher in seconds.                                                                                                              |
+| --noTelemetry            | (Default: false) Disable telemetry data collection.                                                                                                                   |
+| --help                   | Display this help screen.                                                                                                                                             |
 
 # Build & Test
 

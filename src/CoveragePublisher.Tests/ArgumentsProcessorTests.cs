@@ -27,6 +27,8 @@ namespace CoveragePublisher.Tests
 
             --pinApprovedSourceText    (Default: false) Keep the approved source text for the HTML report. No effect unless trusted source path filtering is also enabled.
 
+            --reportGeneratorArgs (Default: ) Additional arguments (in ""-key:value"" form, space separated) to forward to ReportGenerator when generating the HTML report.
+
             --timeout            (Default: 120) Timeout for CoveragePublisher in seconds.
 
             --noTelemetry        (Default: false) Disable telemetry data collection.
@@ -143,6 +145,29 @@ namespace CoveragePublisher.Tests
 
             Assert.AreEqual(expected, config.EnforceTrustedSourcePathFiltering);
             CollectionAssert.AreEqual(new[] { @"C:\coverage.xml" }, config.CoverageFiles.ToArray());
+        }
+
+        [TestMethod]
+        public void WillParseReportGeneratorArgs()
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var cliArgs = argsProcessor.ProcessCommandLineArgs(new string[] { @"C:\a.txt", "--reportGeneratorArgs=-reporttypes:Cobertura -verbosity:Verbose" });
+
+            Assert.AreEqual("-reporttypes:Cobertura -verbosity:Verbose", cliArgs.ReportGeneratorArguments);
+        }
+
+        [TestMethod]
+        public void WillNotFailWhenReportGeneratorArgsIsNotProvided()
+        {
+            var argsProcessor = new ArgumentsProcessor();
+
+            var cliArgs = argsProcessor.ProcessCommandLineArgs(new string[] { @"C:\a.txt" });
+
+            Assert.IsNotNull(cliArgs);
+            Assert.AreEqual("", cliArgs.ReportGeneratorArguments);
+            Assert.IsTrue(cliArgs.CoverageFiles.Contains(@"C:\a.txt"));
+            Assert.IsFalse(ConsoleWriter.ToString().Contains("ERROR"));
         }
     }
 }

@@ -35,6 +35,9 @@ namespace Microsoft.Azure.Pipelines.CoveragePublisher
             [Option("pinApprovedSourceText", Default = false, HelpText = "Keep the approved source text for the HTML report. No effect unless trusted source path filtering is also enabled.")]
             override public bool PinApprovedSourceText { get; set; }
 
+            [Option("reportGeneratorArgs", Default = "", HelpText = "Additional arguments (in \"-key:value\" form, space separated) to forward to ReportGenerator when generating the HTML report.")]
+            override public string ReportGeneratorArguments { get; set; }
+
             [Option("timeout", Default = 120, HelpText = "Timeout for CoveragePublisher in seconds.")]
             public override int TimeoutInSeconds { get; set; }
 
