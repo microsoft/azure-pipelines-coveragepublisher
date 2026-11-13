@@ -45,7 +45,7 @@ extends:
       name: 1ESPtTfsAgentBuildPool1
     sdl:
       binskim:
-        # temp: Passing on warning instead of failing the pipeline on binSkim fialure 
+        # temp: Passing on warning instead of failing the pipeline on binSkim failure 
         break: false
     stages:
     - stage: Build
