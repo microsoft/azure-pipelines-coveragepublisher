@@ -43,6 +43,11 @@ extends:
   parameters:
     pool:
       name: 1ESPtTfsAgentBuildPool1
+    sdl:
+      # Suppresses BinSkim BA2008/BA2009 on the third-party native MonoPosixHelper
+      # binaries from the Mono.Posix.NETStandard package (cannot be rebuilt).
+      suppression:
+        suppressionFile: $(Build.SourcesDirectory)\.gdn\.gdnsuppress
     stages:
     - stage: Build
       jobs:
